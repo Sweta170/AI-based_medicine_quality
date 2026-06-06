@@ -5,6 +5,10 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    color-scheme: only light;
+  }
+
   body {
     @apply bg-bgLight text-textDark font-sans antialiased text-[14px];
     min-height: 100vh;
