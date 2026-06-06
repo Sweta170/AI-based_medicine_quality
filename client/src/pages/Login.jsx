@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import axios from 'axios';
 import { Activity, Mail, Lock, Eye, EyeOff, AlertCircle } from 'lucide-react';
 
@@ -9,6 +9,7 @@ axios.defaults.withCredentials = true;
 
 const Login = () => {
   const navigate = useNavigate();
+  const location = useLocation();
 
   // State variables required exactly by requirements
   const [role, setRole] = useState('pharmacist');
@@ -129,6 +130,16 @@ const Login = () => {
             <h2 className="text-2xl lg:text-3xl font-extrabold text-slate-900 tracking-tight">Sign in to your account</h2>
             <p className="text-sm text-slate-500 mt-2 font-medium">Select your role to continue</p>
           </div>
+
+          {location.state?.message && (
+            <div className="mb-6 p-4 rounded-xl bg-green-50 border border-green-200 text-green-700 text-sm flex items-start gap-3 font-medium animate-fade-in">
+              <svg className="w-5 h-5 shrink-0 mt-0.5 text-green-600" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                <polyline points="22 4 12 14.01 9 11.01" />
+              </svg>
+              <span>{location.state.message}</span>
+            </div>
+          )}
 
           {/* Role Selector Buttons */}
           <div className="grid grid-cols-3 gap-3 mb-6">
