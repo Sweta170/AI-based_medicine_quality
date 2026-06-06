@@ -32,11 +32,12 @@ export const AuthProvider = ({ children }) => {
       async (error) => {
         const originalRequest = error.config;
 
-        // If error is 401 and not retried yet
+        // If error is 401, not retried yet, and the failed request was NOT a token refresh itself
         if (
           error.response &&
           error.response.status === 401 &&
-          !originalRequest._retry
+          !originalRequest._retry &&
+          !originalRequest.url.includes('/auth/refresh')
         ) {
           originalRequest._retry = true;
 
