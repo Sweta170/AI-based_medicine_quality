@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '../utils/api';
 import { useAuth } from '../context/AuthContext';
 import { 
-  Pills, Search, Filter, ShoppingCart, Trash2, Plus, Minus, 
+  Pill, Search, Filter, ShoppingCart, Trash2, Plus, Minus, 
   CreditCard, CheckCircle, X, ShieldAlert, ShoppingBag, AlertCircle, Download
 } from 'lucide-react';
 
