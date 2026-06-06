@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '../utils/api';
 import { useAuth } from '../context/AuthContext';
 import { 
-  Bell, Phone, Clock, Plus, Trash2, AlertCircle, History, RefreshCw
+  Bell, Phone, Clock, Plus, Trash2, AlertCircle, History, RefreshCw, Pill
 } from 'lucide-react';
 
 const CustomerReminders = () => {
@@ -168,7 +168,7 @@ const CustomerReminders = () => {
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
-                  <Pills className="w-4 h-4 hidden" />
+                  <Pill className="w-4 h-4 hidden" />
                 </div>
                 <input
                   type="text"
