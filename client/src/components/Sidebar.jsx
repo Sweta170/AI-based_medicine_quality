@@ -1,7 +1,7 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { LayoutDashboard, Users, Pills, ShoppingBag, ShieldAlert } from 'lucide-react';
+import { LayoutDashboard, Users, Pills, ShoppingBag, ShieldAlert, FileText, Bell, User } from 'lucide-react';
 
 const Sidebar = () => {
   const { user } = useAuth();
@@ -29,9 +29,29 @@ const Sidebar = () => {
       case 'customer':
         return [
           {
+            name: 'Dashboard',
+            path: '/customer/dashboard',
+            icon: LayoutDashboard,
+          },
+          {
             name: 'Medicine Shop',
-            path: '/customer',
+            path: '/customer/shop',
             icon: ShoppingBag,
+          },
+          {
+            name: 'Invoice History',
+            path: '/customer/bills',
+            icon: FileText,
+          },
+          {
+            name: 'Medication Reminders',
+            path: '/customer/reminders',
+            icon: Bell,
+          },
+          {
+            name: 'My Profile',
+            path: '/customer/profile',
+            icon: User,
           },
         ];
       default:

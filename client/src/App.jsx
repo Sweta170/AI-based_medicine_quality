@@ -10,6 +10,10 @@ import Unauthorized from './pages/Unauthorized';
 import SuperadminDashboard from './pages/SuperadminDashboard';
 import PharmacistDashboard from './pages/PharmacistDashboard';
 import CustomerDashboard from './pages/CustomerDashboard';
+import CustomerShop from './pages/CustomerShop';
+import CustomerBills from './pages/CustomerBills';
+import CustomerReminders from './pages/CustomerReminders';
+import CustomerProfile from './pages/CustomerProfile';
 
 // Dashboard Layout wrapper
 const DashboardLayout = () => {
@@ -87,7 +91,61 @@ function App() {
           path="/customer"
           element={
             <ProtectedRoute allowedRoles={['customer']}>
+              <Navigate to="/customer/dashboard" replace />
+            </ProtectedRoute>
+          }
+        />
+        
+        <Route
+          path="/customer/dashboard"
+          element={
+            <ProtectedRoute allowedRoles={['customer']}>
               <CustomerDashboard />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/customer/shop"
+          element={
+            <ProtectedRoute allowedRoles={['customer']}>
+              <CustomerShop />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/customer/bills"
+          element={
+            <ProtectedRoute allowedRoles={['customer']}>
+              <CustomerBills />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/customer/bills/:id"
+          element={
+            <ProtectedRoute allowedRoles={['customer']}>
+              <CustomerBills />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/customer/reminders"
+          element={
+            <ProtectedRoute allowedRoles={['customer']}>
+              <CustomerReminders />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/customer/profile"
+          element={
+            <ProtectedRoute allowedRoles={['customer']}>
+              <CustomerProfile />
             </ProtectedRoute>
           }
         />

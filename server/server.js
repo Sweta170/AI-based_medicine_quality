@@ -10,6 +10,7 @@ import medicineRoutes from './routes/medicineRoutes.js';
 import billRoutes from './routes/billRoutes.js';
 import notificationRoutes from './routes/notificationRoutes.js';
 import { initializeNotificationScheduler } from './utils/notificationScheduler.js';
+import customerRoutes from './routes/customerRoutes.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -61,6 +62,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/medicines', medicineRoutes);
 app.use('/api/bills', billRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/customers', customerRoutes);
 
 // Error Middleware
 app.use(notFound);
