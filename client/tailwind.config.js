@@ -7,6 +7,14 @@ export default {
   theme: {
     extend: {
       colors: {
+        primary: '#1A56A0',
+        lightblue: '#D5E8F0',
+        greenAccent: '#16A34A',
+        orangeAccent: '#D97706',
+        redAccent: '#DC2626',
+        bgLight: '#F9FAFB',
+        textDark: '#1F2937',
+        // Compatibility brand colors
         brand: {
           50: '#f0f9ff',
           100: '#e0f2fe',
@@ -31,11 +39,11 @@ export default {
           700: '#4c5c7f',
           800: '#414e6a',
           900: '#2c3548',
-          950: '#0a0f1d', // premium slate-black
+          950: '#0a0f1d',
         }
       },
       fontFamily: {
-        sans: ['Outfit', 'Inter', 'system-ui', 'sans-serif'],
+        sans: ['Inter', 'system-ui', 'sans-serif'],
       },
     },
   },

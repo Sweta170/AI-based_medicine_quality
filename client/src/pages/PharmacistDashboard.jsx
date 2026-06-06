@@ -9,7 +9,8 @@ import {
   LayoutDashboard, Pills, Plus, Edit2, Trash2, Search, Filter, 
   AlertTriangle, CheckCircle, X, Calendar, RefreshCw, Barcode, 
   Database, Upload, Eye, Bell, Settings, Receipt, Users, LogOut, 
-  DollarSign, AlertCircle, ArrowRight, Lock, User, Info, ShieldAlert
+  DollarSign, AlertCircle, ArrowRight, Lock, User, Info, ShieldAlert,
+  Menu
 } from 'lucide-react';
 
 const PharmacistDashboard = () => {
@@ -19,6 +20,12 @@ const PharmacistDashboard = () => {
 
   // Layout Tab State
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [isSidebarMobileOpen, setIsSidebarMobileOpen] = useState(false);
+
+  const handleNavClick = (tabName) => {
+    setActiveTab(tabName);
+    setIsSidebarMobileOpen(false);
+  };
 
   // Search & Filter States
   const [search, setSearch] = useState('');
@@ -565,8 +572,18 @@ const PharmacistDashboard = () => {
 
   return (
     <div className="flex min-h-screen bg-slate-50 text-slate-800 font-sans">
+      {/* Sidebar Overlay for Mobile */}
+      {isSidebarMobileOpen && (
+        <div 
+          onClick={() => setIsSidebarMobileOpen(false)} 
+          className="fixed inset-0 z-20 bg-slate-900/40 backdrop-blur-xs md:hidden"
+        ></div>
+      )}
+
       {/* Fixed Sidebar */}
-      <aside className="w-64 bg-white border-r border-slate-200 flex flex-col fixed inset-y-0 left-0 z-20">
+      <aside className={`w-64 bg-white border-r border-slate-200 flex flex-col fixed inset-y-0 left-0 z-30 transition-transform duration-300 md:translate-x-0 ${
+        isSidebarMobileOpen ? 'translate-x-0' : '-translate-x-full'
+      }`}>
         <div className="p-6 border-b border-slate-100 flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-[#1A56A0] flex items-center justify-center text-white">
             <Pills className="w-5 h-5" />
@@ -580,7 +597,7 @@ const PharmacistDashboard = () => {
         {/* Navigation Items */}
         <nav className="flex-1 p-4 space-y-1">
           <button
-            onClick={() => setActiveTab('dashboard')}
+            onClick={() => handleNavClick('dashboard')}
             className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-semibold transition-all ${
               activeTab === 'dashboard'
                 ? 'bg-blue-50 text-[#1A56A0] border-l-4 border-[#1A56A0]'
@@ -592,7 +609,7 @@ const PharmacistDashboard = () => {
           </button>
 
           <button
-            onClick={() => setActiveTab('medicines')}
+            onClick={() => handleNavClick('medicines')}
             className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-semibold transition-all ${
               activeTab === 'medicines'
                 ? 'bg-blue-50 text-[#1A56A0] border-l-4 border-[#1A56A0]'
@@ -604,7 +621,7 @@ const PharmacistDashboard = () => {
           </button>
 
           <button
-            onClick={() => setActiveTab('new-bill')}
+            onClick={() => handleNavClick('new-bill')}
             className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-semibold transition-all ${
               activeTab === 'new-bill'
                 ? 'bg-blue-50 text-[#1A56A0] border-l-4 border-[#1A56A0]'
@@ -616,7 +633,7 @@ const PharmacistDashboard = () => {
           </button>
 
           <button
-            onClick={() => setActiveTab('inventory')}
+            onClick={() => handleNavClick('inventory')}
             className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-semibold transition-all ${
               activeTab === 'inventory'
                 ? 'bg-blue-50 text-[#1A56A0] border-l-4 border-[#1A56A0]'
@@ -628,7 +645,7 @@ const PharmacistDashboard = () => {
           </button>
 
           <button
-            onClick={() => setActiveTab('customers')}
+            onClick={() => handleNavClick('customers')}
             className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-semibold transition-all ${
               activeTab === 'customers'
                 ? 'bg-blue-50 text-[#1A56A0] border-l-4 border-[#1A56A0]'
@@ -640,7 +657,7 @@ const PharmacistDashboard = () => {
           </button>
 
           <button
-            onClick={() => setActiveTab('notifications')}
+            onClick={() => handleNavClick('notifications')}
             className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-semibold transition-all ${
               activeTab === 'notifications'
                 ? 'bg-blue-50 text-[#1A56A0] border-l-4 border-[#1A56A0]'
@@ -652,7 +669,7 @@ const PharmacistDashboard = () => {
           </button>
 
           <button
-            onClick={() => setActiveTab('settings')}
+            onClick={() => handleNavClick('settings')}
             className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-semibold transition-all ${
               activeTab === 'settings'
                 ? 'bg-blue-50 text-[#1A56A0] border-l-4 border-[#1A56A0]'
@@ -686,9 +703,15 @@ const PharmacistDashboard = () => {
       </aside>
 
       {/* Main Content Pane */}
-      <main className="flex-1 pl-64 overflow-y-auto min-h-screen">
+      <main className="flex-1 md:pl-64 overflow-y-auto min-h-screen">
         <header className="bg-white border-b border-slate-200 py-4.5 px-8 flex justify-between items-center sticky top-0 z-10">
           <div className="flex items-center gap-2">
+            <button 
+              onClick={() => setIsSidebarMobileOpen(!isSidebarMobileOpen)}
+              className="p-1.5 md:hidden text-slate-600 hover:bg-slate-100 rounded-lg mr-2"
+            >
+              <Menu className="w-5 h-5" />
+            </button>
             <span className="text-slate-400 text-xs font-semibold uppercase tracking-wider">Aegis Operations</span>
             <span className="text-slate-300">/</span>
             <span className="text-slate-800 text-xs font-bold uppercase tracking-widest">{activeTab}</span>
