@@ -1,13 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '../utils/api';
 import { 
   Pills, Plus, Edit2, Trash2, Search, Filter, 
-  AlertTriangle, CheckCircle, X, Calendar, RefreshCw, Barcode, Database, Upload
+  AlertTriangle, CheckCircle, X, Calendar, RefreshCw, Barcode, Database, Upload, Eye
 } from 'lucide-react';
 
 const PharmacistDashboard = () => {
   const queryClient = useQueryClient();
+  const fileInputRef = useRef(null);
+  const [ocrLoading, setOcrLoading] = useState(false);
   const [search, setSearch] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
   const [expiryStatusFilter, setExpiryStatusFilter] = useState('');
@@ -154,6 +156,38 @@ const PharmacistDashboard = () => {
     setModalOpen(false);
     setEditingMedicine(null);
     setError('');
+  };
+
+  const handleOcrFileChange = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append('labelImage', file);
+
+    setOcrLoading(true);
+    setError('');
+
+    try {
+      const { data } = await api.post('/medicines/scan-label', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      if (data.medicineName) setName(data.medicineName);
+      if (data.batchNumber) setBatchNumber(data.batchNumber);
+      if (data.expiryDate) setExpiryDate(data.expiryDate);
+      if (data.labelImageUrl) setLabelImageUrl(data.labelImageUrl);
+
+      alert(`OCR Scan Complete!\nConfidence: ${data.confidence.toUpperCase()}\nExtracted Name: ${data.medicineName || 'None'}\nBatch: ${data.batchNumber || 'None'}\nExpiry: ${data.expiryDate || 'None'}`);
+    } catch (err) {
+      console.error('OCR scan failed:', err);
+      setError(err.response?.data?.message || 'OCR image scanning failed. Please try again.');
+    } finally {
+      setOcrLoading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
   };
 
   const openBulkModal = () => {
@@ -486,7 +520,34 @@ const PharmacistDashboard = () => {
 
             {/* Form */}
             <form onSubmit={handleSubmit} className="space-y-4">
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleOcrFileChange}
+                className="hidden"
+                accept="image/*"
+              />
               <div className="grid grid-cols-2 gap-4">
+                <div className="col-span-2 p-3 bg-brand-500/5 border border-brand-500/10 rounded-2xl flex items-center justify-between">
+                  <div>
+                    <span className="text-xs font-bold text-brand-400 uppercase tracking-wider block">Intelligent Scanning</span>
+                    <span className="text-[10px] text-slate-400">Upload a label photo to extract name, batch, and expiry details.</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current && fileInputRef.current.click()}
+                    disabled={ocrLoading}
+                    className="px-3.5 py-1.5 bg-brand-500 hover:bg-brand-400 text-white font-semibold text-xs rounded-xl shadow shadow-brand-500/20 transition-all flex items-center gap-1.5 disabled:opacity-50 cursor-pointer"
+                  >
+                    {ocrLoading ? (
+                      <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                    ) : (
+                      <Upload className="w-3.5 h-3.5" />
+                    )}
+                    <span>{ocrLoading ? 'Scanning...' : 'Scan Label'}</span>
+                  </button>
+                </div>
+
                 <div className="col-span-2">
                   <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
                     Medicine Name *
