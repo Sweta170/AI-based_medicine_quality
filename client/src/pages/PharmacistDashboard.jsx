@@ -6,7 +6,7 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer 
 } from 'recharts';
 import { 
-  LayoutDashboard, Pills, Plus, Edit2, Trash2, Search, Filter, 
+  LayoutDashboard, Pill, Plus, Edit2, Trash2, Search, Filter, 
   AlertTriangle, CheckCircle, X, Calendar, RefreshCw, Barcode, 
   Database, Upload, Eye, Bell, Settings, Receipt, Users, LogOut, 
   DollarSign, AlertCircle, ArrowRight, Lock, User, Info, ShieldAlert,
@@ -586,7 +586,7 @@ const PharmacistDashboard = () => {
       }`}>
         <div className="p-6 border-b border-slate-100 flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-[#1A56A0] flex items-center justify-center text-white">
-            <Pills className="w-5 h-5" />
+            <Pill className="w-5 h-5" />
           </div>
           <div>
             <h1 className="font-extrabold text-[#1A56A0] text-lg leading-tight tracking-tight">AEGIS PORTAL</h1>

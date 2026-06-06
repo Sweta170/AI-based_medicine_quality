@@ -1,7 +1,7 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { LayoutDashboard, Users, Pills, ShoppingBag, ShieldAlert, FileText, Bell, User } from 'lucide-react';
+import { LayoutDashboard, Users, Pill, ShoppingBag, ShieldAlert, FileText, Bell, User } from 'lucide-react';
 
 const Sidebar = () => {
   const { user } = useAuth();
@@ -23,7 +23,7 @@ const Sidebar = () => {
           {
             name: 'Inventory Manager',
             path: '/pharmacist',
-            icon: Pills,
+            icon: Pill,
           },
         ];
       case 'customer':
