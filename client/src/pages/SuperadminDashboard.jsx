@@ -70,121 +70,121 @@ const SuperadminDashboard = () => {
   const customerCount = users.filter((u) => u.role === 'customer').length;
 
   return (
-    <div className="space-y-8 p-6 max-w-7xl mx-auto">
+    <div className="space-y-4 p-4 max-w-7xl mx-auto">
       {/* Header section */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-extrabold text-white tracking-tight">System Administration</h1>
-          <p className="text-slate-400 text-sm mt-1">
+          <h1 className="text-lg font-bold text-slate-805 dark:text-slate-200 tracking-tight">System Administration</h1>
+          <p className="text-slate-400 dark:text-slate-500 text-xs mt-0.5">
             Oversee user accounts, roles, access permissions, and system metrics.
           </p>
         </div>
         <button
           onClick={() => refetch()}
           disabled={isLoading || isRefetching}
-          className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white rounded-xl border border-white/5 transition-all text-sm disabled:opacity-50"
+          className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-205 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg border border-slate-200 dark:border-slate-700/50 transition-all text-xs disabled:opacity-50"
         >
-          <RefreshCw className={`w-4 h-4 ${isRefetching ? 'animate-spin' : ''}`} />
+          <RefreshCw className={`w-3.5 h-3.5 ${isRefetching ? 'animate-spin' : ''}`} />
           <span>Refresh Accounts</span>
         </button>
       </div>
 
       {/* Notifications */}
       {successMessage && (
-        <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm">
+        <div className="p-3 rounded-lg bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400 text-xs">
           {successMessage}
         </div>
       )}
       {localError && (
-        <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm flex items-center gap-2">
-          <AlertCircle className="w-5 h-5" />
+        <div className="p-3 rounded-lg bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 text-xs flex items-center gap-1.5">
+          <AlertCircle className="w-4 h-4 text-red-600 dark:text-red-400 shrink-0" />
           <span>{localError}</span>
         </div>
       )}
 
       {/* Stat Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className="glass-card p-6 rounded-2xl relative overflow-hidden">
-          <div className="absolute top-4 right-4 w-12 h-12 bg-brand-500/10 rounded-xl flex items-center justify-center text-brand-400">
-            <Users className="w-6 h-6" />
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+        <div className="bg-white dark:bg-[#1a2438] p-4 rounded-xl border border-slate-200 dark:border-slate-700/50 shadow-sm relative overflow-hidden transition-colors duration-200">
+          <div className="absolute top-4 right-4 w-7 h-7 bg-blue-50 dark:bg-white/5 rounded-lg flex items-center justify-center text-[#1A56A0] dark:text-sky-400">
+            <Users className="w-4 h-4" />
           </div>
-          <p className="text-slate-400 text-sm font-semibold uppercase tracking-wider">Total Registers</p>
-          <p className="text-3xl font-bold text-white mt-2">{isLoading ? '...' : totalUsers}</p>
-          <div className="mt-4 text-xs text-slate-400 flex items-center gap-1">
-            <span className="text-emerald-400 font-semibold">Active</span> database pool
+          <p className="text-slate-400 dark:text-slate-500 text-[10px] font-bold uppercase tracking-wider">Total Registers</p>
+          <p className="text-xl font-bold text-slate-900 dark:text-white mt-1">{isLoading ? '...' : totalUsers}</p>
+          <div className="mt-3 text-[10px] text-slate-400 dark:text-slate-500 flex items-center gap-1">
+            <span className="text-emerald-500 font-semibold">Active</span> database pool
           </div>
         </div>
 
-        <div className="glass-card p-6 rounded-2xl relative overflow-hidden">
-          <div className="absolute top-4 right-4 w-12 h-12 bg-red-500/10 rounded-xl flex items-center justify-center text-red-400">
-            <Shield className="w-6 h-6" />
+        <div className="bg-white dark:bg-[#1a2438] p-4 rounded-xl border border-slate-200 dark:border-slate-700/50 shadow-sm relative overflow-hidden transition-colors duration-200">
+          <div className="absolute top-4 right-4 w-7 h-7 bg-red-50 dark:bg-white/5 rounded-lg flex items-center justify-center text-red-500 dark:text-red-400">
+            <Shield className="w-4 h-4" />
           </div>
-          <p className="text-slate-400 text-sm font-semibold uppercase tracking-wider">Super Admins</p>
-          <p className="text-3xl font-bold text-white mt-2">{isLoading ? '...' : adminCount}</p>
-          <div className="mt-4 text-xs text-slate-400">Security controllers</div>
+          <p className="text-slate-400 dark:text-slate-500 text-[10px] font-bold uppercase tracking-wider">Super Admins</p>
+          <p className="text-xl font-bold text-slate-900 dark:text-white mt-1">{isLoading ? '...' : adminCount}</p>
+          <div className="mt-3 text-[10px] text-slate-400 dark:text-slate-500">Security controllers</div>
         </div>
 
-        <div className="glass-card p-6 rounded-2xl relative overflow-hidden">
-          <div className="absolute top-4 right-4 w-12 h-12 bg-emerald-500/10 rounded-xl flex items-center justify-center text-emerald-400">
-            <UserCheck className="w-6 h-6" />
+        <div className="bg-white dark:bg-[#1a2438] p-4 rounded-xl border border-slate-200 dark:border-slate-700/50 shadow-sm relative overflow-hidden transition-colors duration-200">
+          <div className="absolute top-4 right-4 w-7 h-7 bg-emerald-50 dark:bg-white/5 rounded-lg flex items-center justify-center text-emerald-600 dark:text-emerald-450">
+            <UserCheck className="w-4 h-4" />
           </div>
-          <p className="text-slate-400 text-sm font-semibold uppercase tracking-wider">Pharmacists</p>
-          <p className="text-3xl font-bold text-white mt-2">{isLoading ? '...' : pharmacistCount}</p>
-          <div className="mt-4 text-xs text-slate-400">Inventory controllers</div>
+          <p className="text-slate-400 dark:text-slate-500 text-[10px] font-bold uppercase tracking-wider">Pharmacists</p>
+          <p className="text-xl font-bold text-slate-900 dark:text-white mt-1">{isLoading ? '...' : pharmacistCount}</p>
+          <div className="mt-3 text-[10px] text-slate-400 dark:text-slate-500">Inventory controllers</div>
         </div>
 
-        <div className="glass-card p-6 rounded-2xl relative overflow-hidden">
-          <div className="absolute top-4 right-4 w-12 h-12 bg-purple-500/10 rounded-xl flex items-center justify-center text-purple-400">
-            <Users className="w-6 h-6" />
+        <div className="bg-white dark:bg-[#1a2438] p-4 rounded-xl border border-slate-200 dark:border-slate-700/50 shadow-sm relative overflow-hidden transition-colors duration-200">
+          <div className="absolute top-4 right-4 w-7 h-7 bg-purple-50 dark:bg-white/5 rounded-lg flex items-center justify-center text-purple-600 dark:text-purple-400">
+            <Users className="w-4 h-4" />
           </div>
-          <p className="text-slate-400 text-sm font-semibold uppercase tracking-wider">Customers</p>
-          <p className="text-3xl font-bold text-white mt-2">{isLoading ? '...' : customerCount}</p>
-          <div className="mt-4 text-xs text-slate-400">System client tier</div>
+          <p className="text-slate-400 dark:text-slate-500 text-[10px] font-bold uppercase tracking-wider">Customers</p>
+          <p className="text-xl font-bold text-slate-900 dark:text-white mt-1">{isLoading ? '...' : customerCount}</p>
+          <div className="mt-3 text-[10px] text-slate-400 dark:text-slate-500">System client tier</div>
         </div>
       </div>
 
       {/* User Management Section */}
-      <div className="glass-panel rounded-3xl border border-white/5 overflow-hidden">
-        <div className="p-6 border-b border-white/5 flex items-center justify-between">
-          <h2 className="text-xl font-bold text-white">Registered Terminals</h2>
-          <span className="text-xs text-slate-400 bg-white/5 py-1 px-3 rounded-full border border-white/5">
+      <div className="bg-white dark:bg-[#1a2438] rounded-xl border border-slate-200 dark:border-slate-700/50 shadow-sm overflow-hidden transition-colors duration-200">
+        <div className="p-4 border-b border-slate-100 dark:border-slate-700/50 flex items-center justify-between">
+          <h2 className="text-sm font-bold text-slate-805 dark:text-slate-200">Registered Terminals</h2>
+          <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 py-0.5 px-2 rounded-md border border-slate-200 dark:border-slate-700/50">
             Total count: {users.length}
           </span>
         </div>
 
         {isLoading ? (
           <div className="py-20 flex justify-center">
-            <div className="w-10 h-10 border-4 border-brand-500/20 border-t-brand-500 rounded-full animate-spin"></div>
+            <div className="w-8 h-8 border-3 border-slate-200 border-t-[#1A56A0] rounded-full animate-spin"></div>
           </div>
         ) : isError ? (
-          <div className="py-20 text-center text-red-400">
+          <div className="py-20 text-center text-red-500 dark:text-red-400 text-xs">
             <p>Error listing accounts: {error.message}</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
+            <table className="w-full text-left border-collapse text-xs">
               <thead>
-                <tr className="border-b border-white/5 text-slate-400 text-xs font-semibold uppercase tracking-wider bg-white/[0.02]">
-                  <th className="py-4 px-6">Name</th>
-                  <th className="py-4 px-6">Email Address</th>
-                  <th className="py-4 px-6">Role Authority</th>
-                  <th className="py-4 px-6">Registration Date</th>
-                  <th className="py-4 px-6 text-right">Actions</th>
+                <tr className="bg-slate-50 dark:bg-slate-900/40 border-b border-slate-100 dark:border-slate-700/50 text-slate-400 dark:text-slate-500 text-[10px] font-bold uppercase tracking-wider">
+                  <th className="py-2.5 px-4">Name</th>
+                  <th className="py-2.5 px-4">Email Address</th>
+                  <th className="py-2.5 px-4">Role Authority</th>
+                  <th className="py-2.5 px-4">Registration Date</th>
+                  <th className="py-2.5 px-4 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/5">
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-700/50">
                 {users.map((item) => (
-                  <tr key={item._id} className="hover:bg-white/[0.01] transition-colors">
-                    <td className="py-4 px-6">
-                      <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center font-bold text-sm text-brand-400">
+                  <tr key={item._id} className="hover:bg-slate-50/20 dark:hover:bg-slate-800/20 transition-colors">
+                    <td className="py-2.5 px-4">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-7 h-7 rounded-full bg-blue-50 dark:bg-brand/20 border border-blue-100 dark:border-brand/30 flex items-center justify-center font-bold text-xs text-[#1A56A0] dark:text-sky-400">
                           {item.name.charAt(0).toUpperCase()}
                         </div>
                         <div>
-                          <div className="font-semibold text-white">
+                          <div className="font-semibold text-slate-800 dark:text-slate-200">
                             {item.name}
                             {item._id === currentUser?._id && (
-                              <span className="ml-2 text-xs bg-brand-500/10 text-brand-400 px-2 py-0.5 rounded-full border border-brand-500/20">
+                              <span className="ml-2 text-[10px] bg-blue-50 dark:bg-brand/20 text-[#1A56A0] dark:text-sky-400 px-1.5 py-0.5 rounded border border-blue-100 dark:border-brand/30">
                                 You
                               </span>
                             )}
@@ -192,37 +192,37 @@ const SuperadminDashboard = () => {
                         </div>
                       </div>
                     </td>
-                    <td className="py-4 px-6 text-slate-300">{item.email}</td>
-                    <td className="py-4 px-6">
+                    <td className="py-2.5 px-4 text-slate-600 dark:text-slate-400 font-mono">{item.email}</td>
+                    <td className="py-2.5 px-4">
                       <select
                         value={item.role}
                         onChange={(e) => handleRoleChange(item._id, e.target.value)}
                         disabled={updateRoleMutation.isPending && updateRoleMutation.variables?.id === item._id}
-                        className="bg-slate-900 border border-white/10 text-xs rounded-lg px-2.5 py-1 text-slate-200 focus:outline-none focus:border-brand-500 disabled:opacity-50"
+                        className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-[11px] rounded-lg px-2 py-0.5 text-slate-700 dark:text-slate-200 focus:outline-none focus:border-[#1A56A0] disabled:opacity-50 bg-white"
                       >
                         <option value="superadmin">Super Admin</option>
                         <option value="pharmacist">Pharmacist</option>
                         <option value="customer">Customer</option>
                       </select>
                     </td>
-                    <td className="py-4 px-6 text-slate-400 text-sm">
+                    <td className="py-2.5 px-4 text-slate-500 dark:text-slate-400 text-xs">
                       {new Date(item.createdAt).toLocaleDateString(undefined, {
                         year: 'numeric',
                         month: 'short',
                         day: 'numeric',
                       })}
                     </td>
-                    <td className="py-4 px-6 text-right">
+                    <td className="py-2.5 px-4 text-right">
                       <button
                         onClick={() => handleDeleteUser(item._id)}
                         disabled={
                           item._id === currentUser?._id ||
                           (deleteUserMutation.isPending && deleteUserMutation.variables === item._id)
                         }
-                        className="p-2 text-slate-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all border border-transparent hover:border-red-500/20 disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-slate-400 disabled:hover:border-transparent disabled:cursor-not-allowed"
+                        className="p-1 text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-all disabled:opacity-30 disabled:hover:bg-transparent disabled:cursor-not-allowed"
                         title="Delete User"
                       >
-                        <Trash2 className="w-4 h-4" />
+                        <Trash2 className="w-3.5 h-3.5" />
                       </button>
                     </td>
                   </tr>

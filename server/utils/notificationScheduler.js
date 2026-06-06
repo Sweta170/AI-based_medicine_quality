@@ -105,7 +105,7 @@ export const runExpiryReport = async () => {
 
     // Build HTML table content
     let htmlContent = `
-      <h2 style="color: #0f172a; font-family: sans-serif;">Aegis Expiry Warning Report</h2>
+      <h2 style="color: #0f172a; font-family: sans-serif;">Pharmadesk Expiry Warning Report</h2>
       <p style="color: #475569; font-family: sans-serif;">The following medicines are expiring within 90 days. Please review stocks.</p>
     `;
 
@@ -147,7 +147,7 @@ export const runExpiryReport = async () => {
 
     htmlContent += `
       <p style="font-size: 11px; color: #64748b; margin-top: 30px; border-top: 1px solid #e2e8f0; padding-top: 10px;">
-        Aegis Medicine System - Scheduled Automation Report
+        Pharmadesk Medicine System - Scheduled Automation Report
       </p>
     `;
 
@@ -159,9 +159,9 @@ export const runExpiryReport = async () => {
         const isEthereal = transporter.options.host === 'smtp.ethereal.email';
         
         const mailOptions = {
-          from: `"Aegis Notifications" <${process.env.SMTP_USER || 'no-reply@aegismed.com'}>`,
+          from: `"Pharmadesk Notifications" <${process.env.SMTP_USER || 'no-reply@pharmadesk.com'}>`,
           to: pharmacist.email,
-          subject: '⚠️ Daily Expiry Report - Aegis Pharmacy',
+          subject: '⚠️ Daily Expiry Report - Pharmadesk Pharmacy',
           html: htmlContent,
         };
 
@@ -219,7 +219,7 @@ export const runLowStockReport = async () => {
 
     // Build low stock HTML report
     let htmlContent = `
-      <h2 style="color: #0f172a; font-family: sans-serif;">Aegis Low Stock Alert</h2>
+      <h2 style="color: #0f172a; font-family: sans-serif;">Pharmadesk Low Stock Alert</h2>
       <p style="color: #475569; font-family: sans-serif;">The following medicines have fallen below their configured reorder thresholds:</p>
       <table border="1" cellpadding="8" cellspacing="0" style="border-collapse: collapse; font-family: sans-serif; width: 100%; text-align: left; border-color: #cbd5e1;">
         <tr style="background-color: #f8fafc; color: #334155;">
@@ -251,7 +251,7 @@ export const runLowStockReport = async () => {
     htmlContent += `
       </table>
       <p style="font-size: 11px; color: #64748b; margin-top: 30px; border-top: 1px solid #e2e8f0; padding-top: 10px;">
-        Aegis Medicine System - Stock Alert Notification
+        Pharmadesk Medicine System - Stock Alert Notification
       </p>
     `;
 
@@ -262,9 +262,9 @@ export const runLowStockReport = async () => {
       try {
         const isEthereal = transporter.options.host === 'smtp.ethereal.email';
         const mailOptions = {
-          from: `"Aegis Notifications" <${process.env.SMTP_USER || 'no-reply@aegismed.com'}>`,
+          from: `"Pharmadesk Notifications" <${process.env.SMTP_USER || 'no-reply@pharmadesk.com'}>`,
           to: pharmacist.email,
-          subject: '⚠️ Stock Replenishment Alert - Aegis Pharmacy',
+          subject: '⚠️ Stock Replenishment Alert - Pharmadesk Pharmacy',
           html: htmlContent,
         };
 
@@ -316,7 +316,7 @@ export const runSmsReminders = async () => {
         continue;
       }
 
-      const messageText = `Reminder: Time to take your ${reminder.medicineName}. Prescribed by Aegis Medicine System.`;
+      const messageText = `Reminder: Time to take your ${reminder.medicineName}. Prescribed by Pharmadesk Medicine System.`;
 
       try {
         await sendSMS(reminder.phoneNumber, messageText);

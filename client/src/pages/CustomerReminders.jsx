@@ -132,57 +132,54 @@ const CustomerReminders = () => {
   ];
 
   return (
-    <div className="space-y-8 p-6 max-w-7xl mx-auto">
+    <div className="space-y-4 p-4 max-w-7xl mx-auto transition-colors duration-200">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-extrabold text-white tracking-tight">Medication Reminders</h1>
-        <p className="text-slate-400 text-sm mt-1 font-sans">
+        <h1 className="text-lg font-bold text-slate-900 dark:text-white tracking-tight">Medication Reminders</h1>
+        <p className="text-slate-500 dark:text-slate-400 text-xs mt-0.5">
           Configure daily SMS medication schedules, toggle alerts, and examine alert delivery histories.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Form panel */}
-        <div className="glass-card p-6 rounded-3xl border border-white/5 h-max">
-          <h2 className="text-lg font-bold text-white mb-6 flex items-center gap-2 border-b border-white/5 pb-3">
-            <Bell className="w-5 h-5 text-brand-400" />
+        <div className="bg-white dark:bg-[#1a2438] p-4 rounded-xl border border-slate-200 dark:border-slate-700/50 shadow-sm h-max transition-colors duration-200">
+          <h2 className="text-sm font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2 border-b border-slate-150 dark:border-slate-700/50 pb-2">
+            <Bell className="w-4 h-4 text-[#1A56A0] dark:text-sky-400" />
             <span>Create Alarm Schedule</span>
           </h2>
 
           {formSuccess && (
-            <div className="mb-4 p-3 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs rounded-xl">
+            <div className="mb-3 p-2.5 bg-emerald-500/10 border border-emerald-500/20 text-emerald-650 dark:text-emerald-400 text-xs rounded-lg">
               {formSuccess}
             </div>
           )}
           {formError && (
-            <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 text-red-400 text-xs rounded-xl flex items-start gap-1">
+            <div className="mb-3 p-2.5 bg-red-500/10 border border-red-500/20 text-red-650 dark:text-red-400 text-xs rounded-lg flex items-start gap-1">
               <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
               <span>{formError}</span>
             </div>
           )}
 
-          <form onSubmit={handleCreateReminder} className="space-y-4">
+          <form onSubmit={handleCreateReminder} className="space-y-3">
             <div>
-              <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
+              <label className="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5">
                 Medicine Name *
               </label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
-                  <Pill className="w-4 h-4 hidden" />
-                </div>
                 <input
                   type="text"
                   required
                   value={medicineName}
                   onChange={(e) => setMedicineName(e.target.value)}
                   placeholder="e.g. Lipitor 20mg"
-                  className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder-slate-500 focus:outline-none focus:border-brand-500 text-sm"
+                  className="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-[#0C1628] border border-slate-200 dark:border-slate-700/60 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-[#1A56A0] dark:focus:border-sky-400 text-xs transition-colors duration-200"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
+              <label className="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5">
                 SMS Mobile Number *
               </label>
               <div className="relative">
@@ -192,22 +189,22 @@ const CustomerReminders = () => {
                   value={phoneNumber}
                   onChange={(e) => setPhoneNumber(e.target.value)}
                   placeholder="e.g. +15550192834"
-                  className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder-slate-500 focus:outline-none focus:border-brand-500 text-sm"
+                  className="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-[#0C1628] border border-slate-200 dark:border-slate-700/60 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-[#1A56A0] dark:focus:border-sky-400 text-xs transition-colors duration-200"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
+              <label className="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5">
                 Notification Schedule
               </label>
               <select
                 value={time}
                 onChange={(e) => setTime(e.target.value)}
-                className="w-full px-4 py-2.5 rounded-xl bg-darkbg-950 border border-white/10 text-white text-sm focus:outline-none focus:border-brand-500"
+                className="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-[#0C1628] border border-slate-200 dark:border-slate-700/60 text-slate-900 dark:text-white text-xs focus:outline-none focus:border-[#1A56A0] dark:focus:border-sky-400 transition-colors duration-200"
               >
                 {timeOptions.map((t) => (
-                  <option key={t} value={t}>{t}</option>
+                  <option key={t} value={t} className="bg-white dark:bg-[#1a2438]">{t}</option>
                 ))}
               </select>
             </div>
@@ -215,12 +212,12 @@ const CustomerReminders = () => {
             <button
               type="submit"
               disabled={createMutation.isPending}
-              className="w-full py-3 bg-gradient-to-r from-brand-600 to-brand-500 hover:from-brand-500 hover:to-brand-400 text-white font-semibold rounded-xl transition-all text-sm flex items-center justify-center gap-1.5"
+              className="w-full py-2 bg-[#1A56A0] hover:bg-[#1A56A0]/95 text-white font-semibold rounded-lg shadow-sm transition-all text-xs flex items-center justify-center gap-1.5 disabled:opacity-50"
             >
               {createMutation.isPending ? (
-                <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
               ) : (
-                <Plus className="w-4 h-4" />
+                <Plus className="w-3.5 h-3.5" />
               )}
               <span>Create Alert Alarm</span>
             </button>
@@ -228,42 +225,42 @@ const CustomerReminders = () => {
         </div>
 
         {/* Reminders List & History logs */}
-        <div className="lg:col-span-2 space-y-6">
+        <div className="lg:col-span-2 space-y-4">
           {/* Active reminders list */}
-          <div className="glass-panel p-6 rounded-3xl border border-white/5">
-            <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-              <Clock className="w-4.5 h-4.5 text-brand-400" />
+          <div className="bg-white dark:bg-[#1a2438] p-4 rounded-xl border border-slate-200 dark:border-slate-700/50 shadow-sm transition-colors duration-200">
+            <h3 className="text-sm font-semibold text-slate-900 dark:text-white mb-3 flex items-center gap-2">
+              <Clock className="w-4 h-4 text-[#1A56A0] dark:text-sky-400" />
               <span>Medication Alarm Panel</span>
             </h3>
 
             {remindersLoading ? (
               <div className="py-8 flex justify-center">
-                <div className="w-8 h-8 border-2 border-brand-500/20 border-t-brand-500 rounded-full animate-spin"></div>
+                <div className="w-6 h-6 border-2 border-slate-200 dark:border-slate-700 border-t-[#1A56A0] rounded-full animate-spin"></div>
               </div>
             ) : reminders.length === 0 ? (
-              <p className="text-sm text-slate-400 py-6 text-center font-medium">No SMS timers configured. Create one using the side card.</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400 py-6 text-center font-medium">No SMS timers configured. Create one using the side card.</p>
             ) : (
-              <div className="divide-y divide-white/5 space-y-3 max-h-72 overflow-y-auto pr-2">
+              <div className="divide-y divide-slate-100 dark:divide-slate-700/50 max-h-72 overflow-y-auto pr-2">
                 {reminders.map((reminder) => (
-                  <div key={reminder._id} className="flex flex-col sm:flex-row justify-between sm:items-center py-4 gap-4">
+                  <div key={reminder._id} className="flex flex-col sm:flex-row justify-between sm:items-center py-2.5 gap-2.5">
                     <div className="flex-1">
-                      <div className="font-semibold text-white text-base">{reminder.medicineName}</div>
-                      <div className="text-xs text-slate-400 flex items-center gap-1.5 mt-1">
-                        <Phone className="w-3.5 h-3.5 text-slate-500" />
+                      <div className="font-semibold text-slate-900 dark:text-white text-xs">{reminder.medicineName}</div>
+                      <div className="text-[10px] text-slate-500 dark:text-slate-400 flex items-center gap-1 mt-0.5">
+                        <Phone className="w-3 h-3 text-slate-400" />
                         <span>{reminder.phoneNumber}</span>
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-3">
                       {/* Time Selector */}
                       <select
                         value={reminder.time}
                         onChange={(e) => handleTimeChange(reminder, e.target.value)}
                         disabled={updateMutation.isPending && updateMutation.variables?.reminderId === reminder._id}
-                        className="bg-slate-900 border border-white/15 text-xs rounded-xl px-2.5 py-1.5 text-slate-200 focus:outline-none focus:border-brand-500 disabled:opacity-50"
+                        className="bg-slate-50 dark:bg-[#0C1628] border border-slate-200 dark:border-slate-700/60 text-[11px] rounded-lg px-2 py-1 text-slate-900 dark:text-slate-200 focus:outline-none focus:border-[#1A56A0] dark:focus:border-sky-400 disabled:opacity-50 transition-colors duration-200"
                       >
                         {timeOptions.map((opt) => (
-                          <option key={opt} value={opt}>{opt}</option>
+                          <option key={opt} value={opt} className="bg-white dark:bg-[#1a2438]">{opt}</option>
                         ))}
                       </select>
 
@@ -271,20 +268,20 @@ const CustomerReminders = () => {
                       <button
                         onClick={() => handleToggleActive(reminder)}
                         disabled={updateMutation.isPending && updateMutation.variables?.reminderId === reminder._id}
-                        className={`w-11 h-6 flex items-center rounded-full p-1 cursor-pointer transition-all duration-300 disabled:opacity-50 ${
-                          reminder.isActive ? 'bg-brand-500 justify-end' : 'bg-slate-800 justify-start'
+                        className={`w-9 h-5 flex items-center rounded-full p-0.5 cursor-pointer transition-all duration-300 disabled:opacity-50 ${
+                          reminder.isActive ? 'bg-[#1A56A0] dark:bg-sky-500 justify-end' : 'bg-slate-200 dark:bg-slate-800 justify-start'
                         }`}
                       >
-                        <span className="w-4 h-4 bg-white rounded-full shadow-md"></span>
+                        <span className="w-4 h-4 bg-white rounded-full shadow-sm"></span>
                       </button>
 
                       {/* Delete */}
                       <button
                         onClick={() => handleDeleteReminder(reminder._id)}
-                        className="p-1.5 text-slate-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all border border-transparent hover:border-red-500/20"
+                        className="p-1 text-slate-400 hover:text-red-650 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-all border border-transparent hover:border-red-200 dark:hover:border-red-500/20"
                         title="Delete reminder alarm"
                       >
-                        <Trash2 className="w-4.5 h-4.5" />
+                        <Trash2 className="w-3.5 h-3.5" />
                       </button>
                     </div>
                   </div>
@@ -294,44 +291,44 @@ const CustomerReminders = () => {
           </div>
 
           {/* Delivery logs */}
-          <div className="glass-panel p-6 rounded-3xl border border-white/5">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                <History className="w-4.5 h-4.5 text-brand-400" />
+          <div className="bg-white dark:bg-[#1a2438] p-4 rounded-xl border border-slate-200 dark:border-slate-700/50 shadow-sm transition-colors duration-200">
+            <div className="flex justify-between items-center mb-3">
+              <h3 className="text-sm font-semibold text-slate-900 dark:text-white flex items-center gap-2">
+                <History className="w-4 h-4 text-[#1A56A0] dark:text-sky-400" />
                 <span>Medication Alert Dispatch Log</span>
               </h3>
               <button
                 onClick={() => refetchLogs()}
                 disabled={logsLoading}
-                className="p-1.5 bg-white/5 text-slate-400 hover:text-white rounded-lg border border-white/5 hover:border-white/10"
+                className="p-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-[#0C1628] dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-white rounded-lg border border-slate-250 dark:border-slate-700/60 transition-colors"
               >
-                <RefreshCw className="w-3.5 h-3.5" />
+                <RefreshCw className="w-3 h-3" />
               </button>
             </div>
 
             {logsLoading ? (
               <div className="py-8 flex justify-center">
-                <div className="w-8 h-8 border-2 border-brand-500/20 border-t-brand-500 rounded-full animate-spin"></div>
+                <div className="w-6 h-6 border-2 border-slate-200 dark:border-slate-700 border-t-[#1A56A0] rounded-full animate-spin"></div>
               </div>
             ) : logs.length === 0 ? (
-              <p className="text-sm text-slate-400 py-6 text-center font-medium">No alerts generated for your account yet.</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400 py-6 text-center font-medium">No alerts generated for your account yet.</p>
             ) : (
-              <div className="divide-y divide-white/5 max-h-60 overflow-y-auto pr-2 space-y-1">
+              <div className="divide-y divide-slate-150 dark:divide-slate-700/50 max-h-60 overflow-y-auto pr-2">
                 {logs.map((log) => (
-                  <div key={log._id} className="py-3 flex justify-between items-start gap-4">
+                  <div key={log._id} className="py-2.5 flex justify-between items-start gap-3">
                     <div>
-                      <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-white/5 border border-slate-700/50 text-slate-300">
+                      <span className="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700/50 text-slate-600 dark:text-slate-300">
                         {log.type}
                       </span>
-                      <p className="text-sm text-slate-300 mt-2 leading-relaxed">{log.message}</p>
-                      <span className="text-[10px] text-slate-500 block mt-1">
+                      <p className="text-xs text-slate-600 dark:text-slate-300 mt-1.5 leading-relaxed">{log.message}</p>
+                      <span className="text-[9px] text-slate-400 dark:text-slate-500 block mt-0.5">
                         {new Date(log.sentAt).toLocaleString()}
                       </span>
                     </div>
                     <span className={`text-[9px] font-bold uppercase px-1.5 py-0.5 rounded ${
                       log.status === 'sent'
-                        ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-                        : 'bg-red-500/10 text-red-400 border border-red-500/20'
+                        ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20'
+                        : 'bg-red-500/10 text-red-650 dark:text-red-400 border border-red-500/20'
                     }`}>
                       {log.status}
                     </span>

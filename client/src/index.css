@@ -3,30 +3,25 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
 @layer base {
-  :root {
-    color-scheme: only light;
+  html {
+    scroll-behavior: smooth;
   }
-
   body {
-    @apply bg-bgLight text-textDark font-sans antialiased text-[14px];
+    @apply bg-slate-50 dark:bg-[#0C1628] text-slate-900 dark:text-slate-100 font-sans antialiased text-sm;
     min-height: 100vh;
   }
   
   h1, .page-title {
-    font-size: 24px;
-    @apply font-bold text-textDark tracking-tight;
+    @apply text-lg font-bold text-slate-900 dark:text-slate-100 tracking-tight;
   }
   
   h2, .section-title {
-    font-size: 18px;
-    @apply font-semibold text-textDark;
+    @apply text-base font-semibold text-slate-900 dark:text-slate-100;
   }
   
   h3, .card-title {
-    font-size: 16px;
-    @apply font-semibold text-textDark;
+    @apply text-sm font-semibold text-slate-900 dark:text-slate-100;
   }
 }
 
@@ -109,9 +104,17 @@
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
-
 .text-gradient-purple {
   background: linear-gradient(135deg, #c084fc 0%, #8b5cf6 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-8px); }
+}
+
+.animate-float {
+  animation: float 4s ease-in-out infinite;
 }

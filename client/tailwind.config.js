@@ -1,5 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 export default {
+  darkMode: 'class',
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
@@ -9,6 +10,21 @@ export default {
       colors: {
         primary: '#1A56A0',
         lightblue: '#D5E8F0',
+        brand: {
+          DEFAULT: '#1A56A0',
+          light:   '#2563EB',
+          dark:    '#1E3A5F',
+        },
+        surface: {
+          900: '#0C1628',
+          800: '#111827',
+          700: '#1a2438',
+          600: '#1f2d42',
+          50:  '#f8fafc',
+          100: '#f1f5f9',
+          200: '#e2e8f0',
+          300: '#cbd5e1',
+        },
         greenAccent: '#16A34A',
         orangeAccent: '#D97706',
         redAccent: '#DC2626',

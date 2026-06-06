@@ -4,7 +4,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import api from '../utils/api';
 import { useAuth } from '../context/AuthContext';
 import { 
-  FileText, Download, X, Eye, CreditCard, Calendar, Activity, Receipt
+  FileText, Download, X, Eye, Calendar, Receipt
 } from 'lucide-react';
 
 const CustomerBills = () => {
@@ -65,80 +65,80 @@ const CustomerBills = () => {
   };
 
   return (
-    <div className="space-y-8 p-6 max-w-7xl mx-auto">
+    <div className="space-y-4 p-4 max-w-7xl mx-auto">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-extrabold text-white tracking-tight">Invoice History</h1>
-        <p className="text-slate-400 text-sm mt-1">
+        <h1 className="text-lg font-bold text-slate-805 dark:text-slate-200 tracking-tight">Invoice History</h1>
+        <p className="text-xs text-slate-450 dark:text-slate-500 mt-0.5">
           Review past transactions, verify batch items, and download PDF receipts.
         </p>
       </div>
 
       {/* Main Table */}
-      <div className="glass-panel rounded-3xl border border-white/5 overflow-hidden">
+      <div className="bg-white dark:bg-[#1a2438] rounded-xl border border-slate-200 dark:border-slate-700/50 shadow-sm overflow-hidden transition-colors duration-200">
         {isLoading ? (
           <div className="py-20 flex justify-center">
-            <div className="w-10 h-10 border-4 border-brand-500/20 border-t-brand-500 rounded-full animate-spin"></div>
+            <div className="w-8 h-8 border-3 border-slate-200 border-t-[#1A56A0] rounded-full animate-spin"></div>
           </div>
         ) : isError ? (
-          <div className="py-20 text-center text-red-400">
+          <div className="py-20 text-center text-red-500 dark:text-red-400 text-xs">
             <p>Error checking billing system: {error.message}</p>
           </div>
         ) : bills.length === 0 ? (
-          <div className="py-20 text-center text-slate-400">
-            <FileText className="w-12 h-12 text-slate-500 mx-auto mb-4" />
-            <p className="text-base font-semibold">No order invoices registered under your profile.</p>
+          <div className="py-16 text-center text-slate-400 dark:text-slate-500">
+            <FileText className="w-10 h-10 text-slate-400 mx-auto mb-3" />
+            <p className="text-xs font-semibold">No order invoices registered under your profile.</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
+            <table className="w-full text-left border-collapse text-xs">
               <thead>
-                <tr className="border-b border-white/5 text-slate-400 text-xs font-semibold uppercase tracking-wider bg-white/[0.02]">
-                  <th className="py-4 px-6">Invoice Code</th>
-                  <th className="py-4 px-6">Purchase Date</th>
-                  <th className="py-4 px-6">Total Items</th>
-                  <th className="py-4 px-6">Total Charged</th>
-                  <th className="py-4 px-6">Method</th>
-                  <th className="py-4 px-6 text-right">Actions</th>
+                <tr className="bg-slate-50 dark:bg-slate-900/40 border-b border-slate-100 dark:border-slate-700/50 text-slate-400 dark:text-slate-500 text-[9px] font-bold uppercase tracking-wider">
+                  <th className="py-2.5 px-4">Invoice Code</th>
+                  <th className="py-2.5 px-4">Purchase Date</th>
+                  <th className="py-2.5 px-4">Total Items</th>
+                  <th className="py-2.5 px-4">Total Charged</th>
+                  <th className="py-2.5 px-4">Method</th>
+                  <th className="py-2.5 px-4 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/5">
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-700/50">
                 {bills.map((bill) => (
-                  <tr key={bill._id} className="hover:bg-white/[0.01] transition-colors">
-                    <td className="py-4 px-6">
-                      <span className="font-mono text-brand-400 font-semibold">{bill.billNumber}</span>
+                  <tr key={bill._id} className="hover:bg-slate-50/20 dark:hover:bg-slate-800/20 transition-colors">
+                    <td className="py-2.5 px-4">
+                      <span className="font-mono text-[#1A56A0] dark:text-sky-400 font-bold">{bill.billNumber}</span>
                     </td>
-                    <td className="py-4 px-6 text-slate-300">
+                    <td className="py-2.5 px-4 text-slate-600 dark:text-slate-400">
                       {new Date(bill.createdAt).toLocaleDateString(undefined, {
                         year: 'numeric',
                         month: 'short',
                         day: 'numeric',
                       })}
                     </td>
-                    <td className="py-4 px-6 text-slate-300">
+                    <td className="py-2.5 px-4 text-slate-600 dark:text-slate-400">
                       {bill.items.reduce((sum, item) => sum + item.quantity, 0)} units
                     </td>
-                    <td className="py-4 px-6 text-white font-bold">${bill.total.toFixed(2)}</td>
-                    <td className="py-4 px-6 text-slate-400">{bill.paymentMethod}</td>
-                    <td className="py-4 px-6 text-right">
-                      <div className="flex justify-end gap-2">
+                    <td className="py-2.5 px-4 text-slate-850 dark:text-slate-200 font-bold">${bill.total.toFixed(2)}</td>
+                    <td className="py-2.5 px-4 text-slate-500 dark:text-slate-400">{bill.paymentMethod}</td>
+                    <td className="py-2.5 px-4 text-right">
+                      <div className="flex justify-end gap-1.5">
                         <button
                           onClick={() => handleOpenDetails(bill)}
-                          className="p-2 text-slate-400 hover:text-brand-400 hover:bg-brand-500/10 rounded-lg transition-all border border-transparent hover:border-brand-500/20"
+                          className="p-1.5 text-slate-400 dark:text-slate-500 hover:text-[#1A56A0] dark:hover:text-sky-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-all"
                           title="View items detail"
                         >
-                          <Eye className="w-4.5 h-4.5" />
+                          <Eye className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => handleDownloadPDF(bill._id, bill.billNumber)}
                           disabled={downloadingId === bill._id}
-                          className="p-2 text-slate-400 hover:text-emerald-400 hover:bg-emerald-500/10 rounded-lg transition-all border border-transparent hover:border-emerald-500/20 disabled:opacity-50"
+                          className="p-1.5 text-slate-400 dark:text-slate-500 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 rounded-lg transition-all disabled:opacity-50"
                           title="Download PDF Invoice"
                         >
                           {downloadingId === bill._id ? (
-                            <span className="w-4.5 h-4.5 border border-emerald-400 border-t-transparent rounded-full animate-spin block"></span>
+                            <span className="w-4 h-4 border border-emerald-400 border-t-transparent rounded-full animate-spin block"></span>
                           ) : (
-                            <Download className="w-4.5 h-4.5" />
+                            <Download className="w-4 h-4" />
                           )}
                         </button>
                       </div>
@@ -153,64 +153,64 @@ const CustomerBills = () => {
 
       {/* Bill Details Modal */}
       {modalOpen && selectedBill && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-darkbg-950/80 backdrop-blur-sm">
-          <div className="glass-panel w-full max-w-2xl rounded-3xl border border-white/10 shadow-2xl p-6 relative overflow-hidden max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs">
+          <div className="bg-white dark:bg-[#1a2438] w-full max-w-lg rounded-xl border border-slate-200 dark:border-slate-700/50 shadow-2xl p-5 relative overflow-hidden max-h-[90vh] overflow-y-auto transition-colors duration-200">
             {/* Header */}
-            <div className="flex items-center justify-between pb-4 border-b border-white/5 mb-6">
-              <h3 className="text-xl font-bold text-white flex items-center gap-2">
-                <Receipt className="w-5 h-5 text-brand-400" />
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-700/50 mb-4">
+              <h3 className="text-sm font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+                <Receipt className="w-4 h-4 text-[#1A56A0] dark:text-sky-400" />
                 <span>Invoice Statement</span>
               </h3>
-              <button onClick={handleCloseModal} className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-white/5">
-                <X className="w-5 h-5" />
+              <button onClick={handleCloseModal} className="p-1 rounded-lg text-slate-400 hover:text-slate-800 dark:text-slate-505 dark:hover:text-slate-200">
+                <X className="w-4 h-4" />
               </button>
             </div>
 
             {/* Invoice Meta */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 bg-white/[0.02] border border-white/5 p-4 rounded-2xl mb-6 text-sm">
+            <div className="grid grid-cols-2 gap-3 bg-slate-50 dark:bg-slate-905/20 border border-slate-100 dark:border-slate-700/50 p-3 rounded-xl mb-4 text-xs">
               <div>
-                <span className="text-slate-400 text-xs block">Invoice Code</span>
-                <span className="font-mono font-bold text-brand-400">{selectedBill.billNumber}</span>
+                <span className="text-slate-400 dark:text-slate-500 text-[10px] block">Invoice Code</span>
+                <span className="font-mono font-bold text-[#1A56A0] dark:text-sky-400">{selectedBill.billNumber}</span>
               </div>
               <div>
-                <span className="text-slate-400 text-xs block">Purchase Date</span>
-                <span className="text-slate-200">{new Date(selectedBill.createdAt).toLocaleString()}</span>
+                <span className="text-slate-400 dark:text-slate-500 text-[10px] block">Purchase Date</span>
+                <span className="text-slate-700 dark:text-slate-300 font-medium">{new Date(selectedBill.createdAt).toLocaleString()}</span>
               </div>
               <div>
-                <span className="text-slate-400 text-xs block">Payment Method</span>
-                <span className="text-slate-200">{selectedBill.paymentMethod}</span>
+                <span className="text-slate-400 dark:text-slate-500 text-[10px] block">Payment Method</span>
+                <span className="text-slate-700 dark:text-slate-300 font-medium">{selectedBill.paymentMethod}</span>
               </div>
               <div>
-                <span className="text-slate-400 text-xs block">Pharmacist</span>
-                <span className="text-slate-200">
-                  {selectedBill.pharmacistId?.name || 'Aegis Portal Checkout'}
+                <span className="text-slate-400 dark:text-slate-500 text-[10px] block">Pharmacist</span>
+                <span className="text-slate-700 dark:text-slate-300 font-medium truncate block">
+                  {selectedBill.pharmacistId?.name || 'Pharmadesk Checkout'}
                 </span>
               </div>
             </div>
 
             {/* Table */}
-            <div className="border border-white/5 rounded-2xl overflow-hidden mb-6">
-              <table className="w-full text-left text-sm border-collapse">
+            <div className="border border-slate-100 dark:border-slate-700/50 rounded-xl overflow-hidden mb-4">
+              <table className="w-full text-left text-xs border-collapse">
                 <thead>
-                  <tr className="bg-white/[0.02] text-slate-400 text-xs font-semibold uppercase tracking-wider border-b border-white/5">
-                    <th className="py-3 px-4">Medicine Details</th>
-                    <th className="py-3 px-4 text-right">Unit Price</th>
-                    <th className="py-3 px-4 text-right">Quantity</th>
-                    <th className="py-3 px-4 text-right">Total Price</th>
+                  <tr className="bg-slate-50 dark:bg-slate-900/40 text-slate-400 dark:text-slate-500 text-[9px] font-bold uppercase tracking-wider border-b border-slate-100 dark:border-slate-700/50">
+                    <th className="py-2 px-3">Medicine Details</th>
+                    <th className="py-2 px-3 text-right">Unit Price</th>
+                    <th className="py-2 px-3 text-right">Quantity</th>
+                    <th className="py-2 px-3 text-right">Total Price</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-white/5 text-slate-300">
+                <tbody className="divide-y divide-slate-50 dark:divide-slate-700/50 text-slate-700 dark:text-slate-350">
                   {selectedBill.items.map((item, idx) => (
-                    <tr key={idx} className="hover:bg-white/[0.01]">
-                      <td className="py-3.5 px-4 font-semibold text-white">
+                    <tr key={idx} className="hover:bg-slate-50/20 dark:hover:bg-slate-800/20">
+                      <td className="py-2 px-3 font-semibold text-slate-800 dark:text-slate-200">
                         {item.name}
-                        <span className="text-[10px] ml-2 font-bold uppercase bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded border border-slate-700/50">
+                        <span className="text-[9px] ml-1.5 font-bold uppercase bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 px-1.5 py-0.5 rounded border border-slate-200 dark:border-slate-700/50">
                           {item.expiryStatus}
                         </span>
                       </td>
-                      <td className="py-3.5 px-4 text-right font-mono">${item.unitPrice.toFixed(2)}</td>
-                      <td className="py-3.5 px-4 text-right">{item.quantity} units</td>
-                      <td className="py-3.5 px-4 text-right font-semibold text-white font-mono">
+                      <td className="py-2 px-3 text-right font-mono">${item.unitPrice.toFixed(2)}</td>
+                      <td className="py-2 px-3 text-right">{item.quantity} units</td>
+                      <td className="py-2 px-3 text-right font-semibold text-slate-800 dark:text-slate-200 font-mono">
                         ${(item.unitPrice * item.quantity).toFixed(2)}
                       </td>
                     </tr>
@@ -220,38 +220,38 @@ const CustomerBills = () => {
             </div>
 
             {/* Summary Row */}
-            <div className="flex flex-col items-end gap-2 border-t border-white/5 pt-4 text-sm text-slate-300">
+            <div className="flex flex-col items-end gap-1 border-t border-slate-100 dark:border-slate-700/50 pt-3 text-xs text-slate-600 dark:text-slate-450 mb-4">
               <div className="flex gap-4">
-                <span className="text-slate-400">Subtotal:</span>
-                <span className="font-mono text-white w-20 text-right">${selectedBill.subtotal.toFixed(2)}</span>
+                <span className="text-slate-400 dark:text-slate-550">Subtotal:</span>
+                <span className="font-mono text-slate-800 dark:text-slate-200 w-20 text-right">${selectedBill.subtotal.toFixed(2)}</span>
               </div>
               <div className="flex gap-4">
-                <span className="text-slate-400">Discount:</span>
-                <span className="font-mono text-white w-20 text-right">-${selectedBill.discount.toFixed(2)}</span>
+                <span className="text-slate-400 dark:text-slate-550">Discount:</span>
+                <span className="font-mono text-slate-800 dark:text-slate-200 w-20 text-right">-${selectedBill.discount.toFixed(2)}</span>
               </div>
-              <div className="flex gap-4 text-base font-extrabold text-white">
-                <span className="text-brand-400">Grand Total:</span>
-                <span className="font-mono text-brand-400 w-20 text-right">${selectedBill.total.toFixed(2)}</span>
+              <div className="flex gap-4 text-sm font-bold text-slate-900 dark:text-white mt-0.5">
+                <span className="text-[#1A56A0] dark:text-sky-400">Grand Total:</span>
+                <span className="font-mono text-[#1A56A0] dark:text-sky-400 w-20 text-right">${selectedBill.total.toFixed(2)}</span>
               </div>
             </div>
 
             {/* Actions */}
-            <div className="flex justify-end gap-3 pt-6 border-t border-white/5 mt-6">
+            <div className="flex justify-end gap-2 pt-3 border-t border-slate-100 dark:border-slate-700/50">
               <button
                 onClick={handleCloseModal}
-                className="px-4 py-2.5 bg-white/5 hover:bg-white/10 text-slate-300 rounded-xl border border-white/5 text-sm font-semibold transition-all"
+                className="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg text-xs font-semibold transition-all"
               >
                 Close details
               </button>
               <button
                 onClick={() => handleDownloadPDF(selectedBill._id, selectedBill.billNumber)}
                 disabled={downloadingId === selectedBill._id}
-                className="px-5 py-2.5 bg-gradient-to-r from-brand-600 to-brand-500 hover:from-brand-500 hover:to-brand-400 text-white font-semibold rounded-xl shadow-lg transition-all text-sm flex items-center justify-center gap-2 disabled:opacity-50"
+                className="px-4 py-1.5 bg-[#1A56A0] hover:bg-blue-700 text-white font-semibold rounded-lg shadow-md transition-all text-xs flex items-center justify-center gap-1.5 disabled:opacity-50"
               >
                 {downloadingId === selectedBill._id ? (
-                  <span className="w-4.5 h-4.5 border border-white border-t-transparent rounded-full animate-spin block"></span>
+                  <span className="w-4 h-4 border border-white border-t-transparent rounded-full animate-spin block"></span>
                 ) : (
-                  <Download className="w-4.5 h-4.5" />
+                  <Download className="w-4 h-4" />
                 )}
                 <span>Download PDF</span>
               </button>

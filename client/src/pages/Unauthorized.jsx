@@ -18,21 +18,21 @@ const Unauthorized = () => {
   };
 
   return (
-    <div className="min-h-[calc(100vh-73px)] flex items-center justify-center px-4">
+    <div className="min-h-[calc(100vh-48px)] flex items-center justify-center px-4 transition-colors duration-200">
       <div className="max-w-md w-full text-center">
-        <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-red-500/10 border border-red-500/20 text-red-400 mb-6 animate-pulse">
-          <ShieldAlert className="w-10 h-10" />
+        <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/50 text-red-600 dark:text-red-400 mb-4 animate-pulse">
+          <ShieldAlert className="w-6 h-6" />
         </div>
-        <h1 className="text-3xl font-extrabold text-white mb-2">Access Denied</h1>
-        <p className="text-slate-400 text-sm mb-8">
+        <h1 className="text-lg font-bold text-slate-800 dark:text-slate-200 mb-1">Access Denied</h1>
+        <p className="text-slate-500 dark:text-slate-400 text-xs mb-6 leading-relaxed">
           Your current credentials do not grant access to this secure terminal. This event has been logged for security auditing.
         </p>
 
         <button
           onClick={handleGoBack}
-          className="inline-flex items-center gap-2 px-6 py-3 bg-white/5 hover:bg-white/10 text-white font-semibold rounded-xl border border-white/10 transition-all text-sm"
+          className="inline-flex items-center gap-1.5 px-4 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-205 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold rounded-lg border border-slate-200 dark:border-slate-700/50 transition-all text-xs"
         >
-          <ChevronLeft className="w-4 h-4" />
+          <ChevronLeft className="w-3.5 h-3.5" />
           <span>Return to Safety</span>
         </button>
       </div>

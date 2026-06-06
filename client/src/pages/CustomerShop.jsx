@@ -146,23 +146,23 @@ const CustomerShop = () => {
   const categories = [...new Set(medicines.map((m) => m.category))];
 
   return (
-    <div className="space-y-8 p-6 max-w-7xl mx-auto relative">
+    <div className="space-y-4 p-4 max-w-7xl mx-auto relative transition-colors duration-200">
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-extrabold text-white tracking-tight">Medicine Marketplace</h1>
-          <p className="text-slate-400 text-sm mt-1">
+          <h1 className="text-lg font-bold text-slate-900 dark:text-white tracking-tight">Medicine Marketplace</h1>
+          <p className="text-slate-500 dark:text-slate-400 text-xs mt-0.5">
             Browse verified pharmaceuticals, examine expiry levels, and buy medicines.
           </p>
         </div>
         <button
           onClick={() => setCartOpen(true)}
-          className="relative flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-brand-600 to-brand-500 hover:from-brand-500 hover:to-brand-400 text-white font-semibold rounded-xl transition-all shadow-lg shadow-brand-500/20"
+          className="relative flex items-center gap-1.5 px-3 py-1.5 bg-[#1A56A0] hover:bg-[#1A56A0]/95 text-white font-semibold rounded-lg shadow-sm transition-all text-xs"
         >
-          <ShoppingCart className="w-5 h-5" />
+          <ShoppingCart className="w-4 h-4" />
           <span>My Cart</span>
           {cart.length > 0 && (
-            <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold w-6 h-6 flex items-center justify-center rounded-full border-2 border-darkbg-950">
+            <span className="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-[9px] font-bold w-4.5 h-4.5 flex items-center justify-center rounded-full border-2 border-white dark:border-[#0C1628]">
               {cart.reduce((sum, item) => sum + item.quantity, 0)}
             </span>
           )}
@@ -170,41 +170,41 @@ const CustomerShop = () => {
       </div>
 
       {/* Filters */}
-      <div className="flex flex-col md:flex-row gap-4 items-center justify-between bg-white/[0.02] p-4 rounded-2xl border border-white/5">
-        <div className="relative w-full md:w-96">
-          <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
-            <Search className="w-4 h-4" />
+      <div className="flex flex-col sm:flex-row gap-3 items-center justify-between bg-white dark:bg-[#1a2438] p-3 rounded-xl border border-slate-200 dark:border-slate-700/50 shadow-sm transition-colors duration-200">
+        <div className="relative w-full sm:w-80">
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 dark:text-slate-500">
+            <Search className="w-3.5 h-3.5" />
           </div>
           <input
             type="text"
-            placeholder="Search catalog by name, generic, manufacturer..."
+            placeholder="Search catalog by name, generic..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 rounded-xl bg-white/5 border border-white/10 text-white placeholder-slate-500 focus:outline-none focus:border-brand-500 text-sm"
+            className="w-full pl-8 pr-3 py-1.5 rounded-lg bg-slate-50 dark:bg-[#0C1628] border border-slate-200 dark:border-slate-700/60 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-[#1A56A0] dark:focus:border-sky-400 text-xs transition-colors duration-200"
           />
         </div>
 
-        <div className="relative w-full md:w-48">
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500">
-            <Filter className="w-4 h-4" />
+        <div className="relative w-full sm:w-44">
+          <div className="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none text-slate-400 dark:text-slate-500">
+            <Filter className="w-3.5 h-3.5" />
           </div>
           <select
             value={categoryFilter}
             onChange={(e) => setCategoryFilter(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 rounded-xl bg-darkbg-950 border border-white/10 text-white text-sm focus:outline-none focus:border-brand-500 appearance-none"
+            className="w-full pl-8 pr-8 py-1.5 rounded-lg bg-slate-50 dark:bg-[#0C1628] border border-slate-200 dark:border-slate-700/60 text-slate-900 dark:text-white text-xs focus:outline-none focus:border-[#1A56A0] dark:focus:border-sky-400 appearance-none transition-colors duration-200"
           >
-            <option value="">All Categories</option>
-            <option value="Antibiotic">Antibiotic</option>
-            <option value="Analgesic">Analgesic</option>
-            <option value="Antihistamine">Antihistamine</option>
-            <option value="Antiviral">Antiviral</option>
-            <option value="Cardiovascular">Cardiovascular</option>
-            <option value="Diabetes">Diabetes</option>
-            <option value="Vitamins/Supplements">Vitamins/Supplements</option>
-            <option value="Other">Other</option>
+            <option value="" className="bg-white dark:bg-[#1a2438]">All Categories</option>
+            <option value="Antibiotic" className="bg-white dark:bg-[#1a2438]">Antibiotic</option>
+            <option value="Analgesic" className="bg-white dark:bg-[#1a2438]">Analgesic</option>
+            <option value="Antihistamine" className="bg-white dark:bg-[#1a2438]">Antihistamine</option>
+            <option value="Antiviral" className="bg-white dark:bg-[#1a2438]">Antiviral</option>
+            <option value="Cardiovascular" className="bg-white dark:bg-[#1a2438]">Cardiovascular</option>
+            <option value="Diabetes" className="bg-white dark:bg-[#1a2438]">Diabetes</option>
+            <option value="Vitamins/Supplements" className="bg-white dark:bg-[#1a2438]">Vitamins/Supplements</option>
+            <option value="Other" className="bg-white dark:bg-[#1a2438]">Other</option>
           </select>
-          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-400">
-            <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-slate-400 dark:text-slate-500">
+            <svg className="fill-current h-3.5 w-3.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
               <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
             </svg>
           </div>
@@ -214,72 +214,72 @@ const CustomerShop = () => {
       {/* Grid Content */}
       {isLoading ? (
         <div className="py-20 flex justify-center">
-          <div className="w-10 h-10 border-4 border-brand-500/20 border-t-brand-500 rounded-full animate-spin"></div>
+          <div className="w-6 h-6 border-2 border-slate-200 dark:border-slate-700 border-t-[#1A56A0] rounded-full animate-spin"></div>
         </div>
       ) : isError ? (
-        <div className="py-20 text-center text-red-400">
+        <div className="py-20 text-center text-red-500 dark:text-red-400 text-xs">
           <p>Failed loading catalog: {error.message}</p>
         </div>
       ) : medicines.length === 0 ? (
-        <div className="py-20 text-center text-slate-400">
-          <p className="text-base font-medium">No medicines matching specifications currently available.</p>
+        <div className="py-20 text-center text-slate-550 dark:text-slate-500">
+          <p className="text-xs font-semibold">No medicines matching specifications currently available.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {medicines.map((item) => {
             const expired = item.expiryStatus === 'EXPIRED';
             const critical = item.expiryStatus === 'CRITICAL';
             
             return (
-              <div key={item._id} className={`glass-card rounded-2xl p-6 flex flex-col justify-between h-72 border ${
-                expired ? 'border-red-500/10 hover:border-red-500/20' : 'border-white/5 hover:border-brand-500/20'
+              <div key={item._id} className={`bg-white dark:bg-[#1a2438] rounded-xl p-4 flex flex-col justify-between h-64 border transition-all duration-200 shadow-sm hover:shadow-md ${
+                expired ? 'bg-rose-50/20 dark:bg-rose-900/10 border-rose-200 dark:border-rose-900/30' : 'border-slate-200 dark:border-slate-700/50 hover:border-slate-300 dark:hover:border-slate-600'
               }`}>
                 <div>
                   <div className="flex justify-between items-start">
-                    <span className="text-xs px-2.5 py-0.5 rounded-full font-medium bg-brand-500/10 text-brand-400 border border-brand-500/20">
+                    <span className="text-[10px] px-2 py-0.5 rounded-full font-medium bg-[#1A56A0]/10 text-[#1A56A0] dark:bg-sky-500/10 dark:text-sky-400 border border-[#1A56A0]/20 dark:border-sky-500/20">
                       {item.category}
                     </span>
-                    <span className={`text-[10px] px-2 py-0.5 rounded font-bold uppercase ${
-                      expired ? 'bg-red-500/20 text-red-400 border border-red-500/30' :
-                      critical ? 'bg-rose-500/20 text-rose-400 border border-rose-500/20' :
-                      'bg-slate-800 text-slate-400 border border-slate-700/50'
+                    <span className={`text-[9px] px-1.5 py-0.5 rounded font-bold uppercase ${
+                      expired ? 'bg-red-550/10 text-red-650 dark:text-red-400 border border-red-500/20' :
+                      critical ? 'bg-rose-550/10 text-rose-600 dark:text-rose-400 border border-rose-500/20' :
+                      'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700/50'
                     }`}>
                       {item.expiryStatus}
                     </span>
                   </div>
                   
-                  <h3 className="text-lg font-bold text-white mt-3 leading-tight flex flex-col">
+                  <h3 className="text-sm font-bold text-slate-900 dark:text-white mt-2 leading-tight flex flex-col">
                     <span>{item.name}</span>
-                    <span className="text-xs text-slate-400 font-medium italic mt-0.5 font-sans">Formula: {item.genericName}</span>
+                    <span className="text-[10px] text-slate-500 dark:text-slate-400 font-medium italic mt-0.5 font-sans">Formula: {item.genericName}</span>
                   </h3>
                   
-                  <p className="text-slate-500 text-xs mt-1.5 font-medium">
+                  <p className="text-slate-500 dark:text-slate-500 text-[10px] mt-1 font-medium">
                     Brand: {item.manufacturer} | Batch: {item.batchNumber}
                   </p>
                   
-                  <p className="text-slate-400 text-xs mt-2 line-clamp-2 leading-relaxed">
+                  <p className="text-slate-500 dark:text-slate-400 text-xs mt-1.5 line-clamp-2 leading-relaxed">
                     {item.description || 'Verified pharmaceutical medicine for general healthcare usage.'}
                   </p>
                 </div>
 
-                <div className="flex items-center justify-between mt-4 border-t border-white/5 pt-4">
+                <div className="flex items-center justify-between mt-3 border-t border-slate-150 dark:border-slate-700/50 pt-3">
                   <div>
-                    <span className="text-xs text-slate-400 block">Unit Price</span>
-                    <span className="text-xl font-bold text-white">${item.price.toFixed(2)}</span>
+                    <span className="text-[10px] text-slate-405 dark:text-slate-500 block">Unit Price</span>
+                    <span className="text-base font-bold text-slate-900 dark:text-white">${item.price.toFixed(2)}</span>
                   </div>
 
                   {item.quantity === 0 ? (
-                    <span className="text-xs bg-red-500/10 text-red-400 border border-red-500/20 px-3 py-1.5 rounded-xl font-bold">
+                    <span className="text-[10px] bg-red-505/10 text-red-650 dark:text-red-400 border border-red-500/20 px-2 py-1 rounded font-bold">
                       Out of Stock
                     </span>
                   ) : expired ? (
-                    <span className="text-[10px] bg-red-500/10 text-red-400 border border-red-500/20 px-2 py-1.5 rounded-xl font-extrabold" title="Expired items cannot be added to bills">
+                    <span className="text-[9px] bg-red-500/10 text-red-655 dark:text-red-400 border border-red-550/20 px-2 py-1 rounded font-extrabold" title="Expired items cannot be added to bills">
                       EXPIRED - BLOCKED
                     </span>
                   ) : (
                     <button
                       onClick={() => handleAddToCart(item)}
-                      className="px-4 py-2 bg-brand-500 hover:bg-brand-400 text-white font-semibold text-xs rounded-xl shadow-lg shadow-brand-500/10 hover:shadow-brand-500/20 transition-all flex items-center gap-1.5"
+                      className="px-3 py-1.5 bg-[#1A56A0] hover:bg-[#1A56A0]/95 text-white font-semibold text-xs rounded-lg shadow-sm transition-all flex items-center gap-1"
                     >
                       <Plus className="w-3.5 h-3.5" />
                       <span>Add to Cart</span>
@@ -294,75 +294,75 @@ const CustomerShop = () => {
 
       {/* Shopping Cart Drawer */}
       {cartOpen && (
-        <div className="fixed inset-0 z-50 overflow-hidden bg-black/40 backdrop-blur-xs">
+        <div className="fixed inset-0 z-50 overflow-hidden bg-slate-900/50 dark:bg-black/60 backdrop-blur-xs">
           <div className="absolute inset-0 overflow-hidden">
             <div className="pointer-events-none fixed inset-y-0 right-0 flex max-w-full pl-10">
               <div className="pointer-events-auto w-screen max-w-md">
-                <div className="flex h-full flex-col bg-darkbg-950 border-l border-white/10 shadow-2xl">
+                <div className="flex h-full flex-col bg-white dark:bg-[#131b2e] border-l border-slate-205 dark:border-slate-800 shadow-2xl">
                   {/* Header */}
-                  <div className="flex items-center justify-between p-6 border-b border-white/5">
-                    <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                      <ShoppingCart className="w-5 h-5 text-brand-400" />
+                  <div className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-800">
+                    <h2 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                      <ShoppingCart className="w-4.5 h-4.5 text-[#1A56A0] dark:text-sky-400" />
                       <span>Shopping Cart</span>
                     </h2>
                     <button
                       onClick={() => setCartOpen(false)}
-                      className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-white/5"
+                      className="p-1 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5"
                     >
-                      <X className="w-5 h-5" />
+                      <X className="w-4.5 h-4.5" />
                     </button>
                   </div>
 
                   {/* Body */}
-                  <div className="flex-1 overflow-y-auto p-6 space-y-4">
+                  <div className="flex-1 overflow-y-auto p-4 space-y-3">
                     {cart.length === 0 ? (
                       <div className="h-full flex flex-col justify-center items-center text-center text-slate-400">
-                        <ShoppingBag className="w-12 h-12 text-slate-500 mb-4 animate-bounce" />
-                        <p className="text-base font-semibold">Your cart is empty</p>
-                        <p className="text-xs text-slate-500 mt-1">Browse catalog to select items.</p>
+                        <ShoppingBag className="w-10 h-10 text-slate-400 dark:text-slate-600 mb-3 animate-bounce" />
+                        <p className="text-sm font-semibold text-slate-900 dark:text-white">Your cart is empty</p>
+                        <p className="text-xs text-slate-500 mt-0.5">Browse catalog to select items.</p>
                       </div>
                     ) : (
                       cart.map((item) => {
                         const expired = item.expiryStatus === 'EXPIRED';
                         return (
-                          <div key={item._id} className={`flex gap-4 p-4 bg-white/[0.02] border rounded-2xl ${
-                            expired ? 'border-red-500/20 bg-red-500/[0.02]' : 'border-white/5'
+                          <div key={item._id} className={`flex gap-3 p-3 bg-slate-50 dark:bg-[#1a2438] border rounded-xl transition-colors ${
+                            expired ? 'border-red-200 bg-red-500/5 dark:border-red-905/20' : 'border-slate-200 dark:border-slate-700/50'
                           }`}>
                             <div className="flex-1">
-                              <h4 className="font-semibold text-white text-sm flex items-center gap-1.5">
+                              <h4 className="font-semibold text-slate-900 dark:text-white text-xs flex items-center gap-1.5">
                                 <span>{item.name}</span>
                                 {expired && (
-                                  <span className="text-[9px] bg-red-500/20 text-red-400 border border-red-500/30 px-1.5 rounded font-extrabold animate-pulse">
+                                  <span className="text-[9px] bg-red-500/20 text-red-655 border border-red-500/30 px-1.5 rounded font-extrabold animate-pulse">
                                     EXPIRED
                                   </span>
                                 )}
                               </h4>
-                              <p className="text-xs text-slate-400 mt-0.5">{item.category}</p>
-                              <span className="text-brand-400 text-sm font-bold mt-2 inline-block">${item.price.toFixed(2)}</span>
+                              <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">{item.category}</p>
+                              <span className="text-[#1A56A0] dark:text-sky-400 text-xs font-bold mt-1.5 inline-block">${item.price.toFixed(2)}</span>
                             </div>
 
                             <div className="flex flex-col justify-between items-end">
                               <button
                                 onClick={() => handleRemoveFromCart(item._id)}
-                                className="text-slate-500 hover:text-red-400 transition-colors"
+                                className="text-slate-400 hover:text-red-550 dark:hover:text-red-400 transition-colors"
                               >
-                                <Trash2 className="w-4.5 h-4.5" />
+                                <Trash2 className="w-4 h-4" />
                               </button>
 
-                              <div className="flex items-center gap-2 bg-white/5 rounded-lg border border-white/10 p-0.5">
+                              <div className="flex items-center gap-2 bg-slate-100 dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 p-0.5">
                                 <button
                                   onClick={() => handleUpdateQuantity(item._id, -1)}
-                                  className="p-1 text-slate-400 hover:text-white hover:bg-white/5 rounded"
+                                  className="p-1 text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-700 rounded"
                                 >
-                                  <Minus className="w-3.5 h-3.5" />
+                                  <Minus className="w-3 h-3" />
                                 </button>
-                                <span className="text-sm font-bold text-white min-w-4 text-center">{item.quantity}</span>
+                                <span className="text-xs font-bold text-slate-900 dark:text-white min-w-4 text-center">{item.quantity}</span>
                                 <button
                                   onClick={() => handleUpdateQuantity(item._id, 1)}
                                   disabled={expired}
-                                  className="p-1 text-slate-400 hover:text-white hover:bg-white/5 rounded disabled:opacity-30"
+                                  className="p-1 text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-202 dark:hover:bg-slate-700 rounded disabled:opacity-30"
                                 >
-                                  <Plus className="w-3.5 h-3.5" />
+                                  <Plus className="w-3 h-3" />
                                 </button>
                               </div>
                             </div>
@@ -374,15 +374,15 @@ const CustomerShop = () => {
 
                   {/* Footer */}
                   {cart.length > 0 && (
-                    <div className="border-t border-white/5 p-6 bg-white/[0.01] space-y-4">
-                      <div className="flex justify-between items-center text-base font-bold text-white">
+                    <div className="border-t border-slate-200 dark:border-slate-800 p-4 bg-slate-50 dark:bg-[#1a2438]/30 space-y-3">
+                      <div className="flex justify-between items-center text-xs font-bold text-slate-900 dark:text-white">
                         <span>Grand Total:</span>
-                        <span className="text-brand-400 text-xl">${calculateTotal().toFixed(2)}</span>
+                        <span className="text-[#1A56A0] dark:text-sky-400 text-base">${calculateTotal().toFixed(2)}</span>
                       </div>
                       
                       {cart.some(item => item.expiryStatus === 'EXPIRED') && (
-                        <div className="p-3 bg-red-500/10 border border-red-500/20 text-red-400 text-xs rounded-xl flex items-start gap-2">
-                          <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+                        <div className="p-2 bg-red-500/10 border border-red-500/20 text-red-650 dark:text-red-400 text-[10px] rounded-lg flex items-start gap-1.5">
+                          <AlertCircle className="w-3.5 h-3.5 shrink-0 mt-0.5" />
                           <span>Your cart contains expired items. Checkout will be blocked by system rules.</span>
                         </div>
                       )}
@@ -392,9 +392,9 @@ const CustomerShop = () => {
                           setCartOpen(false);
                           setCheckoutOpen(true);
                         }}
-                        className="w-full py-3 bg-gradient-to-r from-brand-600 to-brand-500 hover:from-brand-500 hover:to-brand-400 text-white font-semibold rounded-xl shadow-lg shadow-brand-500/10 hover:shadow-brand-500/20 transition-all flex items-center justify-center gap-2"
+                        className="w-full py-2 bg-[#1A56A0] hover:bg-[#1A56A0]/95 text-white font-semibold rounded-lg shadow-sm transition-all flex items-center justify-center gap-1.5 text-xs"
                       >
-                        <CreditCard className="w-5 h-5" />
+                        <CreditCard className="w-4 h-4" />
                         <span>Proceed to Checkout</span>
                       </button>
                     </div>
@@ -408,34 +408,34 @@ const CustomerShop = () => {
 
       {/* Checkout Modal */}
       {checkoutOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-darkbg-950/80 backdrop-blur-sm">
-          <div className="glass-panel w-full max-w-md rounded-3xl border border-white/10 shadow-2xl p-6 relative">
-            <div className="flex justify-between items-center pb-4 border-b border-white/5 mb-4">
-              <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                <CreditCard className="w-5 h-5 text-brand-400" />
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 dark:bg-black/60 backdrop-blur-xs">
+          <div className="bg-white dark:bg-[#1a2438] w-full max-w-sm rounded-xl border border-slate-200 dark:border-slate-700/50 shadow-xl p-4 relative transition-colors duration-200">
+            <div className="flex justify-between items-center pb-3 border-b border-slate-150 dark:border-slate-700/50 mb-3">
+              <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                <CreditCard className="w-4.5 h-4.5 text-[#1A56A0] dark:text-sky-400" />
                 <span>Simulated Billing Portal</span>
               </h3>
               <button
                 onClick={() => setCheckoutOpen(false)}
-                className="p-1 rounded-lg text-slate-400 hover:text-white"
+                className="p-1 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-white"
               >
-                <X className="w-5 h-5" />
+                <X className="w-4 h-4" />
               </button>
             </div>
 
             {checkoutError && (
-              <div className="mb-4 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs flex items-start gap-2.5">
-                <ShieldAlert className="w-5 h-5 shrink-0 text-red-400" />
+              <div className="mb-3 p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-650 dark:text-red-400 text-[11px] flex items-start gap-2">
+                <ShieldAlert className="w-4 h-4 shrink-0 text-red-600 dark:text-red-400" />
                 <div className="flex flex-col gap-0.5">
                   <span className="font-bold">System Validation Blocked</span>
-                  <span className="text-[11px] leading-relaxed">{checkoutError}</span>
+                  <span className="text-[10px] leading-relaxed">{checkoutError}</span>
                 </div>
               </div>
             )}
 
-            <form onSubmit={handleCheckoutSubmit} className="space-y-4">
+            <form onSubmit={handleCheckoutSubmit} className="space-y-3">
               <div>
-                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
+                <label className="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5">
                   Shipping Address *
                 </label>
                 <input
@@ -444,12 +444,12 @@ const CustomerShop = () => {
                   value={address}
                   onChange={(e) => setAddress(e.target.value)}
                   placeholder="123 Medical Lane, Cityville"
-                  className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder-slate-500 focus:outline-none focus:border-brand-500 text-sm"
+                  className="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-[#0C1628] border border-slate-200 dark:border-slate-700/60 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-[#1A56A0] dark:focus:border-sky-400 text-xs transition-colors duration-200"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
+                <label className="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5">
                   Contact Phone *
                 </label>
                 <input
@@ -458,12 +458,12 @@ const CustomerShop = () => {
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   placeholder="+1 (555) 019-2834"
-                  className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder-slate-500 focus:outline-none focus:border-brand-500 text-sm"
+                  className="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-[#0C1628] border border-slate-200 dark:border-slate-700/60 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-[#1A56A0] dark:focus:border-sky-400 text-xs transition-colors duration-200"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
+                <label className="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5">
                   Mock Card Number *
                 </label>
                 <input
@@ -472,13 +472,13 @@ const CustomerShop = () => {
                   value={cardNumber}
                   onChange={(e) => setCardNumber(e.target.value)}
                   placeholder="4111 2222 3333 4444"
-                  className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder-slate-500 focus:outline-none focus:border-brand-500 text-sm"
+                  className="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-[#0C1628] border border-slate-200 dark:border-slate-700/60 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-[#1A56A0] dark:focus:border-sky-400 text-xs transition-colors duration-200"
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
+                  <label className="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5">
                     Expiry *
                   </label>
                   <input
@@ -487,11 +487,11 @@ const CustomerShop = () => {
                     value={expiry}
                     onChange={(e) => setExpiry(e.target.value)}
                     placeholder="MM/YY"
-                    className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder-slate-500 focus:outline-none focus:border-brand-500 text-sm"
+                    className="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-[#0C1628] border border-slate-200 dark:border-slate-700/60 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-[#1A56A0] dark:focus:border-sky-400 text-xs transition-colors duration-200"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
+                  <label className="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5">
                     CVV *
                   </label>
                   <input
@@ -500,28 +500,28 @@ const CustomerShop = () => {
                     value={cvv}
                     onChange={(e) => setCvv(e.target.value)}
                     placeholder="•••"
-                    className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder-slate-500 focus:outline-none focus:border-brand-500 text-sm"
+                    className="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-[#0C1628] border border-slate-200 dark:border-slate-700/60 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-[#1A56A0] dark:focus:border-sky-400 text-xs transition-colors duration-200"
                   />
                 </div>
               </div>
 
-              <div className="pt-4 border-t border-white/5 flex gap-2 justify-end mt-6">
+              <div className="pt-3 border-t border-slate-150 dark:border-slate-700/50 flex gap-2 justify-end mt-4">
                 <button
                   type="button"
                   onClick={() => setCheckoutOpen(false)}
-                  className="px-4 py-2.5 bg-white/5 hover:bg-white/10 text-slate-300 rounded-xl text-sm font-semibold"
+                  className="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-350 rounded-lg text-xs font-semibold transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isProcessingCheckout}
-                  className="px-5 py-2.5 bg-gradient-to-r from-brand-600 to-brand-500 hover:from-brand-500 hover:to-brand-400 text-white font-semibold rounded-xl transition-all shadow-lg shadow-brand-500/20 disabled:opacity-50 text-sm"
+                  className="px-4 py-1.5 bg-[#1A56A0] hover:bg-[#1A56A0]/95 text-white font-semibold rounded-lg shadow-sm transition-all disabled:opacity-50 text-xs flex items-center justify-center min-w-28"
                 >
                   {isProcessingCheckout ? (
-                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                   ) : (
-                    'Confirm Billing checkout'
+                    'Confirm Checkout'
                   )}
                 </button>
               </div>
@@ -532,60 +532,60 @@ const CustomerShop = () => {
 
       {/* Checkout Success Modal / Receipt */}
       {checkoutSuccess && lastReceipt && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-darkbg-950/80 backdrop-blur-sm">
-          <div className="glass-panel w-full max-w-lg rounded-3xl border border-white/10 shadow-2xl p-6 relative text-center">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 mb-4">
-              <CheckCircle className="w-8 h-8" />
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 dark:bg-black/60 backdrop-blur-sm">
+          <div className="bg-white dark:bg-[#1a2438] w-full max-w-md rounded-xl border border-slate-200 dark:border-slate-700/50 shadow-xl p-5 relative text-center transition-colors duration-200">
+            <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-100 dark:border-emerald-900/50 text-emerald-600 dark:text-emerald-400 mb-3">
+              <CheckCircle className="w-6 h-6" />
             </div>
-            <h3 className="text-2xl font-extrabold text-white">Invoice Settled</h3>
-            <p className="text-slate-400 text-xs mt-1">Checkout complete. Decremented inventory quantities matching billing items.</p>
+            <h3 className="text-base font-bold text-slate-900 dark:text-white">Invoice Settled</h3>
+            <p className="text-slate-500 dark:text-slate-400 text-[11px] mt-0.5">Checkout complete. Decremented inventory quantities matching billing items.</p>
 
-            <div className="bg-white/5 border border-white/5 rounded-2xl p-6 text-left my-6 space-y-4">
-              <div className="flex justify-between items-center text-xs text-slate-400 border-b border-white/5 pb-3">
+            <div className="bg-slate-50 dark:bg-[#0C1628] border border-slate-200 dark:border-slate-700/50 rounded-xl p-4 text-left my-4 space-y-3">
+              <div className="flex justify-between items-center text-[10px] text-slate-400 dark:text-slate-500 border-b border-slate-150 dark:border-slate-705/40 pb-2">
                 <div>
                   <span className="block font-semibold">Invoice ID</span>
-                  <span className="font-mono text-slate-200 mt-0.5 block">{lastReceipt.billNumber}</span>
+                  <span className="font-mono text-slate-800 dark:text-slate-200 mt-0.5 block">{lastReceipt.billNumber}</span>
                 </div>
                 <div className="text-right">
                   <span className="block font-semibold">Processed Time</span>
-                  <span className="text-slate-200 mt-0.5 block">{lastReceipt.date}</span>
+                  <span className="text-slate-800 dark:text-slate-200 mt-0.5 block">{lastReceipt.date}</span>
                 </div>
               </div>
 
               <div>
-                <span className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Billing Items</span>
-                <div className="max-h-36 overflow-y-auto space-y-2 pr-2">
+                <span className="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5">Billing Items</span>
+                <div className="max-h-24 overflow-y-auto space-y-1.5 pr-1">
                   {lastReceipt.items.map((item, index) => (
-                    <div key={index} className="flex justify-between items-center text-sm">
-                      <span className="text-slate-300 font-medium">{item.name} <span className="text-slate-500 text-xs">x{item.quantity}</span></span>
-                      <span className="text-white font-semibold">${(item.unitPrice * item.quantity).toFixed(2)}</span>
+                    <div key={index} className="flex justify-between items-center text-xs text-slate-700 dark:text-slate-300">
+                      <span className="font-medium">{item.name} <span className="text-slate-400 text-[10px]">x{item.quantity}</span></span>
+                      <span className="font-semibold text-slate-900 dark:text-white font-mono">${(item.unitPrice * item.quantity).toFixed(2)}</span>
                     </div>
                   ))}
                 </div>
               </div>
 
-              <div className="border-t border-white/5 pt-4">
-                <span className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Shipping Terminal Address</span>
-                <p className="text-sm text-slate-200 font-medium leading-relaxed">{lastReceipt.shippingAddress}</p>
+              <div className="border-t border-slate-150 dark:border-slate-700/50 pt-2.5">
+                <span className="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-0.5">Shipping Terminal Address</span>
+                <p className="text-xs text-slate-700 dark:text-slate-300 font-medium leading-relaxed">{lastReceipt.shippingAddress}</p>
               </div>
 
-              <div className="flex justify-between items-center border-t border-white/5 pt-4 text-base font-extrabold text-white">
+              <div className="flex justify-between items-center border-t border-slate-150 dark:border-slate-700/50 pt-2.5 text-xs font-bold text-slate-900 dark:text-white">
                 <span>Grand Total Charged</span>
-                <span className="text-brand-400 text-lg">${lastReceipt.total.toFixed(2)}</span>
+                <span className="text-[#1A56A0] dark:text-sky-400 text-sm font-mono">${lastReceipt.total.toFixed(2)}</span>
               </div>
             </div>
 
-            <div className="flex gap-3">
+            <div className="flex gap-2">
               <button
                 onClick={() => handleDownloadPDF(lastReceipt.id, lastReceipt.billNumber)}
-                className="flex-1 py-3 bg-white/5 hover:bg-white/10 text-white font-semibold rounded-xl border border-white/10 transition-all text-sm flex items-center justify-center gap-2"
+                className="flex-1 py-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-250 dark:border-slate-700 text-slate-800 dark:text-white font-semibold rounded-lg transition-all text-xs flex items-center justify-center gap-1.5"
               >
-                <Download className="w-4 h-4" />
-                <span>Download PDF Invoice</span>
+                <Download className="w-3.5 h-3.5" />
+                <span>Download PDF</span>
               </button>
               <button
                 onClick={() => setCheckoutSuccess(false)}
-                className="flex-1 py-3 bg-brand-500 hover:bg-brand-400 text-white font-semibold rounded-xl shadow-lg shadow-brand-500/10 hover:shadow-brand-500/20 transition-all text-sm font-sans"
+                className="flex-1 py-1.5 bg-[#1A56A0] hover:bg-[#1A56A0]/95 text-white font-semibold rounded-lg shadow-sm transition-all text-xs font-sans"
               >
                 Back to Catalog
               </button>

@@ -4,7 +4,7 @@ import axios from 'axios';
 import { Activity, Mail, Lock, Eye, EyeOff, AlertCircle } from 'lucide-react';
 
 // Configure Axios defaults to connect with backend correctly
-axios.defaults.baseURL = 'http://localhost:5000';
+axios.defaults.baseURL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 axios.defaults.withCredentials = true;
 
 const Login = () => {
@@ -83,7 +83,7 @@ const Login = () => {
             <Activity className="w-5 h-5 text-white" />
           </div>
           <div>
-            <span className="block font-bold text-lg tracking-tight text-white">Aegis Medicine</span>
+            <span className="block font-bold text-lg tracking-tight text-white">Pharmadesk</span>
             <span className="block text-[9px] font-bold text-slate-400 tracking-widest uppercase mt-0.5">
               PHARMACY MANAGEMENT SYSTEM
             </span>

@@ -190,7 +190,7 @@ export const generateBillPDF = async (req, res, next) => {
     doc
       .fillColor('#0ea5e9')
       .fontSize(22)
-      .text('AEGIS MEDICINE SYSTEM', 50, 45, { align: 'left' })
+      .text('PHARMADESK', 50, 45, { align: 'left' })
       .fillColor('#64748b')
       .fontSize(10)
       .text('Intelligent Pharmacy & Batch Portal', 50, 70, { align: 'left' })
@@ -275,7 +275,7 @@ export const generateBillPDF = async (req, res, next) => {
       .fillColor('#64748b')
       .fontSize(9)
       .text(
-        'Thank you for choosing Aegis Medicine System. Wishing you strong health!',
+        'Thank you for choosing Pharmadesk. Wishing you strong health!',
         50,
         720,
         { align: 'center', width: 500 }

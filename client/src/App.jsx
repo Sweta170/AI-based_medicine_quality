@@ -14,11 +14,12 @@ import CustomerShop from './pages/CustomerShop';
 import CustomerBills from './pages/CustomerBills';
 import CustomerReminders from './pages/CustomerReminders';
 import CustomerProfile from './pages/CustomerProfile';
+import LandingPage from './pages/LandingPage';
 
 // Dashboard Layout wrapper
 const DashboardLayout = () => {
   return (
-    <div className="min-h-screen flex flex-col bg-darkbg-950">
+    <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-[#0C1628] text-slate-900 dark:text-slate-100 font-sans transition-colors duration-200">
       <Navbar />
       <div className="flex-1 flex overflow-hidden">
         <Sidebar />
@@ -36,8 +37,8 @@ const HomeRedirect = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-darkbg-950">
-        <div className="w-10 h-10 border-4 border-brand-500/20 border-t-brand-500 rounded-full animate-spin"></div>
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-[#0C1628] text-slate-900 dark:text-slate-100 font-sans transition-colors duration-200">
+        <div className="w-10 h-10 border-4 border-slate-200 dark:border-slate-800 border-t-[#1A56A0] rounded-full animate-spin"></div>
       </div>
     );
   }
@@ -62,6 +63,7 @@ function App() {
   return (
     <Routes>
       {/* Public Pages */}
+      <Route path="/" element={<LandingPage />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
 
@@ -152,8 +154,6 @@ function App() {
         />
       </Route>
 
-      {/* Root/Index Redirect */}
-      <Route path="/" element={<HomeRedirect />} />
 
       {/* Wildcard Fallback */}
       <Route path="*" element={<Navigate to="/" replace />} />

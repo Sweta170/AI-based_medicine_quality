@@ -1,7 +1,7 @@
 {
-  "name": "medicine-system",
+  "name": "pharmadesk",
   "version": "1.0.0",
-  "description": "Full MERN stack medicine management system with role-based routing",
+  "description": "Pharmadesk — Intelligent pharmacy management portal with role-based access",
   "main": "server/server.js",
   "scripts": {
     "install:all": "npm install && npm install --prefix server && npm install --prefix client --legacy-peer-deps",

@@ -184,7 +184,7 @@ const Register = () => {
             <span className="text-xl font-bold text-white">⚕</span>
           </div>
           <div>
-            <span className="block font-bold text-lg tracking-tight text-white">Aegis Medicine</span>
+            <span className="block font-bold text-lg tracking-tight text-white">Pharmadesk</span>
             <span className="block text-[9px] font-bold text-slate-400 tracking-widest uppercase mt-0.5">
               Pharmacy Management System
             </span>
