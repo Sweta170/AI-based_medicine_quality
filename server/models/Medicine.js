@@ -72,9 +72,7 @@ const medicineSchema = new mongoose.Schema(
   }
 );
 
-// Indexing batchNumber for fast queries and unique checks
-medicineSchema.index({ batchNumber: 1 });
-
+// Indexing is handled by unique: true on the field definition
 const Medicine = mongoose.model('Medicine', medicineSchema);
 
 export default Medicine;
