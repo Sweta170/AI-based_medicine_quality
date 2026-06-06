@@ -4,13 +4,23 @@ import {
   createMedicine,
   updateMedicine,
   deleteMedicine,
+  bulkImportMedicines,
+  processBill,
 } from '../controllers/medicineController.js';
 import { protect, authorize } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
+// All routes require authentication
 router.use(protect);
 
+// Billing check - accessible by any authenticated role (e.g. customer checking out, pharmacist processing bills)
+router.post('/bill', processBill);
+
+// Bulk import - restricted to pharmacist or superadmin
+router.post('/bulk', authorize('pharmacist', 'superadmin'), bulkImportMedicines);
+
+// standard CRUD
 router
   .route('/')
   .get(getAllMedicines)
