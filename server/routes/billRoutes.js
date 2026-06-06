@@ -3,8 +3,9 @@ import {
   createBill,
   getCustomerBills,
   generateBillPDF,
+  getAllBills,
 } from '../controllers/billController.js';
-import { protect } from '../middleware/authMiddleware.js';
+import { protect, authorize } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
@@ -12,6 +13,7 @@ const router = express.Router();
 router.use(protect);
 
 router.post('/', createBill);
+router.get('/', authorize('superadmin', 'pharmacist'), getAllBills);
 router.get('/customer/:customerId', getCustomerBills);
 router.get('/:id/pdf', generateBillPDF);
 

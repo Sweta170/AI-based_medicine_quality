@@ -294,3 +294,24 @@ export const generateBillPDF = async (req, res, next) => {
     next(error);
   }
 };
+
+// @desc    Get all bills (Pharmacist and Admin only)
+// @route   GET /api/bills
+// @access  Private
+export const getAllBills = async (req, res, next) => {
+  try {
+    if (req.user.role === 'customer') {
+      res.status(403);
+      throw new Error('Not authorized to access all billing history');
+    }
+
+    const bills = await Bill.find({})
+      .populate('customerId', 'name email')
+      .populate('pharmacistId', 'name email')
+      .sort({ createdAt: -1 });
+
+    res.json(bills);
+  } catch (error) {
+    next(error);
+  }
+};

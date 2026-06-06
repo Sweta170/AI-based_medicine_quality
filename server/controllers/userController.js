@@ -90,3 +90,15 @@ export const deleteUser = async (req, res, next) => {
     next(error);
   }
 };
+
+// @desc    Get all customers
+// @route   GET /api/users/customers
+// @access  Private/Pharmacist/Superadmin
+export const getCustomers = async (req, res, next) => {
+  try {
+    const customers = await User.find({ role: 'customer' }).select('-password').sort({ createdAt: -1 });
+    res.json(customers);
+  } catch (error) {
+    next(error);
+  }
+};

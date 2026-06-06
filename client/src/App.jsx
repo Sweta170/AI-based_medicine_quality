@@ -64,6 +64,16 @@ function App() {
       {/* Public Pages */}
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
+
+      {/* Pharmacist Dashboard (No DashboardLayout wrapper to use custom white medical layout) */}
+      <Route
+        path="/pharmacist"
+        element={
+          <ProtectedRoute allowedRoles={['pharmacist', 'superadmin']}>
+            <PharmacistDashboard />
+          </ProtectedRoute>
+        }
+      />
       
       {/* Dashboard Routes (Protected) */}
       <Route element={<DashboardLayout />}>
@@ -74,15 +84,6 @@ function App() {
           element={
             <ProtectedRoute allowedRoles={['superadmin']}>
               <SuperadminDashboard />
-            </ProtectedRoute>
-          }
-        />
-        
-        <Route
-          path="/pharmacist"
-          element={
-            <ProtectedRoute allowedRoles={['pharmacist', 'superadmin']}>
-              <PharmacistDashboard />
             </ProtectedRoute>
           }
         />
