@@ -8,6 +8,8 @@ import authRoutes from './routes/authRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import medicineRoutes from './routes/medicineRoutes.js';
 import billRoutes from './routes/billRoutes.js';
+import notificationRoutes from './routes/notificationRoutes.js';
+import { initializeNotificationScheduler } from './utils/notificationScheduler.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -19,6 +21,9 @@ dotenv.config();
 
 // Connect to Database
 connectDB();
+
+// Initialize Daily Notification Cron Scheduler
+initializeNotificationScheduler();
 
 const app = express();
 
@@ -55,6 +60,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/medicines', medicineRoutes);
 app.use('/api/bills', billRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 // Error Middleware
 app.use(notFound);

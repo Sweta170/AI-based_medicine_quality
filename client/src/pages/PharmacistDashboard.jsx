@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '../utils/api';
 import { 
   Pills, Plus, Edit2, Trash2, Search, Filter, 
-  AlertTriangle, CheckCircle, X, Calendar, RefreshCw, Barcode, Database, Upload, Eye
+  AlertTriangle, CheckCircle, X, Calendar, RefreshCw, Barcode, Database, Upload, Eye, Bell
 } from 'lucide-react';
 
 const PharmacistDashboard = () => {
@@ -190,6 +190,21 @@ const PharmacistDashboard = () => {
     }
   };
 
+  const [triggerLoading, setTriggerLoading] = useState(null);
+
+  const handleTriggerCron = async (cronNumber) => {
+    setTriggerLoading(cronNumber);
+    try {
+      const { data } = await api.post(`/notifications/trigger/${cronNumber}`);
+      alert(`Cron triggered successfully!\nMessage: ${data.message}`);
+    } catch (err) {
+      console.error(err);
+      alert(err.response?.data?.message || 'Failed to trigger cron job');
+    } finally {
+      setTriggerLoading(null);
+    }
+  };
+
   const openBulkModal = () => {
     setBulkJson('');
     setBulkError('');
@@ -313,6 +328,68 @@ const PharmacistDashboard = () => {
           >
             <Plus className="w-5 h-5" />
             <span>Add Medicine</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Scheduled Notifications Cron Trigger Panel */}
+      <div className="glass-panel p-6 rounded-3xl border border-white/5 space-y-4">
+        <div>
+          <h2 className="text-lg font-bold text-white flex items-center gap-2">
+            <Bell className="w-5 h-5 text-brand-400" />
+            <span>Automated Tasks & Scheduled Crons</span>
+          </h2>
+          <p className="text-xs text-slate-400 mt-1 font-sans">
+            Force-trigger daily automation routines immediately for verification (SMTP & Twilio integrations).
+          </p>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <button
+            onClick={() => handleTriggerCron('1')}
+            disabled={triggerLoading === '1'}
+            className="flex items-center justify-between p-4 bg-white/5 hover:bg-white/10 text-white rounded-2xl border border-white/5 text-sm font-semibold transition-all cursor-pointer disabled:opacity-50"
+          >
+            <div className="text-left font-sans">
+              <span className="block text-slate-300">Cron 1: Expiry Alerts</span>
+              <span className="text-[10px] text-slate-500 font-medium font-sans">Daily 8:00 AM email report</span>
+            </div>
+            {triggerLoading === '1' ? (
+              <span className="w-4 h-4 border-2 border-brand-400 border-t-transparent rounded-full animate-spin"></span>
+            ) : (
+              <RefreshCw className="w-4 h-4 text-brand-400" />
+            )}
+          </button>
+          
+          <button
+            onClick={() => handleTriggerCron('2')}
+            disabled={triggerLoading === '2'}
+            className="flex items-center justify-between p-4 bg-white/5 hover:bg-white/10 text-white rounded-2xl border border-white/5 text-sm font-semibold transition-all cursor-pointer disabled:opacity-50"
+          >
+            <div className="text-left font-sans">
+              <span className="block text-slate-300">Cron 2: Low Stock Warning</span>
+              <span className="text-[10px] text-slate-500 font-medium font-sans">Daily 9:00 AM stock alerts</span>
+            </div>
+            {triggerLoading === '2' ? (
+              <span className="w-4 h-4 border-2 border-brand-400 border-t-transparent rounded-full animate-spin"></span>
+            ) : (
+              <RefreshCw className="w-4 h-4 text-brand-400" />
+            )}
+          </button>
+
+          <button
+            onClick={() => handleTriggerCron('3')}
+            disabled={triggerLoading === '3'}
+            className="flex items-center justify-between p-4 bg-white/5 hover:bg-white/10 text-white rounded-2xl border border-white/5 text-sm font-semibold transition-all cursor-pointer disabled:opacity-50"
+          >
+            <div className="text-left font-sans">
+              <span className="block text-slate-300">Cron 3: SMS Medication Alarms</span>
+              <span className="text-[10px] text-slate-500 font-medium font-sans">Daily 10:00 AM customer SMS alerts</span>
+            </div>
+            {triggerLoading === '3' ? (
+              <span className="w-4 h-4 border-2 border-brand-400 border-t-transparent rounded-full animate-spin"></span>
+            ) : (
+              <RefreshCw className="w-4 h-4 text-brand-400" />
+            )}
           </button>
         </div>
       </div>

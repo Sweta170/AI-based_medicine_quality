@@ -4,13 +4,13 @@ import api from '../utils/api';
 import { useAuth } from '../context/AuthContext';
 import { 
   Pills, Search, Filter, ShoppingCart, Trash2, Plus, Minus, 
-  CreditCard, CheckCircle, X, ShieldAlert, ShoppingBag, AlertCircle, FileText, Download, History
+  CreditCard, CheckCircle, X, ShieldAlert, ShoppingBag, AlertCircle, FileText, Download, History, Bell, Phone, Clock
 } from 'lucide-react';
 
 const CustomerDashboard = () => {
   const { user: currentUser } = useAuth();
   const queryClient = useQueryClient();
-  const [activeTab, setActiveTab] = useState('shop'); // 'shop' or 'history'
+  const [activeTab, setActiveTab] = useState('shop'); // 'shop', 'history', or 'reminders'
   
   // Search and filter states
   const [search, setSearch] = useState('');
@@ -32,6 +32,13 @@ const CustomerDashboard = () => {
   const [isProcessingCheckout, setIsProcessingCheckout] = useState(false);
   const [lastReceipt, setLastReceipt] = useState(null);
 
+  // Reminder form states
+  const [remMedicineName, setRemMedicineName] = useState('');
+  const [remPhoneNumber, setRemPhoneNumber] = useState('');
+  const [remTime, setRemTime] = useState('10:00 AM');
+  const [reminderError, setReminderError] = useState('');
+  const [reminderSuccess, setReminderSuccess] = useState('');
+
   // Fetch medicines
   const { data: medicines = [], isLoading, isError, error } = useQuery({
     queryKey: ['medicines', search, categoryFilter],
@@ -45,7 +52,7 @@ const CustomerDashboard = () => {
   });
 
   // Fetch customer bills (history)
-  const { data: bills = [], isLoading: billsLoading, refetch: refetchBills } = useQuery({
+  const { data: bills = [], isLoading: billsLoading } = useQuery({
     queryKey: ['bills', currentUser?._id],
     queryFn: async () => {
       if (!currentUser?._id) return [];
@@ -53,6 +60,61 @@ const CustomerDashboard = () => {
       return data;
     },
     enabled: activeTab === 'history',
+  });
+
+  // Fetch customer reminders
+  const { data: reminders = [], isLoading: remindersLoading } = useQuery({
+    queryKey: ['reminders', currentUser?._id],
+    queryFn: async () => {
+      if (!currentUser?._id) return [];
+      const { data } = await api.get(`/notifications/reminders/customer/${currentUser._id}`);
+      return data;
+    },
+    enabled: activeTab === 'reminders',
+  });
+
+  // Fetch notification history logs for customer
+  const { data: notificationLogs = [], isLoading: logsLoading } = useQuery({
+    queryKey: ['notificationLogs', currentUser?._id],
+    queryFn: async () => {
+      if (!currentUser?._id) return [];
+      const { data } = await api.get(`/notifications/${currentUser._id}`);
+      return data;
+    },
+    enabled: activeTab === 'reminders',
+  });
+
+  // Mutation to create reminder
+  const createReminderMutation = useMutation({
+    mutationFn: async (payload) => {
+      const { data } = await api.post('/notifications/reminders', payload);
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(['reminders', currentUser?._id]);
+      setRemMedicineName('');
+      setRemPhoneNumber('');
+      setReminderSuccess('Reminder registered successfully!');
+      setTimeout(() => setReminderSuccess(''), 3000);
+    },
+    onError: (err) => {
+      setReminderError(err.response?.data?.message || 'Failed to create reminder');
+      setTimeout(() => setReminderError(''), 3000);
+    }
+  });
+
+  // Mutation to delete reminder
+  const deleteReminderMutation = useMutation({
+    mutationFn: async (id) => {
+      const { data } = await api.delete(`/notifications/reminders/${id}`);
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(['reminders', currentUser?._id]);
+    },
+    onError: (err) => {
+      alert(err.response?.data?.message || 'Failed to delete reminder');
+    }
   });
 
   const handleAddToCart = (medicine) => {
@@ -109,7 +171,6 @@ const CustomerDashboard = () => {
     setIsProcessingCheckout(true);
 
     try {
-      // Structure bill payload according to backend schema: { customerId, items: [ { medicineId, quantity } ] }
       const payload = {
         customerId: currentUser?._id,
         items: cart.map(item => ({
@@ -120,10 +181,8 @@ const CustomerDashboard = () => {
         paymentMethod: 'Card'
       };
 
-      // Call billing API endpoint
       const { data } = await api.post('/bills', payload);
 
-      // Successfully processed bill
       setLastReceipt({
         id: data._id,
         billNumber: data.billNumber,
@@ -146,11 +205,9 @@ const CustomerDashboard = () => {
     }
   };
 
-  // Secure PDF Downloader using authenticated Axios instance
   const handleDownloadPDF = async (billId, billNumber) => {
     try {
       const response = await api.get(`/bills/${billId}/pdf`, { responseType: 'blob' });
-      
       const blob = new Blob([response.data], { type: 'application/pdf' });
       const link = document.createElement('a');
       link.href = window.URL.createObjectURL(blob);
@@ -158,11 +215,32 @@ const CustomerDashboard = () => {
       link.click();
     } catch (error) {
       console.error('PDF download error:', error);
-      alert('Failed to download invoice PDF. Please try again.');
+      alert('Failed to download invoice PDF.');
     }
   };
 
-  const categories = [...new Set(medicines.map((m) => m.category))];
+  const handleAddReminder = (e) => {
+    e.preventDefault();
+    setReminderError('');
+    setReminderSuccess('');
+
+    if (!remMedicineName || !remPhoneNumber) {
+      setReminderError('Please enter both medicine name and phone number');
+      return;
+    }
+
+    createReminderMutation.mutate({
+      medicineName: remMedicineName,
+      phoneNumber: remPhoneNumber,
+      time: remTime,
+    });
+  };
+
+  const handleDeleteReminder = (id) => {
+    if (window.confirm('Cancel this SMS medication reminder?')) {
+      deleteReminderMutation.mutate(id);
+    }
+  };
 
   return (
     <div className="space-y-8 p-6 max-w-7xl mx-auto relative">
@@ -174,28 +252,47 @@ const CustomerDashboard = () => {
             Browse verified pharmaceuticals, examine expiry levels, and buy medicines.
           </p>
         </div>
-        <div className="flex gap-3">
+        <div className="flex flex-wrap gap-3">
           <button
-            onClick={() => setActiveTab(activeTab === 'shop' ? 'history' : 'shop')}
-            className="flex items-center gap-2 px-4 py-2.5 bg-white/5 hover:bg-white/10 text-slate-300 rounded-xl border border-white/10 transition-all font-semibold"
+            onClick={() => setActiveTab('shop')}
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border transition-all font-semibold ${
+              activeTab === 'shop'
+                ? 'bg-brand-500/10 text-brand-400 border-brand-500/20 shadow'
+                : 'bg-white/5 text-slate-300 border-white/10 hover:bg-white/10'
+            }`}
           >
-            {activeTab === 'shop' ? (
-              <>
-                <History className="w-5 h-5" />
-                <span>Order History</span>
-              </>
-            ) : (
-              <>
-                <ShoppingBag className="w-5 h-5" />
-                <span>Go Shopping</span>
-              </>
-            )}
+            <ShoppingBag className="w-5 h-5" />
+            <span>Go Shopping</span>
+          </button>
+          
+          <button
+            onClick={() => setActiveTab('history')}
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border transition-all font-semibold ${
+              activeTab === 'history'
+                ? 'bg-brand-500/10 text-brand-400 border-brand-500/20 shadow'
+                : 'bg-white/5 text-slate-300 border-white/10 hover:bg-white/10'
+            }`}
+          >
+            <History className="w-5 h-5" />
+            <span>Order History</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('reminders')}
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border transition-all font-semibold ${
+              activeTab === 'reminders'
+                ? 'bg-brand-500/10 text-brand-400 border-brand-500/20 shadow'
+                : 'bg-white/5 text-slate-300 border-white/10 hover:bg-white/10'
+            }`}
+          >
+            <Bell className="w-5 h-5" />
+            <span>Reminders & Alerts</span>
           </button>
           
           {activeTab === 'shop' && (
             <button
               onClick={() => setCartOpen(true)}
-              className="relative flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-brand-600 to-brand-500 hover:from-brand-500 hover:to-brand-400 text-white font-semibold rounded-xl transition-all shadow-lg shadow-brand-500/20"
+              className="relative flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-brand-600 to-brand-500 hover:from-brand-500 hover:to-brand-400 text-white font-semibold rounded-xl transition-all shadow-lg shadow-brand-500/20 animate-glow"
             >
               <ShoppingCart className="w-5 h-5" />
               <span>My Cart</span>
@@ -334,7 +431,7 @@ const CustomerDashboard = () => {
             </div>
           )}
         </>
-      ) : (
+      ) : activeTab === 'history' ? (
         /* History Section */
         <div className="glass-panel rounded-3xl border border-white/5 overflow-hidden">
           <div className="p-6 border-b border-white/5 flex items-center justify-between">
@@ -351,12 +448,6 @@ const CustomerDashboard = () => {
           ) : bills.length === 0 ? (
             <div className="py-20 text-center text-slate-400">
               <p className="text-base font-semibold">No order receipts registered under your profile.</p>
-              <button
-                onClick={() => setActiveTab('shop')}
-                className="mt-4 px-4 py-2 bg-brand-500/10 hover:bg-brand-500/20 text-brand-400 rounded-xl border border-brand-500/20 text-sm font-semibold transition-all"
-              >
-                Go Shop Now
-              </button>
             </div>
           ) : (
             <div className="overflow-x-auto">
@@ -378,11 +469,7 @@ const CustomerDashboard = () => {
                         <span className="font-mono text-brand-400 font-semibold">{bill.billNumber}</span>
                       </td>
                       <td className="py-4 px-6 text-slate-300">
-                        {new Date(bill.createdAt).toLocaleDateString(undefined, {
-                          year: 'numeric',
-                          month: 'short',
-                          day: 'numeric',
-                        })}
+                        {new Date(bill.createdAt).toLocaleDateString()}
                       </td>
                       <td className="py-4 px-6 text-slate-300">
                         {bill.items.reduce((sum, i) => sum + i.quantity, 0)} units
@@ -404,6 +491,186 @@ const CustomerDashboard = () => {
               </table>
             </div>
           )}
+        </div>
+      ) : (
+        /* Reminders Tab */
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {/* Create Reminder Form */}
+          <div className="glass-card p-6 rounded-3xl border border-white/5 h-max">
+            <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2 border-b border-white/5 pb-3">
+              <Bell className="w-5 h-5 text-brand-400" />
+              <span>Set SMS Reminder</span>
+            </h2>
+
+            {reminderSuccess && (
+              <div className="mb-4 p-3 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs rounded-xl">
+                {reminderSuccess}
+              </div>
+            )}
+            {reminderError && (
+              <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 text-red-400 text-xs rounded-xl flex items-start gap-1">
+                <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+                <span>{reminderError}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleAddReminder} className="space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
+                  Medicine Name *
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
+                    <Pills className="w-4 h-4" />
+                  </div>
+                  <input
+                    type="text"
+                    required
+                    value={remMedicineName}
+                    onChange={(e) => setRemMedicineName(e.target.value)}
+                    placeholder="e.g. Aspirin 100mg"
+                    className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder-slate-500 focus:outline-none focus:border-brand-500 text-sm"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
+                  Mobile Number (SMS) *
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
+                    <Phone className="w-4 h-4" />
+                  </div>
+                  <input
+                    type="text"
+                    required
+                    value={remPhoneNumber}
+                    onChange={(e) => setRemPhoneNumber(e.target.value)}
+                    placeholder="e.g. +15551234567"
+                    className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder-slate-500 focus:outline-none focus:border-brand-500 text-sm"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
+                  Schedule Time
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
+                    <Clock className="w-4 h-4" />
+                  </div>
+                  <select
+                    value={remTime}
+                    onChange={(e) => setRemTime(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-darkbg-950 border border-white/10 text-white text-sm focus:outline-none focus:border-brand-500"
+                  >
+                    <option value="08:00 AM">08:00 AM</option>
+                    <option value="09:00 AM">09:00 AM</option>
+                    <option value="10:00 AM">10:00 AM (Twilio Daily Cron)</option>
+                    <option value="02:00 PM">02:00 PM</option>
+                    <option value="08:00 PM">08:00 PM</option>
+                  </select>
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={createReminderMutation.isPending}
+                className="w-full py-2.5 bg-gradient-to-r from-brand-600 to-brand-500 hover:from-brand-500 hover:to-brand-400 text-white font-semibold rounded-xl shadow-lg transition-all text-sm flex items-center justify-center gap-1.5"
+              >
+                {createReminderMutation.isPending ? (
+                  <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                ) : (
+                  <Plus className="w-4 h-4" />
+                )}
+                <span>Register Reminder</span>
+              </button>
+            </form>
+          </div>
+
+          {/* Active Reminders List & History logs */}
+          <div className="md:col-span-2 space-y-6">
+            {/* Active Reminders */}
+            <div className="glass-panel p-6 rounded-3xl border border-white/5">
+              <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                <Bell className="w-4 h-4 text-brand-400" />
+                <span>Active Medication Timers</span>
+              </h3>
+
+              {remindersLoading ? (
+                <div className="py-8 flex justify-center">
+                  <div className="w-8 h-8 border-2 border-brand-500/20 border-t-brand-500 rounded-full animate-spin"></div>
+                </div>
+              ) : reminders.length === 0 ? (
+                <p className="text-sm text-slate-400 py-4 text-center">No active medication alarms set.</p>
+              ) : (
+                <div className="divide-y divide-white/5 max-h-60 overflow-y-auto pr-2">
+                  {reminders.map((r) => (
+                    <div key={r._id} className="flex justify-between items-center py-3">
+                      <div>
+                        <div className="font-semibold text-white text-sm">{r.medicineName}</div>
+                        <div className="text-xs text-slate-400 flex items-center gap-1 mt-0.5">
+                          <Phone className="w-3 h-3 text-slate-500" />
+                          <span>{r.phoneNumber}</span>
+                          <span className="text-slate-600">|</span>
+                          <Clock className="w-3 h-3 text-slate-500" />
+                          <span>{r.time}</span>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => handleDeleteReminder(r._id)}
+                        className="p-1.5 text-slate-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all border border-transparent hover:border-red-500/20"
+                        title="Cancel reminder"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Notification logs */}
+            <div className="glass-panel p-6 rounded-3xl border border-white/5">
+              <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                <History className="w-4 h-4 text-brand-400" />
+                <span>System Notification Log History</span>
+              </h3>
+
+              {logsLoading ? (
+                <div className="py-8 flex justify-center">
+                  <div className="w-8 h-8 border-2 border-brand-500/20 border-t-brand-500 rounded-full animate-spin"></div>
+                </div>
+              ) : notificationLogs.length === 0 ? (
+                <p className="text-sm text-slate-400 py-4 text-center font-medium">No system alerts logged under your profile yet.</p>
+              ) : (
+                <div className="divide-y divide-white/5 max-h-64 overflow-y-auto pr-2 space-y-1">
+                  {notificationLogs.map((log) => (
+                    <div key={log._id} className="py-3 flex justify-between items-start gap-4">
+                      <div>
+                        <div className="text-xs font-semibold px-2 py-0.5 rounded w-max text-center uppercase bg-white/5 border border-white/5 text-slate-300">
+                          {log.type}
+                        </div>
+                        <p className="text-sm text-slate-200 mt-1.5 leading-relaxed">{log.message}</p>
+                        <span className="text-[10px] text-slate-500 block mt-1">
+                          {new Date(log.sentAt).toLocaleString()}
+                        </span>
+                      </div>
+                      <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded ${
+                        log.status === 'sent' 
+                          ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' 
+                          : 'bg-red-500/10 text-red-400 border border-red-500/20'
+                      }`}>
+                        {log.status}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       )}
 
