@@ -37,6 +37,20 @@ const Login = () => {
     setError('');
     try {
       const res = await axios.post('/api/auth/login', { email, password, role });
+      
+      // Normalize response data to match expected shape and prevent TypeErrors
+      if (res.data && !res.data.user) {
+        res.data.user = {
+          id: res.data._id || res.data.id,
+          name: res.data.name,
+          email: res.data.email,
+          role: res.data.role
+        };
+      }
+      if (res.data && !res.data.refreshToken) {
+        res.data.refreshToken = '';
+      }
+
       localStorage.setItem('accessToken', res.data.accessToken);
       localStorage.setItem('refreshToken', res.data.refreshToken);
       localStorage.setItem('user', JSON.stringify(res.data.user));
