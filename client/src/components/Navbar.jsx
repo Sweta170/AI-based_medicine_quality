@@ -40,13 +40,13 @@ const Navbar = () => {
       </div>
 
       {user && (
-        <div className="flex items-center gap-4">
-          {/* Avatar + name + email + Role Badge */}
-          <div className="flex items-center gap-3 pl-3 pr-3 py-1 rounded-full border border-slate-200/60 dark:border-slate-700/30 bg-slate-50/50 dark:bg-white/5">
+        <div className="flex items-center gap-2 sm:gap-4">
+          {/* Avatar + name + email + Role Badge - Hidden on mobile */}
+          <div className="hidden sm:flex items-center gap-3 pl-3 pr-3 py-1 rounded-full border border-slate-200/60 dark:border-slate-700/30 bg-slate-50/50 dark:bg-white/5">
             <span className={`text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full ${getRoleBadgeStyle(user.role)}`}>
               {getRoleLabel(user.role)}
             </span>
-            <div className="flex flex-col text-right hidden sm:flex">
+            <div className="flex flex-col text-right">
               <span className="text-xs font-semibold text-slate-900 dark:text-slate-100 leading-tight">{user.name}</span>
               <span className="text-[9px] text-slate-400 dark:text-slate-500 leading-none">{user.email}</span>
             </div>
@@ -80,12 +80,13 @@ const Navbar = () => {
             )}
           </button>
 
-          {/* Logout Button */}
+          {/* Logout Button - Always visible */}
           <button
             onClick={logout}
-            className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 transition-colors py-1 px-2.5 rounded-lg hover:bg-red-500/10 border border-transparent hover:border-red-500/20"
+            className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 transition-colors py-1 px-2 sm:px-2.5 rounded-lg hover:bg-red-500/10 border border-transparent hover:border-red-500/20 whitespace-nowrap"
+            title="Logout"
           >
-            <LogOut className="w-4 h-4" />
+            <LogOut className="w-4 h-4 shrink-0" />
             <span className="text-sm font-semibold hidden sm:inline">Logout</span>
           </button>
         </div>
