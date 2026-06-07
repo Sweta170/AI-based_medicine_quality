@@ -11,7 +11,7 @@ import {
   AlertTriangle, CheckCircle, X, Calendar, RefreshCw, Barcode, 
   Database, Upload, Eye, Bell, Settings, Receipt, Users, LogOut, 
   IndianRupee, AlertCircle, ArrowRight, Lock, User, Info, ShieldAlert,
-  Menu, ChevronRight
+  Menu, ChevronRight, FileText
 } from 'lucide-react';
 
 const getDaysLeft = (expiryDate) => {
