@@ -55,8 +55,8 @@ const Login = () => {
       localStorage.setItem('refreshToken', res.data.refreshToken);
       localStorage.setItem('user', JSON.stringify(res.data.user));
       const routes = {
-        pharmacist: '/pharmacist/dashboard',
-        superadmin: '/admin/dashboard',
+        pharmacist: '/pharmacist',
+        superadmin: '/superadmin',
         customer: '/customer/dashboard',
       };
       navigate(routes[res.data.user.role]);
