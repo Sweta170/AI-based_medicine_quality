@@ -72,25 +72,40 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   // Check auth state on mount (silent refresh)
+  // Uses a timeout so Render cold-start delays don't hang the loading screen forever
   useEffect(() => {
+    const controller = new AbortController();
+
     const initializeAuth = async () => {
       try {
-        // Try refreshing token
-        const { data } = await api.post('/auth/refresh');
+        // Try refreshing token (timeout after 12s for Render cold starts)
+        const timeoutId = setTimeout(() => controller.abort(), 12000);
+
+        const { data } = await api.post('/auth/refresh', {}, {
+          signal: controller.signal,
+        });
+        clearTimeout(timeoutId);
+
         setAccessToken(data.accessToken);
         tokenRef.current = data.accessToken;
 
         // Fetch current user details
-        const userRes = await api.get('/auth/me');
+        const userRes = await api.get('/auth/me', { signal: controller.signal });
         setUser(userRes.data);
       } catch (err) {
-        console.log('No active session found.');
+        if (err.name === 'CanceledError' || err.code === 'ERR_CANCELED') {
+          console.warn('Auth check timed out — backend may be waking up (Render cold start).');
+        } else {
+          console.log('No active session found.');
+        }
       } finally {
         setLoading(false);
       }
     };
 
     initializeAuth();
+
+    return () => controller.abort();
   }, []);
 
   const login = async (email, password) => {
