@@ -73,6 +73,7 @@ export const createBill = async (req, res, next) => {
         quantity: item.quantity,
         unitPrice: medicine.price,
         expiryStatus,
+        expiryDate: medicine.expiryDate,
         ref: medicine, // keep ref to update stock later
       });
     }
@@ -110,6 +111,7 @@ export const createBill = async (req, res, next) => {
         quantity: item.quantity,
         unitPrice: item.unitPrice,
         expiryStatus: item.expiryStatus,
+        expiryDate: item.expiryDate,
       })),
       subtotal,
       discount: finalDiscount,
@@ -212,15 +214,19 @@ export const generateBillPDF = async (req, res, next) => {
     doc.strokeColor('#e2e8f0').lineWidth(1).moveTo(50, 120).lineTo(550, 120).stroke();
 
     // Client/Customer Information
+    const customerName = bill.customerId ? bill.customerId.name : 'Guest Customer';
+    const customerEmail = bill.customerId ? bill.customerId.email : 'N/A';
+    const customerPhone = bill.customerId ? (bill.customerId.phone || 'N/A') : (bill.guestPhone || 'N/A');
+
     doc
       .fillColor('#0f172a')
       .fontSize(12)
       .text('Billed To:', 50, 140, { bold: true })
       .fontSize(10)
       .fillColor('#475569')
-      .text(`Name: ${bill.customerId.name}`, 50, 160)
-      .text(`Email: ${bill.customerId.email}`, 50, 175)
-      .text(`Phone: ${bill.customerId.phone || 'N/A'}`, 50, 190)
+      .text(`Name: ${customerName}`, 50, 160)
+      .text(`Email: ${customerEmail}`, 50, 175)
+      .text(`Phone: ${customerPhone}`, 50, 190)
       .moveDown(2);
 
     // --- Table Headers ---
@@ -229,7 +235,7 @@ export const generateBillPDF = async (req, res, next) => {
       .fillColor('#0f172a')
       .fontSize(10)
       .text('Medicine Details', 50, tableTop, { bold: true })
-      .text('Expiry Status', 240, tableTop, { bold: true })
+      .text('Expiry Date', 240, tableTop, { bold: true })
       .text('Unit Price', 340, tableTop, { bold: true, align: 'right', width: 60 })
       .text('Quantity', 420, tableTop, { bold: true, align: 'right', width: 50 })
       .text('Total', 500, tableTop, { bold: true, align: 'right', width: 50 });
@@ -240,11 +246,14 @@ export const generateBillPDF = async (req, res, next) => {
     // --- Table Body ---
     let y = tableTop + 25;
     bill.items.forEach((item) => {
+      const expDate = item.expiryDate
+        ? new Date(item.expiryDate).toLocaleDateString('en-IN', { month: 'short', year: 'numeric' })
+        : 'N/A';
       // Draw rows
       doc
         .fillColor('#334155')
         .text(item.name, 50, y, { width: 180 })
-        .text(item.expiryStatus, 240, y)
+        .text(expDate, 240, y)
         .text(`Rs. ${item.unitPrice.toFixed(2)}`, 340, y, { align: 'right', width: 60 })
         .text(item.quantity.toString(), 420, y, { align: 'right', width: 50 })
         .text(`Rs. ${(item.unitPrice * item.quantity).toFixed(2)}`, 500, y, { align: 'right', width: 50 });
@@ -425,6 +434,7 @@ export const createInstoreBill = async (req, res, next) => {
         quantity: item.quantity,
         unitPrice: medicine.price,
         expiryStatus,
+        expiryDate: medicine.expiryDate,
         ref: medicine,
       });
     }
@@ -464,6 +474,7 @@ export const createInstoreBill = async (req, res, next) => {
         quantity: item.quantity,
         unitPrice: item.unitPrice,
         expiryStatus: item.expiryStatus,
+        expiryDate: item.expiryDate,
       })),
       subtotal,
       discount: finalDiscount,

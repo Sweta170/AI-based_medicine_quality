@@ -25,6 +25,9 @@ const billItemSchema = new mongoose.Schema({
     required: true,
     enum: ['EXPIRED', 'CRITICAL', 'WARNING', 'CAUTION', 'SAFE'],
   },
+  expiryDate: {
+    type: Date,
+  },
 });
 
 const billSchema = new mongoose.Schema(

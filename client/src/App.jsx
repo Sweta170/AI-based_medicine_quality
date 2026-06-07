@@ -16,7 +16,6 @@ import CustomerBills from './pages/CustomerBills';
 import CustomerReminders from './pages/CustomerReminders';
 import CustomerProfile from './pages/CustomerProfile';
 import LandingPage from './pages/LandingPage';
-import InStoreBilling from './pages/pharmacist/InStoreBilling';
 import PrintReceipt from './pages/pharmacist/PrintReceipt';
 
 // Browser notification activator — runs the reminder checker for customers
@@ -92,14 +91,6 @@ function App() {
         }
       />
 
-      <Route
-        path="/pharmacist/instore-billing"
-        element={
-          <ProtectedRoute allowedRoles={['pharmacist', 'superadmin']}>
-            <InStoreBilling />
-          </ProtectedRoute>
-        }
-      />
 
       <Route
         path="/pharmacist/receipt/:billId"

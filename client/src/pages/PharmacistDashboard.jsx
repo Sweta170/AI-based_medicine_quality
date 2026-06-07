@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '../utils/api';
 import { useAuth } from '../context/AuthContext';
@@ -65,7 +65,8 @@ const PharmacistDashboard = () => {
   const fileInputRef = useRef(null);
 
   // Layout Tab State
-  const [activeTab, setActiveTab] = useState('dashboard');
+  const location = useLocation();
+  const [activeTab, setActiveTab] = useState(location.state?.activeTab || 'dashboard');
   const [isSidebarMobileOpen, setIsSidebarMobileOpen] = useState(false);
 
   const handleNavClick = (tabName) => {
@@ -112,6 +113,8 @@ const PharmacistDashboard = () => {
   const [billSearch, setBillSearch] = useState('');
   const [billCategory, setBillCategory] = useState('');
   const [selectedCustomerId, setSelectedCustomerId] = useState('');
+  const [guestPhone, setGuestPhone] = useState('');
+  const [confirmedBill, setConfirmedBill] = useState(null);
   const [billItems, setBillItems] = useState([]);
   const [discount, setDiscount] = useState('');
   const [paymentMethod, setPaymentMethod] = useState('Card');
@@ -475,11 +478,6 @@ const PharmacistDashboard = () => {
     setBillError('');
     setBillSuccess('');
 
-    if (!selectedCustomerId) {
-      setBillError('Please select a customer for this bill');
-      return;
-    }
-
     if (billItems.length === 0) {
       setBillError('Please add at least one medicine to the bill');
       return;
@@ -493,33 +491,37 @@ const PharmacistDashboard = () => {
 
     setIsBillingPending(true);
     try {
+      const customerObj = customers.find(c => c._id === selectedCustomerId);
+      const customerName = customerObj ? customerObj.name : 'Guest';
+
       const payload = {
-        customerId: selectedCustomerId,
+        customerPhone: selectedCustomerId ? (customerObj.phone || '') : guestPhone.trim(),
+        customerId: selectedCustomerId || null,
+        customerName: customerName,
+        paymentMethod,
+        discount: parseFloat(discount) || 0,
         items: billItems.map(item => ({
           medicineId: item._id,
-          quantity: item.billQuantity
-        })),
-        discount: parseFloat(discount) || 0,
-        paymentMethod
+          name: item.name,
+          quantity: item.billQuantity,
+          unitPrice: item.price,
+          expiryStatus: item.expiryStatus
+        }))
       };
 
-      // Create bill
-      const { data } = await api.post('/bills', payload);
+      // Create bill using instore checkout endpoint
+      const { data } = await api.post('/bills/instore', payload);
 
-      setBillSuccess(`Bill ${data.billNumber} created successfully! Starting receipt PDF print.`);
+      setBillSuccess(`Bill ${data.bill.billNumber} created successfully!`);
       
+      // Store confirmed bill — triggers success modal
+      setConfirmedBill(data.bill);
+
       // Reset bill inputs
       setBillItems([]);
       setDiscount('');
       setSelectedCustomerId('');
-
-      // Auto trigger PDF Download
-      const response = await api.get(`/bills/${data._id}/pdf`, { responseType: 'blob' });
-      const blob = new Blob([response.data], { type: 'application/pdf' });
-      const link = document.createElement('a');
-      link.href = window.URL.createObjectURL(blob);
-      link.download = `invoice-${data.billNumber}.pdf`;
-      link.click();
+      setGuestPhone('');
 
       // Refresh data
       queryClient.invalidateQueries(['medicines']);
@@ -765,12 +767,6 @@ const PharmacistDashboard = () => {
           </div>
           
           <div className="flex items-center gap-4 text-[10.5px] font-medium text-slate-500">
-            <button
-              onClick={() => navigate('/pharmacist/instore-billing')}
-              className="flex items-center gap-2 px-4 py-2 bg-[#1A56A0] text-white rounded-xl text-sm font-semibold hover:bg-[#1450b0] transition-all"
-            >
-              🏪 In-Store Bill
-            </button>
             {activeTab === 'notifications' ? (
               <div className="flex items-center gap-1.5 px-2.5 py-1 border border-slate-200 rounded-lg bg-slate-50 text-slate-600 font-normal">
                 <Calendar className="w-3.5 h-3.5 text-slate-400" />
@@ -1297,24 +1293,45 @@ const PharmacistDashboard = () => {
                     </span>
                   </div>
 
-                  <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800">
-                    <p className="text-[10px] font-semibold tracking-wider uppercase
-                      text-slate-400 mb-1.5">
-                      Assign customer *
-                    </p>
-                    <select
-                      value={selectedCustomerId}
-                      onChange={e => setSelectedCustomerId(e.target.value)}
-                      className="w-full text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200
-                        dark:border-slate-700 rounded-lg px-3 py-2 text-slate-705 dark:text-slate-200
-                        outline-none focus:border-[#1A56A0] focus:ring-1 focus:ring-[#1A56A0]/20
-                        cursor-pointer"
-                    >
-                      <option value="">Choose registered customer account...</option>
-                      {customers.map(c => (
-                        <option key={c._id} value={c._id}>{c.name} {getEmDash()} {c.email}</option>
-                      ))}
-                    </select>
+                  <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800 space-y-2.5">
+                    <div>
+                      <p className="text-[10px] font-semibold tracking-wider uppercase text-slate-400 mb-1.5">
+                        Assign customer (Optional)
+                      </p>
+                      <select
+                        value={selectedCustomerId}
+                        onChange={e => {
+                          setSelectedCustomerId(e.target.value);
+                          if (e.target.value) setGuestPhone('');
+                        }}
+                        className="w-full text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200
+                          dark:border-slate-700 rounded-lg px-3 py-2 text-slate-705 dark:text-slate-200
+                          outline-none focus:border-[#1A56A0] focus:ring-1 focus:ring-[#1A56A0]/20
+                          cursor-pointer"
+                      >
+                        <option value="">Walk-in Guest (No Account)</option>
+                        {customers.map(c => (
+                          <option key={c._id} value={c._id}>{c.name} {getEmDash()} {c.email}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {!selectedCustomerId && (
+                      <div className="transition-all duration-200">
+                        <p className="text-[10px] font-semibold tracking-wider uppercase text-slate-400 mb-1.5">
+                          Guest Phone Number (Optional)
+                        </p>
+                        <input
+                          type="text"
+                          placeholder="e.g. +91 9876543210"
+                          value={guestPhone}
+                          onChange={e => setGuestPhone(e.target.value)}
+                          className="w-full text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200
+                            dark:border-slate-700 rounded-lg px-3 py-2 text-slate-705 dark:text-slate-200
+                            outline-none focus:border-[#1A56A0] focus:ring-1 focus:ring-[#1A56A0]/20"
+                        />
+                      </div>
+                    )}
                   </div>
 
                   {/* Expiry Alert banner */}
@@ -1443,7 +1460,7 @@ const PharmacistDashboard = () => {
                     
                     <button
                       onClick={handleConfirmAndPrintBill}
-                      disabled={!selectedCustomerId || billItems.length === 0 || isBillingPending || billItems.some(item => item.expiryStatus === 'EXPIRED')}
+                      disabled={billItems.length === 0 || isBillingPending || billItems.some(item => item.expiryStatus === 'EXPIRED')}
                       className="w-full py-2 rounded-lg text-xs font-semibold text-white
                         bg-[#1A56A0] hover:bg-[#1e63b8] disabled:opacity-40
                         disabled:cursor-not-allowed transition-colors"
@@ -2088,6 +2105,97 @@ const PharmacistDashboard = () => {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+      {/* ── Bill Confirmed Success Modal ── */}
+      {confirmedBill && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs">
+          <div className="bg-white dark:bg-[#1a2438] w-full max-w-md rounded-2xl border border-slate-200 dark:border-slate-700/50 shadow-2xl p-6 relative max-h-[90vh] overflow-y-auto transition-colors duration-200 space-y-4 text-slate-800 dark:text-slate-200">
+            {/* Header */}
+            <div className="flex flex-col items-center text-center space-y-2">
+              <CheckCircle className="w-12 h-12 text-green-500 animate-bounce" />
+              <h3 className="text-xl font-bold text-slate-900 dark:text-white mt-2">Payment Done!</h3>
+              <p className="text-xs text-slate-550 dark:text-slate-400">
+                Bill {confirmedBill.billNumber} confirmed successfully
+              </p>
+            </div>
+
+            {/* Customer + Payment row */}
+            <div className="bg-slate-50 dark:bg-slate-900/50 p-3.5 rounded-xl border border-slate-100 dark:border-slate-800 text-xs space-y-2">
+              <div className="flex justify-between">
+                <span className="text-slate-450 font-semibold">Customer</span>
+                <span className="text-right">
+                  <span className="font-bold block text-slate-800 dark:text-slate-200">{confirmedBill.customerName || 'Guest'}</span>
+                  <span className="text-slate-500 font-mono block mt-0.5">{confirmedBill.customerPhone || 'N/A'}</span>
+                </span>
+              </div>
+              <div className="flex justify-between items-center pt-2 border-t border-slate-100 dark:border-slate-800/80">
+                <span className="text-slate-450 font-semibold">Payment</span>
+                <span className="font-bold text-slate-800 dark:text-slate-200">{confirmedBill.paymentMethod}</span>
+              </div>
+              <div className="text-[10px] text-slate-400 text-right mt-1">
+                {new Date(confirmedBill.createdAt).toLocaleString('en-IN')}
+              </div>
+            </div>
+
+            {/* Items list */}
+            <div className="space-y-1.5 text-xs">
+              <p className="text-[10px] font-bold text-slate-450 uppercase tracking-wider">Items Purchased</p>
+              <div className="divide-y divide-slate-100 dark:divide-slate-800 border border-slate-100 dark:border-slate-850 rounded-xl overflow-hidden bg-slate-50/20 dark:bg-slate-900/5 max-h-40 overflow-y-auto">
+                {confirmedBill.items.map((item, i) => (
+                  <div key={i} className="p-2.5 flex justify-between items-center">
+                    <span className="font-medium text-slate-850 dark:text-slate-200 truncate pr-2">
+                      {item.name} × {item.quantity}
+                    </span>
+                    <span className="font-bold text-slate-850 dark:text-slate-100 font-mono shrink-0">
+                      ₹{(item.unitPrice * item.quantity).toFixed(2)}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Totals */}
+            <div className="pt-2 border-t border-slate-150 dark:border-slate-805 text-xs space-y-1.5">
+              {confirmedBill.discount > 0 && (
+                <div className="flex justify-between text-green-600 dark:text-green-400 font-medium">
+                  <span>Discount</span>
+                  <span className="font-mono">−₹{confirmedBill.discount.toFixed(2)}</span>
+                </div>
+              )}
+              <div className="flex justify-between items-baseline pt-1">
+                <span className="font-bold text-[#1A56A0] dark:text-sky-400">Total Paid</span>
+                <span className="font-bold text-lg text-[#1A56A0] dark:text-sky-400 font-mono">
+                  ₹{confirmedBill.total.toFixed(2)}
+                </span>
+              </div>
+            </div>
+
+            {/* Action buttons */}
+            <div className="flex gap-3 pt-2">
+              <button
+                onClick={() => {
+                  const receiptUrl = `/pharmacist/receipt/${confirmedBill._id}`;
+                  window.open(receiptUrl, '_blank');
+                }}
+                className="flex-1 py-2.5 rounded-xl border border-[#1A56A0] text-[#1A56A0] dark:text-sky-400 dark:border-sky-500 text-xs font-semibold hover:bg-blue-50 dark:hover:bg-sky-900/20 transition-colors"
+              >
+                🖨 Print Receipt
+              </button>
+              <button
+                onClick={() => {
+                  setConfirmedBill(null);
+                  setBillItems([]);
+                  setDiscount('');
+                  setSelectedCustomerId('');
+                  setGuestPhone('');
+                }}
+                className="flex-1 py-2.5 rounded-xl bg-[#1A56A0] hover:bg-[#1450b0] text-white text-xs font-semibold transition-colors"
+              >
+                + New Bill
+              </button>
+            </div>
           </div>
         </div>
       )}
