@@ -210,8 +210,8 @@ const CustomerShop = () => {
   return (
     <div className="flex h-screen w-screen bg-[#F4F6F9] font-sans antialiased text-slate-800 overflow-hidden">
       
-      {/* ─── Left Sidebar (188px) ─── */}
-      <aside className="w-[188px] shrink-0 bg-white border-r border-[#E5E7EB] flex flex-col justify-between p-4 h-full z-10 select-none">
+      {/* Desktop Left Sidebar */}
+      <aside className="hidden md:flex w-[188px] shrink-0 bg-white border-r border-[#E5E7EB] flex flex-col justify-between p-4 h-full z-10 select-none">
         <div>
           {/* Logo */}
           <div className="flex items-center gap-2.5 pb-5 border-b border-slate-100 mb-5">
@@ -262,6 +262,37 @@ const CustomerShop = () => {
         </div>
       </aside>
 
+      {/* Mobile Bottom Navigation Bar */}
+      <nav className="fixed bottom-0 left-0 right-0 h-14 bg-white dark:bg-[#111827] border-t border-slate-200 dark:border-slate-800 flex md:hidden justify-around items-center z-50 shadow-lg px-1">
+        {navLinks.map((link) => {
+          const Icon = link.icon;
+          let shortName = link.name;
+          if (link.name === 'User Control Panel') shortName = 'Users';
+          if (link.name === 'Inventory Manager') shortName = 'Inventory';
+          if (link.name === 'Medication Reminders') shortName = 'Reminders';
+          if (link.name === 'Invoice History') shortName = 'Bills';
+          if (link.name === 'My Profile') shortName = 'Profile';
+          if (link.name === 'Medicine Shop') shortName = 'Shop';
+
+          return (
+            <NavLink
+              key={link.path}
+              to={link.path}
+              className={({ isActive }) =>
+                `flex flex-col items-center justify-center flex-1 h-full py-1 text-[10px] font-medium transition-colors ${
+                  isActive
+                    ? 'text-blue-600 dark:text-sky-400 font-semibold'
+                    : 'text-slate-400 dark:text-slate-500 hover:text-slate-700'
+                }`
+              }
+            >
+              <Icon className="w-4.5 h-4.5 mb-0.5 shrink-0" />
+              <span className="text-[9px] tracking-tight truncate max-w-[65px]">{shortName}</span>
+            </NavLink>
+          );
+        })}
+      </nav>
+
       {/* ─── Main Content ─── */}
       <div className="flex-1 flex flex-col h-full overflow-hidden min-w-0">
         
@@ -273,7 +304,7 @@ const CustomerShop = () => {
           </div>
 
           <div className="flex items-center gap-3 shrink-0 ml-4">
-            <div className="flex flex-col text-right">
+            <div className="flex flex-col text-right hidden sm:flex">
               <span className="text-[12px] font-bold text-slate-800 truncate max-w-[140px]">{userName}</span>
               <span className="text-[10.5px] text-slate-400 font-medium truncate max-w-[180px]">{userEmail}</span>
             </div>
@@ -297,7 +328,7 @@ const CustomerShop = () => {
         </header>
 
         {/* Scrollable Content */}
-        <main className="flex-1 overflow-y-auto p-5 space-y-4">
+        <main className="flex-1 overflow-y-auto p-5 pb-20 md:pb-5 space-y-4">
           
           {/* Search + Dropdown */}
           <div className="flex gap-3 items-center">
