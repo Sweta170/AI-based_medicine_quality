@@ -95,11 +95,6 @@ const PharmacistDashboard = () => {
   const [bulkError, setBulkError] = useState('');
   const [bulkSuccess, setBulkSuccess] = useState('');
 
-  // Inventory Table Sort States
-  const [invSortField, setInvSortField] = useState('name');
-  const [invSortDirection, setInvSortDirection] = useState('asc');
-  const [invSearch, setInvSearch] = useState('');
-
   // Billing states
   const [billSearch, setBillSearch] = useState('');
   const [billCategory, setBillCategory] = useState('');
@@ -642,39 +637,6 @@ const PharmacistDashboard = () => {
     return <span className={cls}>{status}</span>;
   };
 
-  // Inventory Table Filter and Sort
-  const handleSort = (field) => {
-    if (invSortField === field) {
-      setInvSortDirection(prev => prev === 'asc' ? 'desc' : 'asc');
-    } else {
-      setInvSortField(field);
-      setInvSortDirection('asc');
-    }
-  };
-
-  const filteredInventory = medicines.filter(m => {
-    const q = invSearch.toLowerCase();
-    return (
-      m.name.toLowerCase().includes(q) ||
-      m.genericName.toLowerCase().includes(q) ||
-      m.batchNumber.toLowerCase().includes(q)
-    );
-  });
-
-  const sortedInventory = [...filteredInventory].sort((a, b) => {
-    let valA = a[invSortField];
-    let valB = b[invSortField];
-
-    if (invSortField === 'expiryDate') {
-      valA = new Date(a.expiryDate);
-      valB = new Date(b.expiryDate);
-    }
-
-    if (valA < valB) return invSortDirection === 'asc' ? -1 : 1;
-    if (valA > valB) return invSortDirection === 'asc' ? 1 : -1;
-    return 0;
-  });
-
   // Category listing
   const standardCategories = [
     'Antibiotic', 'Analgesic', 'Antihistamine', 'Antiviral', 
@@ -715,7 +677,6 @@ const PharmacistDashboard = () => {
             { name: 'Home', tab: 'dashboard', icon: LayoutDashboard },
             { name: 'Medicines', tab: 'medicines', icon: Database },
             { name: 'New bill', tab: 'new-bill', icon: Receipt },
-            { name: 'Stock', tab: 'inventory', icon: Barcode },
             { name: 'Customers', tab: 'customers', icon: Users },
             { name: 'Alerts', tab: 'notifications', icon: Bell },
             { name: 'Settings', tab: 'settings', icon: Settings }
@@ -1474,98 +1435,7 @@ const PharmacistDashboard = () => {
             </div>
           )}
 
-          {/* TAB 4: INVENTORY TRACKER */}
-          {activeTab === 'inventory' && (
-            <div className="space-y-4">
-              {/* Header card */}
-              <div className="bg-white dark:bg-[#1a2438] p-4 rounded-xl border border-slate-200 dark:border-slate-700/50 shadow-sm flex flex-col sm:flex-row justify-between sm:items-center gap-3 transition-colors duration-200">
-                <div>
-                  <h3 className="font-bold text-sm text-slate-800 dark:text-slate-200">Inventory Tracker</h3>
-                  <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">Filter, search, and sort through the full pharmaceutical batches dataset.</p>
-                </div>
-                <div className="relative w-full sm:w-72">
-                  <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2.5" />
-                  <input
-                    type="text"
-                    placeholder="Search inventory table..."
-                    value={invSearch}
-                    onChange={(e) => setInvSearch(e.target.value)}
-                    className="w-full pl-8 pr-3 py-1.5 border border-slate-200 dark:border-slate-700 rounded-lg text-xs focus:outline-none focus:border-[#1A56A0] text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900"
-                  />
-                </div>
-              </div>
 
-              {/* Table */}
-              <div className="bg-white dark:bg-[#1a2438] rounded-xl border border-slate-200 dark:border-slate-700/50 shadow-sm overflow-hidden transition-colors duration-200">
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left border-collapse text-xs">
-                    <thead>
-                      <tr className="bg-slate-50 dark:bg-slate-900/40 border-b border-slate-100 dark:border-slate-700/50 text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider text-[9px]">
-                        <th onClick={() => handleSort('name')} className="py-2.5 px-4 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800/40 transition-colors">
-                          Medicine Name {invSortField === 'name' && (invSortDirection === 'asc' ? '▲' : '▼')}
-                        </th>
-                        <th onClick={() => handleSort('batchNumber')} className="py-2.5 px-4 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800/40 transition-colors">
-                          Batch No {invSortField === 'batchNumber' && (invSortDirection === 'asc' ? '▲' : '▼')}
-                        </th>
-                        <th onClick={() => handleSort('expiryDate')} className="py-2.5 px-4 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800/40 transition-colors">
-                          Expiry Date {invSortField === 'expiryDate' && (invSortDirection === 'asc' ? '▲' : '▼')}
-                        </th>
-                        <th onClick={() => handleSort('quantity')} className="py-2.5 px-4 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800/40 transition-colors">
-                          Qty Level {invSortField === 'quantity' && (invSortDirection === 'asc' ? '▲' : '▼')}
-                        </th>
-                        <th onClick={() => handleSort('expiryStatus')} className="py-2.5 px-4 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800/40 transition-colors">
-                          Compliance Status {invSortField === 'expiryStatus' && (invSortDirection === 'asc' ? '▲' : '▼')}
-                        </th>
-                        <th className="py-2.5 px-4 text-right">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100 dark:divide-slate-700/50 text-xs">
-                      {sortedInventory.length === 0 ? (
-                        <tr>
-                          <td colSpan={6} className="py-6 text-center text-slate-400">No inventory records match query.</td>
-                        </tr>
-                      ) : (
-                        sortedInventory.map(med => (
-                          <tr key={med._id} className="hover:bg-slate-50/30 dark:hover:bg-slate-800/20">
-                            <td className="py-2.5 px-4">
-                              <span className="font-bold text-slate-800 dark:text-slate-200 block">{med.name}</span>
-                              <span className="text-[10px] text-slate-400 dark:text-slate-500 block mt-0.5">Formula: {med.genericName} | {med.category}</span>
-                            </td>
-                            <td className="py-2.5 px-4 font-mono text-slate-600 dark:text-slate-400">{med.batchNumber}</td>
-                            <td className="py-2.5 px-4 text-slate-600 dark:text-slate-400">
-                              {new Date(med.expiryDate).toLocaleDateString()}
-                            </td>
-                            <td className="py-2.5 px-4 font-bold text-slate-705 dark:text-slate-300">{med.quantity} units</td>
-                            <td className="py-2.5 px-4">{getExpiryStatusBadge(med.expiryStatus)}</td>
-                            <td className="py-2.5 px-4 text-right">
-                              <div className="flex justify-end gap-1.5">
-                                <button
-                                  onClick={() => {
-                                    setActiveTab('medicines');
-                                    openEditModal(med);
-                                  }}
-                                  className="text-[#1A56A0] dark:text-sky-400 hover:text-blue-800 dark:hover:text-sky-305 font-bold text-xs"
-                                >
-                                  Edit
-                                </button>
-                                <span className="text-slate-300 dark:text-slate-700">|</span>
-                                <button
-                                  onClick={() => handleDelete(med._id)}
-                                  className="text-red-505 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 font-bold text-xs"
-                                >
-                                  Delete
-                                </button>
-                              </div>
-                            </td>
-                          </tr>
-                        ))
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-          )}
 
           {/* TAB 5: CUSTOMERS SHEET */}
           {activeTab === 'customers' && (
