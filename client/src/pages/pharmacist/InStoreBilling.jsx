@@ -98,7 +98,8 @@ const InStoreBilling = () => {
         quantity: 1,
         unitPrice: med.price,
         expiryStatus: med.expiryStatus,
-        stock: med.quantity
+        stock: med.quantity,
+        expiryDate: med.expiryDate
       }];
     });
     setSearchQuery('');
@@ -341,6 +342,14 @@ const InStoreBilling = () => {
                         <p className="font-semibold text-xs text-slate-900 dark:text-white">{med.name}</p>
                         <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">Formula: {med.genericName}</p>
                         <p className="text-[10px] text-slate-400 mt-0.5">Batch: {med.batchNumber} · <span className="font-semibold text-slate-500 dark:text-slate-350">Stock: {med.quantity}</span></p>
+                        <p className="text-[10px] text-slate-400 mt-0.5">
+                          Exp:{' '}
+                          <span className="font-semibold text-slate-500 dark:text-slate-350">
+                            {med.expiryDate
+                              ? new Date(med.expiryDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
+                              : 'N/A'}
+                          </span>
+                        </p>
                       </div>
                       <div className="text-right">
                         <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${badgeColor}`}>
@@ -374,11 +383,20 @@ const InStoreBilling = () => {
                   <div key={item.medicineId} className="p-3.5 flex items-center justify-between gap-3 hover:bg-slate-50/40 dark:hover:bg-slate-900/10 transition-colors">
                     <div className="flex-1 min-w-0">
                       <p className="text-xs font-bold text-slate-800 dark:text-slate-200 truncate">{item.name}</p>
-                      <div className="flex items-center gap-2 mt-1">
+                      <div className="flex items-center gap-2 flex-wrap mt-1">
                         <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${getBadgeColor(item.expiryStatus)}`}>
                           {getLabel(item.expiryStatus)}
                         </span>
                         <span className="text-[10px] text-slate-400">Stock: {item.stock}</span>
+                        ·
+                        <span className="text-[10px] text-slate-400">
+                          Exp:{' '}
+                          <span className="font-semibold text-slate-500 dark:text-slate-350">
+                            {item.expiryDate
+                              ? new Date(item.expiryDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
+                              : 'N/A'}
+                          </span>
+                        </span>
                       </div>
                     </div>
 
