@@ -164,7 +164,7 @@ export const generateBillPDF = async (req, res, next) => {
   const { id } = req.params;
 
   try {
-    const bill = await Bill.findById(id).populate('customerId', 'name email');
+    const bill = await Bill.findById(id).populate('customerId', 'name email phone');
 
     if (!bill) {
       res.status(404);
@@ -194,19 +194,18 @@ export const generateBillPDF = async (req, res, next) => {
       .fillColor('#64748b')
       .fontSize(10)
       .text('Intelligent Pharmacy & Batch Portal', 50, 70, { align: 'left' })
-      .text('123 Medical Boulevard, Cityville', 50, 85, { align: 'left' })
       .moveDown();
 
     // Invoice Title
     doc
       .fillColor('#0f172a')
       .fontSize(18)
-      .text('INVOICE / RECEIPT', 400, 45, { align: 'right' })
+      .text('INVOICE / RECEIPT', 300, 45, { align: 'right', width: 245 })
       .fontSize(10)
       .fillColor('#475569')
-      .text(`Invoice No: ${bill.billNumber}`, 400, 65, { align: 'right' })
-      .text(`Date: ${new Date(bill.createdAt).toLocaleDateString()}`, 400, 80, { align: 'right' })
-      .text(`Payment: ${bill.paymentMethod}`, 400, 95, { align: 'right' })
+      .text(`Invoice No: ${bill.billNumber}`, 300, 68, { align: 'right', width: 245 })
+      .text(`Date: ${new Date(bill.createdAt).toLocaleDateString()}`, 300, 83, { align: 'right', width: 245 })
+      .text(`Payment: ${bill.paymentMethod}`, 300, 98, { align: 'right', width: 245 })
       .moveDown();
 
     // Divider Line
@@ -221,6 +220,7 @@ export const generateBillPDF = async (req, res, next) => {
       .fillColor('#475569')
       .text(`Name: ${bill.customerId.name}`, 50, 160)
       .text(`Email: ${bill.customerId.email}`, 50, 175)
+      .text(`Phone: ${bill.customerId.phone || 'N/A'}`, 50, 190)
       .moveDown(2);
 
     // --- Table Headers ---

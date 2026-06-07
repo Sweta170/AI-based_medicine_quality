@@ -4,6 +4,7 @@ import {
   createReminder,
   getCustomerReminders,
   deleteReminder,
+  logBrowserNotification,
   triggerCron,
 } from '../controllers/notificationController.js';
 import { protect, authorize } from '../middleware/authMiddleware.js';
@@ -17,6 +18,9 @@ router.use(protect);
 router.post('/reminders', createReminder);
 router.get('/reminders/customer/:customerId', getCustomerReminders);
 router.delete('/reminders/:id', deleteReminder);
+
+// Browser notification log endpoint
+router.post('/browser-log', logBrowserNotification);
 
 // History logs
 router.get('/:userId', getNotificationHistory);

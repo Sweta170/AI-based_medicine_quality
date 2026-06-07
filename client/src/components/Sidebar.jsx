@@ -17,6 +17,11 @@ const Sidebar = () => {
             path: '/superadmin',
             icon: Users,
           },
+          {
+            name: 'Inventory Manager',
+            path: '/pharmacist',
+            icon: Pill,
+          },
         ];
       case 'pharmacist':
         return [

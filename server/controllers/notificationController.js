@@ -1,7 +1,7 @@
 import Notification from '../models/Notification.js';
 import Reminder from '../models/Reminder.js';
 import User from '../models/User.js';
-import { runExpiryReport, runLowStockReport, runSmsReminders } from '../utils/notificationScheduler.js';
+import { runExpiryReport, runLowStockReport, runEmailReminders } from '../utils/notificationScheduler.js';
 
 // @desc    Get notification history for a specific user
 // @route   GET /api/notifications/:userId
@@ -98,6 +98,33 @@ export const deleteReminder = async (req, res, next) => {
   }
 };
 
+// @desc    Log a browser notification that was shown to the customer
+// @route   POST /api/notifications/browser-log
+// @access  Private
+export const logBrowserNotification = async (req, res, next) => {
+  const { medicineName } = req.body;
+
+  if (!medicineName) {
+    res.status(400);
+    return next(new Error('Medicine name is required'));
+  }
+
+  try {
+    const messageText = `Pharmadesk Reminder: Time to take your ${medicineName}. Keep healthy!`;
+
+    const log = await Notification.create({
+      recipientId: req.user._id,
+      type: 'Browser',
+      message: messageText,
+      status: 'sent',
+    });
+
+    res.status(201).json(log);
+  } catch (error) {
+    next(error);
+  }
+};
+
 // @desc    Manually trigger scheduled cron jobs for verification
 // @route   POST /api/notifications/trigger/:cronNumber
 // @access  Private/Pharmacist,Superadmin
@@ -112,7 +139,7 @@ export const triggerCron = async (req, res, next) => {
     } else if (cronNumber === '2') {
       result = await runLowStockReport();
     } else if (cronNumber === '3') {
-      result = await runSmsReminders();
+      result = await runEmailReminders();
     } else {
       res.status(400);
       throw new Error('Invalid cron job number specified. Choose 1, 2, or 3.');

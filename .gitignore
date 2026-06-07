@@ -27,3 +27,8 @@ client/.env.production
 # OS files
 .DS_Store
 Thumbs.db
+
+# Tesseract OCR & Uploads
+server/eng.traineddata
+server/uploads/
+

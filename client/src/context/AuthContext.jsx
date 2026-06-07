@@ -101,7 +101,9 @@ export const AuthProvider = ({ children }) => {
         _id: data._id,
         name: data.name,
         email: data.email,
+        phone: data.phone || '',
         role: data.role,
+        createdAt: data.createdAt,
       });
       setAccessToken(data.accessToken);
       return data;
@@ -120,7 +122,9 @@ export const AuthProvider = ({ children }) => {
         _id: data._id,
         name: data.name,
         email: data.email,
+        phone: data.phone || '',
         role: data.role,
+        createdAt: data.createdAt,
       });
       setAccessToken(data.accessToken);
       return data;
@@ -128,6 +132,19 @@ export const AuthProvider = ({ children }) => {
       throw error.response?.data?.message || 'Registration failed';
     } finally {
       setLoading(false);
+    }
+  };
+
+  const updateProfile = async (name, currentPassword, password) => {
+    try {
+      const { data } = await api.put('/auth/profile', { name, currentPassword, password });
+      setUser((prev) => ({
+        ...prev,
+        name: data.name,
+      }));
+      return data;
+    } catch (error) {
+      throw error.response?.data?.message || 'Profile update failed';
     }
   };
 
@@ -151,11 +168,13 @@ export const AuthProvider = ({ children }) => {
     <AuthContext.Provider
       value={{
         user,
+        setUser,
         accessToken,
         loading,
         login,
         register,
         logout,
+        updateProfile,
         isAuthenticated: !!user,
       }}
     >

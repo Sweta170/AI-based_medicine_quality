@@ -102,3 +102,56 @@ export const getCustomers = async (req, res, next) => {
     next(error);
   }
 };
+
+// @desc    Update user profile name or phone
+// @route   PATCH /api/users/profile
+// @access  Private
+export const updateProfileNameOrPhone = async (req, res, next) => {
+  const { name, phone, currentPassword } = req.body;
+
+  try {
+    const user = await User.findById(req.user._id);
+
+    if (!user) {
+      res.status(404);
+      throw new Error('User not found');
+    }
+
+    if (phone !== undefined) {
+      const normalizedNewPhone = phone.trim();
+      const normalizedOldPhone = (user.phone || '').trim();
+
+      if (normalizedNewPhone !== normalizedOldPhone) {
+        if (!currentPassword) {
+          res.status(400);
+          throw new Error('Password is required to confirm change');
+        }
+
+        const isMatch = await user.matchPassword(currentPassword);
+        if (!isMatch) {
+          res.status(401);
+          throw new Error('Incorrect password');
+        }
+
+        user.phone = normalizedNewPhone;
+      }
+    }
+
+    if (name !== undefined && name.trim()) {
+      user.name = name;
+    }
+
+    const updatedUser = await user.save();
+
+    res.json({
+      _id: updatedUser._id,
+      name: updatedUser.name,
+      email: updatedUser.email,
+      role: updatedUser.role,
+      phone: updatedUser.phone,
+      createdAt: updatedUser.createdAt,
+    });
+  } catch (error) {
+    next(error);
+  }
+};

@@ -367,40 +367,106 @@ export const scanLabel = async (req, res, next) => {
     const rawText = result.data.text;
 
     // 2. Parse raw text
+    const normalizedText = rawText.replace(/\s+/g, ' ');
     const lines = rawText.split('\n').map(l => l.trim()).filter(l => l.length > 0);
 
-    // Parse Medicine Name: Longest capitalized line
-    let medicineName = '';
-    const uppercaseLines = lines.filter(line => {
-      const letters = line.replace(/[^a-zA-Z]/g, '');
-      return letters.length > 2 && letters === letters.toUpperCase();
-    });
+    const titleCase = (str) => {
+      if (!str) return '';
+      return str
+        .toLowerCase()
+        .split(' ')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
+    };
 
-    if (uppercaseLines.length > 0) {
-      uppercaseLines.sort((a, b) => b.length - a.length);
-      medicineName = uppercaseLines[0];
-    } else {
-      const capLines = lines.filter(line => {
-        const words = line.split(/\s+/).filter(w => /[a-zA-Z]/.test(w));
-        return words.length > 0 && words.every(w => /^[A-Z]/.test(w));
+    const cleanLine = (line) => {
+      let cleaned = line.replace(/[^a-zA-Z0-9\s-/]/g, '').trim();
+      const words = cleaned.split(/\s+/);
+      const validWords = words.filter(word => {
+        if (word.length > 1) return true;
+        if (/^[0-9]$/.test(word)) return true;
+        return false;
       });
-      if (capLines.length > 0) {
-        capLines.sort((a, b) => b.length - a.length);
-        medicineName = capLines[0];
-      } else {
-        const letterLines = lines.filter(line => /[a-zA-Z]/.test(line));
-        if (letterLines.length > 0) {
-          letterLines.sort((a, b) => b.length - a.length);
-          medicineName = letterLines[0];
-        }
+      return validWords.join(' ').replace(/\s+/g, ' ').trim();
+    };
+
+    // 1) Direct regex matcher for common medicines
+    let foundBrand = '';
+    let foundGeneric = '';
+
+    const brandRegexes = [
+      /\b(dolo(?:-?\s*\d+)?)\b/i,
+      /\b(crocin(?:-?\s*\d+)?)\b/i,
+      /\b(calpol(?:-?\s*\d+)?)\b/i,
+      /\b(combiflam(?:-?\s*\d+)?)\b/i,
+      /\b(pantocid(?:-?\s*\d+)?)\b/i,
+      /\b(limcee(?:-?\s*\d+)?)\b/i,
+      /\b(becosules(?:-?\s*\d+)?)\b/i,
+      /\b(advil(?:-?\s*\d+)?)\b/i,
+      /\b(tylenol(?:-?\s*\d+)?)\b/i,
+      /\b(saridon(?:-?\s*\d+)?)\b/i,
+      /\b(benadryl(?:-?\s*\d+)?)\b/i,
+      /\b(allegra(?:-?\s*\d+)?)\b/i,
+      /\b(zinetac(?:-?\s*\d+)?)\b/i,
+    ];
+
+    const genericRegexes = [
+      /\b(paracetamol(?:\s+tablets?(?:\s+ip)?)?)\b/i,
+      /\b(acetaminophen(?:\s+tablets?(?:\s+ip)?)?)\b/i,
+      /\b(ibuprofen(?:\s+tablets?(?:\s+ip)?)?)\b/i,
+      /\b(amoxicillin(?:\s+capsules?(?:\s+ip)?)?)\b/i,
+      /\b(augmentin(?:\s+tablets?(?:\s+ip)?)?)\b/i,
+      /\b(pantoprazole(?:\s+tablets?(?:\s+ip)?)?)\b/i,
+      /\b(cetirizine(?:\s+tablets?(?:\s+ip)?)?)\b/i,
+      /\b(omeprazole(?:\s+capsules?(?:\s+ip)?)?)\b/i,
+      /\b(metformin(?:\s+tablets?(?:\s+ip)?)?)\b/i,
+      /\b(gliclazide(?:\s+tablets?(?:\s+ip)?)?)\b/i,
+      /\b(atorvastatin(?:\s+tablets?(?:\s+ip)?)?)\b/i,
+      /\b(azithromycin(?:\s+tablets?(?:\s+ip)?)?)\b/i,
+      /\b(ranitidine(?:\s+tablets?(?:\s+ip)?)?)\b/i,
+      /\b(famotidine(?:\s+tablets?(?:\s+ip)?)?)\b/i,
+    ];
+
+    for (const regex of brandRegexes) {
+      const match = normalizedText.match(regex);
+      if (match) {
+        foundBrand = match[1];
+        break;
       }
     }
 
-    // Parse Expiry Date: Look for EXP / Expiry / Use Before + date in DD/MM/YYYY or MM/YYYY
+    for (const regex of genericRegexes) {
+      const match = normalizedText.match(regex);
+      if (match) {
+        foundGeneric = match[1];
+        break;
+      }
+    }
+
+    // 2) Extract Manufacturer
+    let manufacturer = '';
+    const mfgKeywords = ['limited', 'ltd', 'labs', 'pharma', 'industries', 'corp', 'co', 'incorporated'];
+    const mfgLines = lines.filter(line => {
+      const clean = cleanLine(line).toLowerCase();
+      return mfgKeywords.some(kw => clean.includes(kw));
+    });
+
+    if (mfgLines.length > 0) {
+      let mfgClean = cleanLine(mfgLines[0]);
+      const words = mfgClean.split(' ');
+      const mfgIndex = words.findIndex(w => mfgKeywords.some(kw => w.toLowerCase().includes(kw)));
+      if (mfgIndex !== -1) {
+        const start = Math.max(0, mfgIndex - 2);
+        mfgClean = words.slice(start, mfgIndex + 1).join(' ');
+      }
+      manufacturer = titleCase(mfgClean);
+    }
+
+    // 3) Parse Expiry Date
     let expiryDate = '';
     const expRegexes = [
       /(?:exp|expiry|use\s+before)[:\s-]*\b((?:0[1-9]|[12]\d|3[01])[-/])?(0[1-9]|1[0-2])[-/](\d{4}|\d{2})\b/i,
-      /\b((?:0[1-9]|[12]\d|3[01])[-/])?(0[1-9]|1[0-2])[-/](\d{4}|\d{2})\b/ // fallback match anywhere
+      /\b((?:0[1-9]|[12]\d|3[01])[-/])?(0[1-9]|1[0-2])[-/](\d{4}|\d{2})\b/ // fallback
     ];
 
     for (const regex of expRegexes) {
@@ -417,7 +483,7 @@ export const scanLabel = async (req, res, next) => {
       }
     }
 
-    // Parse Batch Number: Look for Batch No / B.No / Lot No
+    // 4) Parse Batch Number
     let batchNumber = '';
     const batchRegex = /(?:batch\s+no|b\.no|lot\s+no)[:\s-]*([a-zA-Z0-9-]+)/i;
     const batchMatch = rawText.match(batchRegex);
@@ -425,9 +491,85 @@ export const scanLabel = async (req, res, next) => {
       batchNumber = batchMatch[1].trim();
     }
 
-    // Calculate confidence based on how many fields were found (high: 3, medium: 2, low: 1 or 0)
+    // 5) Heuristic fallback for Brand/Generic names
+    const excludeKeywords = [
+      'ltd', 'limited', 'labs', 'pharma', 'industries', 'corp', 'co', 'incorporated',
+      'mfg', 'lic', 'no', 'dosage', 'directed', 'physician', 'store', 'dry', 'dark',
+      'temperature', 'exceeding', 'overdose', 'injurious', 'liver', 'made in', 'marketed',
+      'distributor', 'warning', 'address', 'road', 'sikkim'
+    ];
+
+    const candidates = [];
+    for (const line of lines) {
+      const cleaned = cleanLine(line);
+      if (cleaned.length < 3) continue;
+
+      const lowerCleaned = cleaned.toLowerCase();
+      if (excludeKeywords.some(kw => lowerCleaned.includes(kw))) {
+        continue;
+      }
+
+      let score = 0;
+      if (/\b(tablets?|capsules?|tabs?|caps?|ip|bp|usp|injection|syrup|suspension|gel|cream|ointment)\b/i.test(cleaned)) {
+        score += 15;
+      }
+      if (/\b\d+\s*(?:mg|g|ml)?\b/i.test(cleaned)) {
+        score += 10;
+      }
+
+      const words = cleaned.split(/\s+/).filter(w => /[a-zA-Z]/.test(w));
+      if (words.length > 0) {
+        if (words.every(w => /^[A-Z]/.test(w))) {
+          score += 8;
+        }
+        if (cleaned === cleaned.toUpperCase()) {
+          score += 5;
+        }
+      }
+
+      if (cleaned.length > 5 && cleaned.length < 25) {
+        score += 5;
+      } else if (cleaned.length > 35) {
+        score -= 10;
+      }
+
+      candidates.push({ original: line, cleaned, score });
+    }
+
+    candidates.sort((a, b) => b.score - a.score);
+
+    let medicineName = foundBrand ? titleCase(foundBrand) : '';
+    let genericName = foundGeneric ? titleCase(foundGeneric) : '';
+
+    if (candidates.length > 0) {
+      if (!medicineName && !genericName) {
+        const top = candidates[0];
+        if (/\b(tablets?|capsules?|ip|bp|usp)\b/i.test(top.cleaned)) {
+          genericName = titleCase(top.cleaned);
+          const brandCand = candidates.find(c => c !== top && !/\b(tablets?|capsules?|ip|bp|usp)\b/i.test(c.cleaned));
+          medicineName = brandCand ? titleCase(brandCand.cleaned) : titleCase(top.cleaned);
+        } else {
+          medicineName = titleCase(top.cleaned);
+          const genericCand = candidates.find(c => c !== top && /\b(tablets?|capsules?|ip|bp|usp)\b/i.test(c.cleaned));
+          genericName = genericCand ? titleCase(genericCand.cleaned) : titleCase(top.cleaned);
+        }
+      } else if (!medicineName) {
+        const brandCand = candidates.find(c => c.cleaned.toLowerCase() !== genericName.toLowerCase() && !/\b(tablets?|capsules?|ip|bp|usp)\b/i.test(c.cleaned));
+        medicineName = brandCand ? titleCase(brandCand.cleaned) : genericName;
+      } else if (!genericName) {
+        const genericCand = candidates.find(c => c.cleaned.toLowerCase() !== medicineName.toLowerCase() && /\b(tablets?|capsules?|ip|bp|usp)\b/i.test(c.cleaned));
+        genericName = genericCand ? titleCase(genericCand.cleaned) : medicineName;
+      }
+    }
+
+    // Format final clean fallbacks
+    medicineName = medicineName || titleCase(foundBrand) || 'Unknown';
+    genericName = genericName || titleCase(foundGeneric) || 'Unknown';
+    manufacturer = manufacturer || 'Unknown Manufacturer';
+
+    // Calculate confidence based on how many fields were found
     let foundCount = 0;
-    if (medicineName) foundCount++;
+    if (medicineName && medicineName !== 'Unknown') foundCount++;
     if (expiryDate) foundCount++;
     if (batchNumber) foundCount++;
 
@@ -459,6 +601,8 @@ export const scanLabel = async (req, res, next) => {
 
     res.json({
       medicineName,
+      genericName,
+      manufacturer,
       expiryDate,
       batchNumber,
       labelImageUrl,

@@ -72,17 +72,17 @@ async function seedData() {
 
     // 3. Create Medicines
     console.log('Seeding Medicines...');
-    const medParacetamol = await Medicine.create({
-      name: 'Paracetamol 500mg',
-      genericName: 'Acetaminophen',
-      manufacturer: 'Pharmadesk Labs',
-      batchNumber: 'PARA-2026-001',
+    const medAdvil = await Medicine.create({
+      name: 'Advil 200mg',
+      genericName: 'Ibuprofen',
+      manufacturer: 'Pfizer',
+      batchNumber: 'ADV123-EXP',
       manufactureDate: sixMonthsAgo,
       expiryDate: twoYearsHence,
-      quantity: 150,
-      reorderLevel: 20,
-      price: 1.50,
-      category: 'Analgesics',
+      quantity: 120,
+      reorderLevel: 10,
+      price: 8.99,
+      category: 'Pain Relief',
       barcode: '8901234567890',
       createdBy: pharmacist._id,
     });
@@ -90,45 +90,75 @@ async function seedData() {
     const medAmoxicillin = await Medicine.create({
       name: 'Amoxicillin 250mg',
       genericName: 'Amoxicillin',
-      manufacturer: 'BioPharma Corp',
+      manufacturer: 'BioPharmaCorp',
       batchNumber: 'AMOX-2026-003',
       manufactureDate: threeMonthsAgo,
       expiryDate: oneYearHence,
-      quantity: 5, // Low stock (reorderLevel = 15)
-      reorderLevel: 15,
+      quantity: 5,
+      reorderLevel: 10,
       price: 4.20,
       category: 'Antibiotics',
       barcode: '8901234567891',
       createdBy: pharmacist._id,
     });
 
-    const medIbuprofen = await Medicine.create({
-      name: 'Ibuprofen 400mg',
-      genericName: 'Ibuprofen',
-      manufacturer: 'Medix Labs',
-      batchNumber: 'IBU-2026-002',
+    const medAugmentin = await Medicine.create({
+      name: 'Augmentin 625mg',
+      genericName: 'Amoxicillin',
+      manufacturer: 'GSK',
+      batchNumber: 'AUG789-EXP',
       manufactureDate: oneMonthAgo,
-      expiryDate: fifteenDaysHence, // Nearing expiry (15 days)
-      quantity: 80,
+      expiryDate: oneYearHence,
+      quantity: 44,
       reorderLevel: 10,
-      price: 2.00,
-      category: 'NSAIDs',
+      price: 15.50,
+      category: 'Antibiotics',
       barcode: '8901234567892',
       createdBy: pharmacist._id,
     });
 
-    const medCoughSyrup = await Medicine.create({
-      name: 'Cough Syrup - Benadryl',
-      genericName: 'Diphenhydramine',
-      manufacturer: 'Johnson & Johnson',
-      batchNumber: 'BEN-2025-009',
-      manufactureDate: twoYearsAgo,
-      expiryDate: tenDaysAgo, // Expired (10 days ago)
-      quantity: 12,
-      reorderLevel: 5,
-      price: 5.50,
-      category: 'Antihistamines',
+    const medAzithral = await Medicine.create({
+      name: 'Azithral 500mg',
+      genericName: 'Azithromycin',
+      manufacturer: 'Alembic',
+      batchNumber: 'AZI-2026-11',
+      manufactureDate: now,
+      expiryDate: twoYearsHence,
+      quantity: 60,
+      reorderLevel: 10,
+      price: 22.00,
+      category: 'Antibiotics',
       barcode: '8901234567893',
+      createdBy: pharmacist._id,
+    });
+
+    const medBenadryl = await Medicine.create({
+      name: 'Benadryl 100ml',
+      genericName: 'Diphenhydramine',
+      manufacturer: 'J&J',
+      batchNumber: 'BEN-007',
+      manufactureDate: twoYearsAgo,
+      expiryDate: oneYearHence,
+      quantity: 30,
+      reorderLevel: 10,
+      price: 11.00,
+      category: 'Cough & Cold',
+      barcode: '8901234567894',
+      createdBy: pharmacist._id,
+    });
+
+    const medCetirizine = await Medicine.create({
+      name: 'Cetirizine 10mg',
+      genericName: 'Cetirizine HCl',
+      manufacturer: 'UCB',
+      batchNumber: 'CET-2026-02',
+      manufactureDate: now,
+      expiryDate: twoYearsHence,
+      quantity: 200,
+      reorderLevel: 10,
+      price: 6.50,
+      category: 'Allergy',
+      barcode: '8901234567895',
       createdBy: pharmacist._id,
     });
 
@@ -139,7 +169,7 @@ async function seedData() {
     await Reminder.create([
       {
         customerId: customer._id,
-        medicineName: 'Paracetamol 500mg',
+        medicineName: 'Advil 200mg',
         phoneNumber: '+15550199',
         time: '08:00 AM',
         isActive: true,
@@ -153,7 +183,7 @@ async function seedData() {
       },
       {
         customerId: customer._id,
-        medicineName: 'Ibuprofen 400mg',
+        medicineName: 'Augmentin 625mg',
         phoneNumber: '+15550199',
         time: '09:00 PM',
         isActive: false,
@@ -168,23 +198,23 @@ async function seedData() {
       customerId: customer._id,
       items: [
         {
-          medicineId: medParacetamol._id,
-          name: medParacetamol.name,
-          quantity: 10,
-          unitPrice: medParacetamol.price,
+          medicineId: medAdvil._id,
+          name: medAdvil.name,
+          quantity: 2,
+          unitPrice: medAdvil.price,
           expiryStatus: 'SAFE',
         },
         {
-          medicineId: medIbuprofen._id,
-          name: medIbuprofen.name,
-          quantity: 2,
-          unitPrice: medIbuprofen.price,
-          expiryStatus: 'CAUTION',
+          medicineId: medAugmentin._id,
+          name: medAugmentin.name,
+          quantity: 1,
+          unitPrice: medAugmentin.price,
+          expiryStatus: 'SAFE',
         }
       ],
-      subtotal: 19.00,
+      subtotal: (medAdvil.price * 2) + medAugmentin.price,
       discount: 2.00,
-      total: 17.00,
+      total: ((medAdvil.price * 2) + medAugmentin.price) - 2.00,
       paymentMethod: 'UPI',
     });
 
@@ -195,20 +225,20 @@ async function seedData() {
         {
           medicineId: medAmoxicillin._id,
           name: medAmoxicillin.name,
-          quantity: 3,
+          quantity: 1,
           unitPrice: medAmoxicillin.price,
           expiryStatus: 'SAFE',
         }
       ],
-      subtotal: 12.60,
+      subtotal: medAmoxicillin.price,
       discount: 0.00,
-      total: 12.60,
+      total: medAmoxicillin.price,
       paymentMethod: 'Cash',
     });
 
     console.log('Bills created successfully:');
-    console.log(`- Bill 1: ${bill1.billNumber} (₹${bill1.total})`);
-    console.log(`- Bill 2: ${bill2.billNumber} (₹${bill2.total})`);
+    console.log(`- Bill 1: ${bill1.billNumber} (₹${bill1.total.toFixed(2)})`);
+    console.log(`- Bill 2: ${bill2.billNumber} (₹${bill2.total.toFixed(2)})`);
 
     // 6. Create Notifications
     console.log('Seeding Notifications...');

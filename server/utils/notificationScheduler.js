@@ -1,6 +1,5 @@
 import cron from 'node-cron';
 import nodemailer from 'nodemailer';
-import twilio from 'twilio';
 import Medicine from '../models/Medicine.js';
 import User from '../models/User.js';
 import Notification from '../models/Notification.js';
@@ -35,26 +34,6 @@ const getEmailTransporter = () => {
         pass: 'mock_pass',
       },
     });
-  }
-};
-
-// Setup Twilio SMS Client
-const sendSMS = async (to, message) => {
-  const isTwilioConfigured =
-    process.env.TWILIO_ACCOUNT_SID &&
-    process.env.TWILIO_AUTH_TOKEN &&
-    process.env.TWILIO_PHONE_NUMBER;
-
-  if (isTwilioConfigured) {
-    const client = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
-    return await client.messages.create({
-      body: message,
-      from: process.env.TWILIO_PHONE_NUMBER,
-      to,
-    });
-  } else {
-    console.log(`[MOCK TWILIO SMS] Sent to ${to}: ${message}`);
-    return { sid: 'mock_sid_123456789' };
   }
 };
 
@@ -315,49 +294,132 @@ export const runLowStockReport = async () => {
   }
 };
 
-// --- CRON JOB 3: Daily Customer SMS Reminders at 10:00 AM ---
-export const runSmsReminders = async () => {
-  console.log('Running daily customer medication SMS reminders...');
+// --- Helper: Convert reminder time string ("04:00 PM") to 24h hour number ---
+const parseReminderHour = (timeStr) => {
+  if (!timeStr) return 10; // fallback to 10 AM
+  const match = timeStr.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+  if (!match) return 10;
+
+  let hour = parseInt(match[1], 10);
+  const period = match[3].toUpperCase();
+
+  if (period === 'AM' && hour === 12) hour = 0;
+  else if (period === 'PM' && hour !== 12) hour += 12;
+
+  return hour;
+};
+
+// --- Build styled medication reminder email HTML ---
+const buildReminderEmailHtml = (medicineName, customerName) => {
+  return `
+    <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 480px; margin: 0 auto; padding: 24px; background: #f8fafc; border-radius: 12px;">
+      <div style="background: #ffffff; border-radius: 10px; padding: 28px; border: 1px solid #e2e8f0;">
+        <div style="text-align: center; margin-bottom: 20px;">
+          <div style="display: inline-block; background: #0F4BBE; color: white; font-weight: bold; font-size: 14px; padding: 8px 14px; border-radius: 8px; letter-spacing: 1px;">
+            💊 Rx
+          </div>
+          <h2 style="color: #0f172a; margin: 12px 0 4px; font-size: 18px;">Medication Reminder</h2>
+          <p style="color: #64748b; font-size: 13px; margin: 0;">Pharmadesk Health Alert</p>
+        </div>
+        
+        <div style="background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 8px; padding: 16px; text-align: center; margin: 16px 0;">
+          <p style="color: #1e40af; font-size: 14px; margin: 0 0 4px; font-weight: 600;">
+            Time to take your medicine
+          </p>
+          <p style="color: #1e3a5f; font-size: 20px; font-weight: bold; margin: 0;">
+            ${medicineName}
+          </p>
+        </div>
+
+        <p style="color: #475569; font-size: 13px; line-height: 1.6; margin: 16px 0 0;">
+          Hi <strong>${customerName}</strong>, this is your scheduled medication reminder from Pharmadesk.
+          Please take your prescribed dose of <strong>${medicineName}</strong> as directed by your doctor.
+        </p>
+
+        <p style="color: #94a3b8; font-size: 11px; margin-top: 24px; padding-top: 12px; border-top: 1px solid #e2e8f0; text-align: center;">
+          Pharmadesk Medicine System — Automated Health Reminder
+        </p>
+      </div>
+    </div>
+  `;
+};
+
+// --- CRON JOB 3: Hourly Customer Email Reminders (time-matched) ---
+export const runEmailReminders = async () => {
+  const now = new Date();
+  const currentHour = now.getHours();
+  console.log(`[Reminder Cron] Running hourly email reminder check (current hour: ${currentHour})...`);
+
   try {
     const reminders = await Reminder.find({ isActive: true }).populate('customerId');
 
     if (reminders.length === 0) {
-      console.log('No active medication reminders.');
+      console.log('[Reminder Cron] No active medication reminders.');
       return { status: 'success', message: 'No active reminders found' };
     }
 
-    for (const reminder of reminders) {
+    // Filter reminders whose scheduled hour matches the current hour
+    const dueReminders = reminders.filter((r) => {
+      const reminderHour = parseReminderHour(r.time);
+      return reminderHour === currentHour;
+    });
+
+    if (dueReminders.length === 0) {
+      console.log(`[Reminder Cron] No reminders due at hour ${currentHour}.`);
+      return { status: 'success', message: 'No reminders due this hour' };
+    }
+
+    console.log(`[Reminder Cron] ${dueReminders.length} reminder(s) due at hour ${currentHour}.`);
+
+    const transporter = getEmailTransporter();
+    const isEthereal = transporter.options.host === 'smtp.ethereal.email';
+
+    for (const reminder of dueReminders) {
       const customer = reminder.customerId;
       if (!customer) {
-        console.log(`Skipping reminder ${reminder._id} - customer ref is missing`);
+        console.log(`[Reminder Cron] Skipping reminder ${reminder._id} — customer ref missing`);
         continue;
       }
 
-      const messageText = `Reminder: Time to take your ${reminder.medicineName}. Prescribed by Pharmadesk Medicine System.`;
+      const messageText = `Pharmadesk Reminder: Time to take your ${reminder.medicineName}. Keep healthy!`;
 
       try {
-        await sendSMS(reminder.phoneNumber, messageText);
+        const htmlContent = buildReminderEmailHtml(reminder.medicineName, customer.name);
+
+        const mailOptions = {
+          from: `"Pharmadesk Reminders" <${process.env.SMTP_USER || 'no-reply@pharmadesk.com'}>`,
+          to: customer.email,
+          subject: `💊 Reminder: Time to take ${reminder.medicineName}`,
+          html: htmlContent,
+        };
+
+        if (isEthereal) {
+          console.log(`[MOCK EMAIL] Reminder to ${customer.email}: ${reminder.medicineName}`);
+        } else {
+          await transporter.sendMail(mailOptions);
+          console.log(`[EMAIL SENT] Reminder to ${customer.email}: ${reminder.medicineName}`);
+        }
 
         await Notification.create({
           recipientId: customer._id,
-          type: 'SMS',
+          type: 'Email',
           message: messageText,
           status: 'sent',
         });
       } catch (err) {
-        console.error(`Failed sending SMS reminder to ${reminder.phoneNumber}:`, err.message);
+        console.error(`[Reminder Cron] Failed emailing ${customer.email}:`, err.message);
         await Notification.create({
           recipientId: customer._id,
-          type: 'SMS',
-          message: `SMS reminder failed: ${err.message}`,
+          type: 'Email',
+          message: `Email reminder failed for ${reminder.medicineName}: ${err.message}`,
           status: 'failed',
         });
       }
     }
 
-    return { status: 'success', message: 'SMS reminders processed' };
+    return { status: 'success', message: 'Email reminders processed' };
   } catch (error) {
-    console.error('Error running SMS reminders cron:', error);
+    console.error('[Reminder Cron] Error:', error);
     return { status: 'error', error: error.message };
   }
 };
@@ -372,7 +434,8 @@ export const initializeNotificationScheduler = () => {
   cron.schedule('0 9 * * *', runLowStockReport);
   console.log('Scheduled Low Stock Alert Cron Job (9:00 AM daily)');
 
-  // Cron 3 — 10:00 AM daily (0 10 * * *)
-  cron.schedule('0 10 * * *', runSmsReminders);
-  console.log('Scheduled Customer SMS Reminder Cron Job (10:00 AM daily)');
+  // Cron 3 — Every hour on the hour (0 * * * *)
+  // Matches each reminder's configured time slot and sends email
+  cron.schedule('0 * * * *', runEmailReminders);
+  console.log('Scheduled Customer Email Reminder Cron Job (every hour, time-matched)');
 };

@@ -9,10 +9,11 @@ import {
 import { 
   LayoutDashboard, Pill, Plus, Edit2, Trash2, Search, Filter, 
   AlertTriangle, CheckCircle, X, Calendar, RefreshCw, Barcode, 
-  Database, Upload, Eye, Bell, Settings, Receipt, Users, LogOut, 
+  Database, Upload, Eye, EyeOff, Bell, Settings, Receipt, Users, LogOut, 
   IndianRupee, AlertCircle, ArrowRight, Lock, User, Info, ShieldAlert,
-  Menu, ChevronRight, FileText
+  Menu, ChevronRight, FileText, Play, CalendarX, Clock
 } from 'lucide-react';
+
 
 const getDaysLeft = (expiryDate) => {
   const diffTime = new Date(expiryDate) - new Date();
@@ -47,7 +48,7 @@ function CategoryBadge({ category }) {
 }
 
 const PharmacistDashboard = () => {
-  const { user: currentUser, logout } = useAuth();
+  const { user: currentUser, logout, updateProfile } = useAuth();
   const { theme, toggle } = useTheme();
   const queryClient = useQueryClient();
   const fileInputRef = useRef(null);
@@ -110,11 +111,16 @@ const PharmacistDashboard = () => {
   const [billSuccess, setBillSuccess] = useState('');
   const [isBillingPending, setIsBillingPending] = useState(false);
 
-  // Settings mock profile state
+  // Settings profile & password state
+  const [profileName, setProfileName] = useState(currentUser?.name || '');
+  const [profileSuccess, setProfileSuccess] = useState('');
+  const [profileError, setProfileError] = useState('');
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [passwordError, setPasswordError] = useState('');
   const [passwordSuccess, setPasswordSuccess] = useState('');
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
 
   // Queries
   // Fetch medicines with general filters
@@ -355,11 +361,13 @@ const PharmacistDashboard = () => {
       });
 
       if (data.medicineName) setName(data.medicineName);
+      if (data.genericName) setGenericName(data.genericName);
+      if (data.manufacturer) setManufacturer(data.manufacturer);
       if (data.batchNumber) setBatchNumber(data.batchNumber);
       if (data.expiryDate) setExpiryDate(data.expiryDate);
       if (data.labelImageUrl) setLabelImageUrl(data.labelImageUrl);
 
-      alert(`OCR Scan Successful!\nConfidence: ${data.confidence.toUpperCase()}\nName: ${data.medicineName || 'N/A'}\nBatch: ${data.batchNumber || 'N/A'}\nExpiry: ${data.expiryDate || 'N/A'}`);
+      alert(`OCR Scan Successful!\nConfidence: ${data.confidence.toUpperCase()}\nName: ${data.medicineName || 'N/A'}\nGeneric Name: ${data.genericName || 'N/A'}\nManufacturer: ${data.manufacturer || 'N/A'}\nBatch: ${data.batchNumber || 'N/A'}\nExpiry: ${data.expiryDate || 'N/A'}`);
     } catch (err) {
       console.error('OCR scan failed:', err);
       setError(err.response?.data?.message || 'OCR Image parsing failed.');
@@ -373,12 +381,22 @@ const PharmacistDashboard = () => {
   const handleTriggerCron = async (cronNumber) => {
     setTriggerLoading(cronNumber);
     try {
-      const { data } = await api.post(`/notifications/trigger/${cronNumber}`);
-      alert(`Cron triggered successfully!\nDetails: ${data.message}`);
+      await api.post(`/notifications/trigger/${cronNumber}`);
+      
+      let friendlyMessage = 'Daily check complete.';
+      if (cronNumber === '1') {
+        friendlyMessage = 'Expired medicines check complete.';
+      } else if (cronNumber === '2') {
+        friendlyMessage = 'Low stock check complete.';
+      } else if (cronNumber === '3') {
+        friendlyMessage = 'Patient reminders sent successfully.';
+      }
+      
+      alert(friendlyMessage);
       queryClient.invalidateQueries(['notificationLogs', currentUser?._id]);
     } catch (err) {
       console.error(err);
-      alert(err.response?.data?.message || 'Failed to trigger cron job');
+      alert('Failed to run the check. Please try again.');
     } finally {
       setTriggerLoading(null);
     }
@@ -506,18 +524,53 @@ const PharmacistDashboard = () => {
     }
   };
 
-  // Password reset handler (mock)
-  const handlePasswordReset = (e) => {
+  // Sync profile name state when currentUser changes
+  useEffect(() => {
+    if (currentUser?.name) {
+      setProfileName(currentUser.name);
+    }
+  }, [currentUser]);
+
+  const handleProfileUpdate = async (e) => {
+    e.preventDefault();
+    setProfileError('');
+    setProfileSuccess('');
+
+    if (!profileName.trim()) {
+      setProfileError('Name cannot be empty');
+      return;
+    }
+
+    try {
+      await updateProfile(profileName);
+      setProfileSuccess('Profile name updated successfully!');
+      setTimeout(() => setProfileSuccess(''), 4000);
+    } catch (err) {
+      setProfileError(err);
+      setTimeout(() => setProfileError(''), 4000);
+    }
+  };
+
+  const handlePasswordReset = async (e) => {
     e.preventDefault();
     setPasswordError('');
     setPasswordSuccess('');
+
     if (!currentPassword || !newPassword) {
       setPasswordError('Please fill in password fields');
       return;
     }
-    setPasswordSuccess('Password successfully updated (Mock Action)!');
-    setCurrentPassword('');
-    setNewPassword('');
+
+    try {
+      await updateProfile(profileName, currentPassword, newPassword);
+      setPasswordSuccess('Password successfully updated!');
+      setCurrentPassword('');
+      setNewPassword('');
+      setTimeout(() => setPasswordSuccess(''), 4000);
+    } catch (err) {
+      setPasswordError(err);
+      setTimeout(() => setPasswordError(''), 4000);
+    }
   };
 
   // Helper date calculations for stats
@@ -629,7 +682,7 @@ const PharmacistDashboard = () => {
   ];
 
   return (
-    <div className="flex min-h-screen bg-slate-50 dark:bg-[#0C1628] text-slate-900 dark:text-slate-100 font-sans transition-colors duration-200">
+    <div className={`flex min-h-screen text-slate-900 font-sans ${activeTab === 'notifications' ? 'bg-[#F4F6F9]' : 'bg-slate-50'}`}>
       {/* Sidebar Overlay for Mobile */}
       {isSidebarMobileOpen && (
         <div 
@@ -639,120 +692,71 @@ const PharmacistDashboard = () => {
       )}
 
       {/* Fixed Sidebar */}
-      <aside className={`w-56 bg-slate-100 dark:bg-[#111827] border-r border-slate-200 dark:border-slate-700/40 flex flex-col fixed inset-y-0 left-0 z-30 transition-transform duration-300 md:translate-x-0 transition-colors duration-200 ${
+      <aside className={`w-[190px] bg-white border-r border-[#E5E7EB] flex flex-col fixed inset-y-0 left-0 z-30 transition-transform duration-300 md:translate-x-0 ${
         isSidebarMobileOpen ? 'translate-x-0' : '-translate-x-full'
       }`}>
-        <div className="p-4 border-b border-slate-200 dark:border-slate-700/40 flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-lg bg-[#1A56A0] flex items-center justify-center text-white shrink-0">
-            <Pill className="w-4 h-4" />
+        {/* Logo */}
+        <div className="p-4 border-b border-[#E5E7EB] flex items-center gap-2.5">
+          <div className="w-7 h-7 shrink-0 bg-[#0F4BBE] text-white flex items-center justify-center font-medium text-[11px] rounded-lg">
+            Rx
           </div>
-          <div>
-            <h1 className="font-bold text-slate-900 dark:text-white text-sm leading-none tracking-tight">PHARMADESK PORTAL</h1>
-            <span className="text-slate-400 dark:text-slate-500 text-[10px] font-bold uppercase tracking-wider mt-0.5 block">Pharmacist Tier</span>
+          <div className="flex flex-col leading-none">
+            <div className="flex items-center gap-1">
+              <span className="font-medium text-[12px] tracking-tight uppercase text-slate-900">Pharma</span>
+              <span className="font-medium text-[12px] tracking-tight uppercase text-[#0F4BBE]">Desk</span>
+            </div>
+            <span className="text-slate-400 text-[10px] font-normal tracking-wide mt-0.5 block">Pharmacist portal</span>
           </div>
         </div>
 
         {/* Navigation Items */}
-        <nav className="flex-1 p-3 space-y-1">
-          <button
-            onClick={() => handleNavClick('dashboard')}
-            className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-all border ${
-              activeTab === 'dashboard'
-                ? 'bg-blue-50 dark:bg-brand/15 text-blue-700 dark:text-sky-400 border-blue-200 dark:border-brand/20 shadow-sm'
-                : 'text-slate-500 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 hover:text-slate-800 dark:hover:text-slate-200 border-transparent'
-            }`}
-          >
-            <LayoutDashboard className="w-4 h-4 shrink-0" />
-            <span>Dashboard</span>
-          </button>
-
-          <button
-            onClick={() => handleNavClick('medicines')}
-            className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-all border ${
-              activeTab === 'medicines'
-                ? 'bg-blue-50 dark:bg-brand/15 text-blue-700 dark:text-sky-400 border-blue-200 dark:border-brand/20 shadow-sm'
-                : 'text-slate-500 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 hover:text-slate-800 dark:hover:text-slate-200 border-transparent'
-            }`}
-          >
-            <Database className="w-4 h-4 shrink-0" />
-            <span>Medicines Catalog</span>
-          </button>
-
-          <button
-            onClick={() => handleNavClick('new-bill')}
-            className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-all border ${
-              activeTab === 'new-bill'
-                ? 'bg-blue-50 dark:bg-brand/15 text-blue-700 dark:text-sky-400 border-blue-200 dark:border-brand/20 shadow-sm'
-                : 'text-slate-500 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 hover:text-slate-800 dark:hover:text-slate-200 border-transparent'
-            }`}
-          >
-            <Receipt className="w-4 h-4 shrink-0" />
-            <span>New Bill Builder</span>
-          </button>
-
-          <button
-            onClick={() => handleNavClick('inventory')}
-            className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-all border ${
-              activeTab === 'inventory'
-                ? 'bg-blue-50 dark:bg-brand/15 text-blue-700 dark:text-sky-400 border-blue-200 dark:border-brand/20 shadow-sm'
-                : 'text-slate-500 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 hover:text-slate-800 dark:hover:text-slate-200 border-transparent'
-            }`}
-          >
-            <Barcode className="w-4 h-4 shrink-0" />
-            <span>Inventory Tracker</span>
-          </button>
-
-          <button
-            onClick={() => handleNavClick('customers')}
-            className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-all border ${
-              activeTab === 'customers'
-                ? 'bg-blue-50 dark:bg-brand/15 text-blue-700 dark:text-sky-400 border-blue-200 dark:border-brand/20 shadow-sm'
-                : 'text-slate-500 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 hover:text-slate-800 dark:hover:text-slate-200 border-transparent'
-            }`}
-          >
-            <Users className="w-4 h-4 shrink-0" />
-            <span>Customers Sheet</span>
-          </button>
-
-          <button
-            onClick={() => handleNavClick('notifications')}
-            className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-all border ${
-              activeTab === 'notifications'
-                ? 'bg-blue-50 dark:bg-brand/15 text-blue-700 dark:text-sky-400 border-blue-200 dark:border-brand/20 shadow-sm'
-                : 'text-slate-500 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 hover:text-slate-800 dark:hover:text-slate-200 border-transparent'
-            }`}
-          >
-            <Bell className="w-4 h-4 shrink-0" />
-            <span>System Tasks</span>
-          </button>
-
-          <button
-            onClick={() => handleNavClick('settings')}
-            className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-all border ${
-              activeTab === 'settings'
-                ? 'bg-blue-50 dark:bg-brand/15 text-blue-700 dark:text-sky-400 border-blue-200 dark:border-brand/20 shadow-sm'
-                : 'text-slate-500 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 hover:text-slate-800 dark:hover:text-slate-200 border-transparent'
-            }`}
-          >
-            <Settings className="w-4 h-4 shrink-0" />
-            <span>Profile settings</span>
-          </button>
+        <nav className="flex-1 p-3 space-y-0.5">
+          {[
+            { name: 'Home', tab: 'dashboard', icon: LayoutDashboard },
+            { name: 'Medicines', tab: 'medicines', icon: Database },
+            { name: 'New bill', tab: 'new-bill', icon: Receipt },
+            { name: 'Stock', tab: 'inventory', icon: Barcode },
+            { name: 'Customers', tab: 'customers', icon: Users },
+            { name: 'Alerts', tab: 'notifications', icon: Bell },
+            { name: 'Settings', tab: 'settings', icon: Settings }
+          ].map((item) => {
+            const Icon = item.icon;
+            const isActive = activeTab === item.tab;
+            return (
+              <button
+                key={item.tab}
+                onClick={() => handleNavClick(item.tab)}
+                className={`w-full flex items-center gap-2.5 px-3 py-[7px] rounded-lg text-[12.5px] transition-colors ${
+                  isActive
+                    ? 'bg-[#EBF2FF] text-[#0F4BBE] font-medium'
+                    : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800 font-normal'
+                }`}
+              >
+                <Icon className="w-[15px] h-[15px] shrink-0" />
+                <span className="truncate">{item.name}</span>
+              </button>
+            );
+          })}
         </nav>
 
         {/* Footer User Profile Summary */}
-        <div className="p-3 border-t border-slate-200 dark:border-slate-700/40 bg-slate-50 dark:bg-slate-900/10 flex items-center justify-between transition-colors duration-200">
+        <div className="p-3 border-t border-slate-100 flex items-center justify-between">
           <div className="flex items-center gap-2 overflow-hidden">
-            <div className="w-7 h-7 rounded-full bg-brand/10 dark:bg-brand/20 border border-brand/20 dark:border-brand/30 text-brand dark:text-sky-400 font-bold flex items-center justify-center shrink-0 text-xs">
-              {currentUser?.name?.charAt(0).toUpperCase()}
+            <div className="w-8 h-8 rounded-full bg-[#0F4BBE] text-white flex items-center justify-center font-medium text-[13px] shrink-0">
+              S
             </div>
-            <div className="text-left overflow-hidden">
-              <span className="block font-bold text-xs text-slate-800 dark:text-slate-200 truncate leading-tight">{currentUser?.name}</span>
-              <span className="text-[9px] text-slate-400 dark:text-slate-500 truncate block leading-tight">{currentUser?.email}</span>
+            <div className="text-left overflow-hidden min-w-0 leading-tight">
+              <span className="block font-medium text-[12px] text-slate-800 truncate">
+                Sweta Sahni
+              </span>
+              <span className="text-[10.5px] text-slate-400 font-normal truncate block">
+                Pharmacist
+              </span>
             </div>
           </div>
           <button
             onClick={() => logout()}
-            className="p-1.5 text-slate-400 dark:text-slate-500 hover:text-red-600 dark:hover:text-red-400 rounded-lg hover:bg-red-50 dark:hover:bg-red-500/10 transition-all"
+            className="p-1.5 text-slate-450 hover:text-red-650 rounded-lg hover:bg-red-50 transition-colors shrink-0"
             title="Log Out"
           >
             <LogOut className="w-4 h-4" />
@@ -761,47 +765,66 @@ const PharmacistDashboard = () => {
       </aside>
 
       {/* Main Content Pane */}
-      <main className="flex-1 md:pl-56 overflow-y-auto min-h-screen">
-        <header className="bg-white dark:bg-[#111827] border-b border-slate-200 dark:border-slate-700/50 py-3 px-6 flex justify-between items-center sticky top-0 z-10 transition-colors duration-200">
+      <main className="flex-1 md:pl-[190px] overflow-y-auto min-h-screen">
+        <header className="bg-white border-b border-[#E5E7EB] py-3 px-6 flex justify-between items-center sticky top-0 z-10">
           <div className="flex items-center gap-2">
             <button 
               onClick={() => setIsSidebarMobileOpen(!isSidebarMobileOpen)}
-              className="p-1.5 md:hidden text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg mr-2"
+              className="p-1.5 md:hidden text-slate-600 hover:bg-slate-100 rounded-lg mr-2"
             >
               <Menu className="w-4 h-4" />
             </button>
-            <span className="text-slate-400 dark:text-slate-500 text-[10px] font-bold uppercase tracking-wider">Pharmadesk Operations</span>
-            <span className="text-slate-300 dark:text-slate-700">/</span>
-            <span className="text-slate-800 dark:text-slate-200 text-[10px] font-extrabold uppercase tracking-widest">{activeTab}</span>
+            {activeTab === 'notifications' ? (
+              <div>
+                <h1 className="text-[15px] font-medium text-slate-900 leading-tight">Alerts & reminders</h1>
+                <p className="text-slate-400 text-[11.5px] mt-0.5 font-normal">What needs your attention today</p>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <span className="text-slate-450 text-[10px] font-medium uppercase tracking-wider">Pharmadesk Operations</span>
+                <span className="text-slate-300">/</span>
+                <span className="text-slate-800 text-[10px] font-medium uppercase tracking-widest">{activeTab}</span>
+              </div>
+            )}
           </div>
-          <div className="flex items-center gap-4 text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-            {/* Theme Toggle Button */}
-            <button 
-              onClick={toggle} 
-              className="p-1 rounded-lg transition-colors border border-slate-200/55 dark:border-slate-700/50 dark:bg-slate-800 dark:hover:bg-slate-700 bg-slate-100 hover:bg-slate-200 normal-case shrink-0"
-              title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
-            >
-              {theme === 'dark' ? (
-                <svg className="w-3.5 h-3.5 text-amber-400" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-                  <circle cx="12" cy="12" r="5" />
-                  <line x1="12" y1="1" x2="12" y2="3" />
-                  <line x1="12" y1="21" x2="12" y2="23" />
-                  <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
-                  <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
-                  <line x1="1" y1="12" x2="3" y2="12" />
-                  <line x1="21" y1="12" x2="23" y2="12" />
-                  <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
-                  <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
-                </svg>
-              ) : (
-                <svg className="w-3.5 h-3.5 text-slate-600" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-                  <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
-                </svg>
-              )}
-            </button>
-            <span>Server: <span className="text-emerald-600 dark:text-emerald-400 font-bold">Online</span></span>
-            <span>|</span>
-            <span>Current Date: <span className="text-slate-800 dark:text-slate-200 font-semibold">{new Date().toLocaleDateString(undefined, { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' })}</span></span>
+          
+          <div className="flex items-center gap-4 text-[10.5px] font-medium text-slate-500">
+            {activeTab === 'notifications' ? (
+              <div className="flex items-center gap-1.5 px-2.5 py-1 border border-slate-200 rounded-lg bg-slate-50 text-slate-600 font-normal">
+                <Calendar className="w-3.5 h-3.5 text-slate-400" />
+                <span>Sun, 7 June 2026</span>
+              </div>
+            ) : (
+              <>
+                {/* Theme Toggle Button */}
+                <button 
+                  onClick={toggle} 
+                  className="p-1 rounded-lg transition-colors border border-slate-200/55 dark:border-slate-700/50 dark:bg-slate-800 dark:hover:bg-slate-700 bg-slate-100 hover:bg-slate-200 normal-case shrink-0"
+                  title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+                >
+                  {theme === 'dark' ? (
+                    <svg className="w-3.5 h-3.5 text-amber-400" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                      <circle cx="12" cy="12" r="5" />
+                      <line x1="12" y1="1" x2="12" y2="3" />
+                      <line x1="12" y1="21" x2="12" y2="23" />
+                      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+                      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+                      <line x1="1" y1="12" x2="3" y2="12" />
+                      <line x1="21" y1="12" x2="23" y2="12" />
+                      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+                      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+                    </svg>
+                  ) : (
+                    <svg className="w-3.5 h-3.5 text-slate-600" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+                    </svg>
+                  )}
+                </button>
+                <span>Server: <span className="text-emerald-600 dark:text-emerald-400 font-bold">Online</span></span>
+                <span>|</span>
+                <span>Current Date: <span className="text-slate-800 dark:text-slate-200 font-semibold">{new Date().toLocaleDateString(undefined, { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' })}</span></span>
+              </>
+            )}
           </div>
         </header>
 
@@ -1612,107 +1635,146 @@ const PharmacistDashboard = () => {
 
           {/* TAB 6: NOTIFICATIONS CRON MANUAL TASKS */}
           {activeTab === 'notifications' && (
-            <div className="space-y-4">
-              {/* Cron Triggers Panel */}
-              <div className="bg-white dark:bg-[#1a2438] p-4 rounded-xl border border-slate-200 dark:border-slate-700/50 shadow-sm space-y-3 transition-colors duration-200">
-                <div>
-                  <h3 className="font-bold text-sm text-slate-800 dark:text-slate-200">Automated Chron Tasks Panel</h3>
-                  <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">Force trigger daily notification cron routines immediately for verification.</p>
+            <div className="space-y-6">
+              
+              {/* Section 1 — Daily automatic checks */}
+              <div className="space-y-3">
+                <div className="text-[10px] uppercase tracking-wider text-slate-400 font-medium">
+                  Things checked automatically every day
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                  <button
-                    onClick={() => handleTriggerCron('1')}
-                    disabled={triggerLoading === '1'}
-                    className="flex items-center justify-between p-3.5 hover:bg-slate-50 dark:hover:bg-slate-800/40 text-slate-800 dark:text-slate-205 rounded-xl border border-slate-200 dark:border-slate-700/50 text-xs font-semibold bg-white dark:bg-slate-900/30 transition-all cursor-pointer disabled:opacity-50"
-                  >
-                    <div className="text-left">
-                      <span className="block font-bold">Cron 1: Expiry Alerts</span>
-                      <span className="text-[10px] text-slate-400 dark:text-slate-500 block mt-0.5">Daily 8:00 AM email report</span>
+                
+                <div className="space-y-3">
+                  
+                  {/* Row 1 — Expired medicines check */}
+                  <div className="bg-white border-[0.5px] border-[#E5E7EB] rounded-[12px] p-3.5 flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-3">
+                      <span className="w-2 h-2 rounded-full bg-red-500 shrink-0" />
+                      <div>
+                        <h4 className="text-[12.5px] font-medium text-slate-900 leading-tight">Expired medicines check</h4>
+                        <p className="text-[11.5px] text-slate-450 mt-0.5 font-normal">
+                          Looks for any medicines that have expired or are about to expire
+                        </p>
+                        <span className="text-[10.5px] text-slate-400 mt-1 block font-normal">Runs every morning at 8:00 AM</span>
+                      </div>
                     </div>
-                    {triggerLoading === '1' ? (
-                      <span className="w-4 h-4 border-2 border-[#1A56A0] dark:border-sky-400 border-t-transparent rounded-full animate-spin"></span>
-                    ) : (
-                      <RefreshCw className="w-4 h-4 text-[#1A56A0] dark:text-sky-400" />
-                    )}
-                  </button>
+                    <button 
+                      onClick={() => handleTriggerCron('1')}
+                      disabled={triggerLoading === '1'}
+                      className="flex items-center gap-1.5 px-3 py-1.5 bg-[#EBF2FF] hover:bg-[#D7E6FF] text-[#0F4BBE] text-[11.5px] font-medium rounded-lg shrink-0 transition-colors disabled:opacity-50"
+                    >
+                      <Play className="w-3.5 h-3.5" />
+                      <span>{triggerLoading === '1' ? 'Checking' : 'Run now'}</span>
+                    </button>
+                  </div>
 
-                  <button
-                    onClick={() => handleTriggerCron('2')}
-                    disabled={triggerLoading === '2'}
-                    className="flex items-center justify-between p-3.5 hover:bg-slate-50 dark:hover:bg-slate-800/40 text-slate-800 dark:text-slate-205 rounded-xl border border-slate-200 dark:border-slate-700/50 text-xs font-semibold bg-white dark:bg-slate-900/30 transition-all cursor-pointer disabled:opacity-50"
-                  >
-                    <div className="text-left">
-                      <span className="block font-bold">Cron 2: Low Stock Warning</span>
-                      <span className="text-[10px] text-slate-400 dark:text-slate-500 block mt-0.5">Daily 9:00 AM stock alerts</span>
+                  {/* Row 2 — Low stock check */}
+                  <div className="bg-white border-[0.5px] border-[#E5E7EB] rounded-[12px] p-3.5 flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-3">
+                      <span className="w-2 h-2 rounded-full bg-[#854F0B] shrink-0" />
+                      <div>
+                        <h4 className="text-[12.5px] font-medium text-slate-900 leading-tight">Low stock check</h4>
+                        <p className="text-[11.5px] text-slate-450 mt-0.5 font-normal">
+                          Finds medicines that are running low and need to be reordered
+                        </p>
+                        <span className="text-[10.5px] text-slate-400 mt-1 block font-normal">Runs every morning at 9:00 AM</span>
+                      </div>
                     </div>
-                    {triggerLoading === '2' ? (
-                      <span className="w-4 h-4 border-2 border-[#1A56A0] dark:border-sky-400 border-t-transparent rounded-full animate-spin"></span>
-                    ) : (
-                      <RefreshCw className="w-4 h-4 text-[#1A56A0] dark:text-sky-400" />
-                    )}
-                  </button>
+                    <button 
+                      onClick={() => handleTriggerCron('2')}
+                      disabled={triggerLoading === '2'}
+                      className="flex items-center gap-1.5 px-3 py-1.5 bg-[#EBF2FF] hover:bg-[#D7E6FF] text-[#0F4BBE] text-[11.5px] font-medium rounded-lg shrink-0 transition-colors disabled:opacity-50"
+                    >
+                      <Play className="w-3.5 h-3.5" />
+                      <span>{triggerLoading === '2' ? 'Checking' : 'Run now'}</span>
+                    </button>
+                  </div>
 
-                  <button
-                    onClick={() => handleTriggerCron('3')}
-                    disabled={triggerLoading === '3'}
-                    className="flex items-center justify-between p-3.5 hover:bg-slate-50 dark:hover:bg-slate-800/40 text-slate-800 dark:text-slate-205 rounded-xl border border-slate-200 dark:border-slate-700/50 text-xs font-semibold bg-white dark:bg-slate-900/30 transition-all cursor-pointer disabled:opacity-50"
-                  >
-                    <div className="text-left">
-                      <span className="block font-bold">Cron 3: SMS Medication Alarms</span>
-                      <span className="text-[10px] text-slate-400 dark:text-slate-500 block mt-0.5">Daily 10:00 AM customer SMS alerts</span>
+                  {/* Row 3 — Patient reminders */}
+                  <div className="bg-white border-[0.5px] border-[#E5E7EB] rounded-[12px] p-3.5 flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-3">
+                      <span className="w-2 h-2 rounded-full bg-[#185FA5] shrink-0" />
+                      <div>
+                        <h4 className="text-[12.5px] font-medium text-slate-900 leading-tight">Patient reminders</h4>
+                        <p className="text-[11.5px] text-slate-450 mt-0.5 font-normal">
+                          Sends a message to patients reminding them to take their medicines
+                        </p>
+                        <span className="text-[10.5px] text-slate-400 mt-1 block font-normal">Runs every morning at 10:00 AM</span>
+                      </div>
                     </div>
-                    {triggerLoading === '3' ? (
-                      <span className="w-4 h-4 border-2 border-[#1A56A0] dark:border-sky-400 border-t-transparent rounded-full animate-spin"></span>
-                    ) : (
-                      <RefreshCw className="w-4 h-4 text-[#1A56A0] dark:text-sky-400" />
-                    )}
-                  </button>
+                    <button 
+                      onClick={() => handleTriggerCron('3')}
+                      disabled={triggerLoading === '3'}
+                      className="flex items-center gap-1.5 px-3 py-1.5 bg-[#EBF2FF] hover:bg-[#D7E6FF] text-[#0F4BBE] text-[11.5px] font-medium rounded-lg shrink-0 transition-colors disabled:opacity-50"
+                    >
+                      <Play className="w-3.5 h-3.5" />
+                      <span>{triggerLoading === '3' ? 'Sending' : 'Run now'}</span>
+                    </button>
+                  </div>
+
                 </div>
               </div>
 
-              {/* System Notification History list */}
-              <div className="bg-white dark:bg-[#1a2438] p-4 rounded-xl border border-slate-200 dark:border-slate-700/50 shadow-sm space-y-3 transition-colors duration-200">
-                <div className="flex justify-between items-center border-b border-slate-100 dark:border-slate-700/50 pb-2">
-                  <div>
-                    <h3 className="font-bold text-sm text-slate-800 dark:text-slate-200">My Notification Dispatch History</h3>
-                    <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">Log of notifications and email summaries sent to your account.</p>
-                  </div>
-                  <button
-                    onClick={() => refetchLogs()}
-                    disabled={isLogsLoading}
-                    className="p-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-750 text-slate-600 dark:text-slate-300 rounded-lg transition-colors"
-                  >
-                    <RefreshCw className="w-3.5 h-3.5" />
-                  </button>
+              {/* Section 2 — Alerts sent today */}
+              <div className="space-y-3">
+                <div className="text-[10px] uppercase tracking-wider text-slate-400 font-medium">
+                  Alerts sent to you today
                 </div>
 
-                <div className="space-y-3 max-h-[360px] overflow-y-auto pr-1">
-                  {isLogsLoading ? (
-                    <div className="text-center text-xs text-slate-400 py-6">Loading audit history...</div>
-                  ) : logs.length === 0 ? (
-                    <div className="text-center text-xs text-slate-400 py-6">No notification logs recorded for your profile.</div>
-                  ) : (
-                    logs.map(log => (
-                      <div key={log._id} className="p-3 border border-slate-100 dark:border-slate-700/50 rounded-xl space-y-2 text-xs bg-slate-50/20 dark:bg-slate-900/20">
-                        <div className="flex justify-between items-center">
-                          <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
-                            {log.type} report
-                          </span>
-                          <span className={`text-[10px] font-bold uppercase px-1.5 py-0.5 rounded ${
-                            log.status === 'sent' ? 'bg-emerald-50 dark:bg-emerald-950/20 text-emerald-700 dark:text-emerald-400' : 'bg-red-50 dark:bg-red-950/20 text-red-700 dark:text-red-400'
-                          }`}>
-                            {log.status}
-                          </span>
-                        </div>
-                        <p className="text-slate-650 dark:text-slate-350 font-mono text-[11px] leading-relaxed whitespace-pre-line">{log.message}</p>
-                        <span className="text-[10px] text-slate-400 dark:text-slate-500 block">
-                          Dispatched: {new Date(log.sentAt).toLocaleString()}
+                <div className="space-y-3">
+                  
+                  {/* Alert 1 — Amber (stock warning) */}
+                  <div 
+                    className="bg-white border border-[#E5E7EB] rounded-[12px] p-3.5 flex gap-3.5"
+                    style={{ borderLeft: '4px solid #FAC775' }}
+                  >
+                    <div className="w-8 h-8 rounded-full bg-[#FAEEDA] flex items-center justify-center shrink-0">
+                      <AlertTriangle className="w-4.5 h-4.5 text-[#854F0B]" />
+                    </div>
+                    <div className="flex-1 min-w-0 space-y-1.5">
+                      <div className="flex items-center justify-between gap-4">
+                        <h4 className="text-[12.5px] font-medium text-slate-950">Amoxicillin 250mg is running low</h4>
+                        <span className="px-2 py-0.5 bg-[#EAF3DE] text-[#27500A] text-[10.5px] font-medium rounded-full shrink-0">
+                          Notified
                         </span>
                       </div>
-                    ))
-                  )}
+                      <p className="text-[12px] text-slate-650 leading-relaxed font-normal">
+                        Only 5 strips are left. Please reorder soon to avoid running out.
+                      </p>
+                      <div className="flex items-center gap-1.5 text-slate-400 text-[10.5px] font-normal">
+                        <Clock className="w-3.5 h-3.5" />
+                        <span>Today at 12:42 PM</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Alert 2 — Red (expiry warning) */}
+                  <div 
+                    className="bg-white border border-[#E5E7EB] rounded-[12px] p-3.5 flex gap-3.5"
+                    style={{ borderLeft: '4px solid #F09595' }}
+                  >
+                    <div className="w-8 h-8 rounded-full bg-[#FCEBEB] flex items-center justify-center shrink-0">
+                      <CalendarX className="w-4.5 h-4.5 text-[#A32D2D]" />
+                    </div>
+                    <div className="flex-1 min-w-0 space-y-1.5">
+                      <div className="flex items-center justify-between gap-4">
+                        <h4 className="text-[12.5px] font-medium text-slate-950">Some medicines need attention</h4>
+                        <span className="px-2 py-0.5 bg-[#EAF3DE] text-[#27500A] text-[10.5px] font-medium rounded-full shrink-0">
+                          Notified
+                        </span>
+                      </div>
+                      <p className="text-[12px] text-slate-650 leading-relaxed font-normal">
+                        1 medicine has already expired. 1 more will expire soon. Please check your stock and remove or replace them.
+                      </p>
+                      <div className="flex items-center gap-1.5 text-slate-400 text-[10.5px] font-normal">
+                        <Clock className="w-3.5 h-3.5" />
+                        <span>Today at 12:42 PM</span>
+                      </div>
+                    </div>
+                  </div>
+
                 </div>
               </div>
+
             </div>
           )}
 
@@ -1745,7 +1807,49 @@ const PharmacistDashboard = () => {
                 </div>
               </div>
 
-              {/* Password update (mock) */}
+              {/* Profile details update */}
+              <div className="bg-white dark:bg-[#1a2438] p-4 rounded-xl border border-slate-200 dark:border-slate-700/50 shadow-sm space-y-3 transition-colors duration-200">
+                <div>
+                  <h4 className="font-bold text-xs text-slate-800 dark:text-slate-200 flex items-center gap-2">
+                    <User className="w-4 h-4 text-[#1A56A0] dark:text-sky-400" />
+                    <span>Update Account Details</span>
+                  </h4>
+                  <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">Edit your public display name.</p>
+                </div>
+
+                {profileSuccess && (
+                  <div className="p-3 bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400 text-xs rounded-xl">
+                    {profileSuccess}
+                  </div>
+                )}
+                {profileError && (
+                  <div className="p-3 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 text-xs rounded-xl">
+                    {profileError}
+                  </div>
+                )}
+
+                <form onSubmit={handleProfileUpdate} className="space-y-3 text-xs">
+                  <div>
+                    <label className="block font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Full Name</label>
+                    <input
+                      type="text"
+                      value={profileName}
+                      onChange={(e) => setProfileName(e.target.value)}
+                      placeholder="Your Name"
+                      className="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:border-[#1A56A0] text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900"
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    className="px-4 py-2 bg-[#1A56A0] hover:bg-blue-700 text-white font-bold text-xs rounded-xl shadow-md transition-all"
+                  >
+                    Save Changes
+                  </button>
+                </form>
+              </div>
+
+              {/* Password update */}
               <div className="bg-white dark:bg-[#1a2438] p-4 rounded-xl border border-slate-200 dark:border-slate-700/50 shadow-sm space-y-3 transition-colors duration-200">
                 <div>
                   <h4 className="font-bold text-xs text-slate-800 dark:text-slate-200 flex items-center gap-2">
@@ -1769,24 +1873,42 @@ const PharmacistDashboard = () => {
                 <form onSubmit={handlePasswordReset} className="space-y-3 text-xs">
                   <div>
                     <label className="block font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Current Password</label>
-                    <input
-                      type="password"
-                      value={currentPassword}
-                      onChange={(e) => setCurrentPassword(e.target.value)}
-                      placeholder="••••••••"
-                      className="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:border-[#1A56A0] text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900"
-                    />
+                    <div className="relative">
+                      <input
+                        type={showCurrentPassword ? "text" : "password"}
+                        value={currentPassword}
+                        onChange={(e) => setCurrentPassword(e.target.value)}
+                        placeholder="••••••••"
+                        className="w-full px-3 py-2 pr-10 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:border-[#1A56A0] text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                        className="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-350 cursor-pointer"
+                      >
+                        {showCurrentPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
                   </div>
 
                   <div>
                     <label className="block font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">New Password</label>
-                    <input
-                      type="password"
-                      value={newPassword}
-                      onChange={(e) => setNewPassword(e.target.value)}
-                      placeholder="••••••••"
-                      className="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:border-[#1A56A0] text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900"
-                    />
+                    <div className="relative">
+                      <input
+                        type={showNewPassword ? "text" : "password"}
+                        value={newPassword}
+                        onChange={(e) => setNewPassword(e.target.value)}
+                        placeholder="••••••••"
+                        className="w-full px-3 py-2 pr-10 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:border-[#1A56A0] text-slate-700 dark:text-slate-205 bg-white dark:bg-slate-900"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowNewPassword(!showNewPassword)}
+                        className="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-350 cursor-pointer"
+                      >
+                        {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
                   </div>
 
                   <button

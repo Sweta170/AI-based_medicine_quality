@@ -1,14 +1,25 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Link } from 'react-router-dom';
 import api from '../utils/api';
 import { useAuth } from '../context/AuthContext';
+import useBrowserNotifications from '../hooks/useBrowserNotifications';
 import { 
-  Bell, Phone, Clock, Plus, Trash2, AlertCircle, History, RefreshCw, Pill
+  Bell, Phone, Clock, Plus, Trash2, AlertCircle, History, RefreshCw, Pill,
+  BellRing, Mail, Globe, MessageSquare
 } from 'lucide-react';
 
 const CustomerReminders = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
+  const { requestPermission } = useBrowserNotifications();
+
+  // Browser notification permission state
+  const [notifPermission, setNotifPermission] = useState(
+    typeof window !== 'undefined' && 'Notification' in window
+      ? Notification.permission
+      : 'unsupported'
+  );
 
   // Form states
   const [medicineName, setMedicineName] = useState('');
@@ -25,6 +36,33 @@ const CustomerReminders = () => {
       return data;
     },
   });
+
+  // Fetch real medicines catalog for select dropdown
+  const { data: medicines = [] } = useQuery({
+    queryKey: ['medicinesList'],
+    queryFn: async () => {
+      const { data } = await api.get('/medicines');
+      return data;
+    },
+  });
+
+  // Fetch user profile to get real phone number
+  const { data: userProfile } = useQuery({
+    queryKey: ['userProfile', user?._id],
+    queryFn: async () => {
+      const { data } = await api.get('/auth/me');
+      return data;
+    },
+    enabled: !!user?._id,
+  });
+
+  // Auto-fill SMS mobile number once customer profile or user context phone loads
+  useEffect(() => {
+    const defaultPhone = userProfile?.phone || user?.phone;
+    if (defaultPhone) {
+      setPhoneNumber(defaultPhone);
+    }
+  }, [userProfile?.phone, user?.phone]);
 
   // Fetch notification log history
   const { data: logs = [], isLoading: logsLoading, refetch: refetchLogs } = useQuery({
@@ -44,7 +82,6 @@ const CustomerReminders = () => {
     onSuccess: () => {
       queryClient.invalidateQueries(['reminders', user?._id]);
       setMedicineName('');
-      setPhoneNumber('');
       setFormSuccess('Reminder alarm successfully added!');
       setTimeout(() => setFormSuccess(''), 3000);
     },
@@ -120,9 +157,14 @@ const CustomerReminders = () => {
   };
 
   const handleDeleteReminder = (id) => {
-    if (window.confirm('Delete this reminder? You will no longer receive daily SMS alerts.')) {
+    if (window.confirm('Delete this reminder? You will no longer receive alerts.')) {
       deleteMutation.mutate(id);
     }
+  };
+
+  const handleEnableNotifications = async () => {
+    const result = await requestPermission();
+    setNotifPermission(result);
   };
 
   const timeOptions = [
@@ -131,14 +173,83 @@ const CustomerReminders = () => {
     '08:00 PM', '10:00 PM'
   ];
 
+  // Dispatch log type badge styling
+  const getTypeBadge = (type) => {
+    switch (type) {
+      case 'Email':
+        return {
+          icon: Mail,
+          className: 'bg-blue-500/10 border-blue-500/20 text-blue-600 dark:text-blue-400',
+        };
+      case 'Browser':
+        return {
+          icon: Globe,
+          className: 'bg-violet-500/10 border-violet-500/20 text-violet-600 dark:text-violet-400',
+        };
+      case 'SMS':
+        return {
+          icon: MessageSquare,
+          className: 'bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700/50 text-slate-500 dark:text-slate-400',
+        };
+      default:
+        return {
+          icon: Bell,
+          className: 'bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700/50 text-slate-600 dark:text-slate-300',
+        };
+    }
+  };
+
   return (
     <div className="space-y-4 p-4 max-w-7xl mx-auto transition-colors duration-200">
       {/* Header */}
       <div>
         <h1 className="text-lg font-bold text-slate-900 dark:text-white tracking-tight">Medication Reminders</h1>
         <p className="text-slate-500 dark:text-slate-400 text-xs mt-0.5">
-          Configure daily SMS medication schedules, toggle alerts, and examine alert delivery histories.
+          Configure medication schedules, toggle alerts, and examine alert delivery histories.
         </p>
+      </div>
+
+      {/* Browser Notification Permission Banner */}
+      {notifPermission !== 'granted' && notifPermission !== 'unsupported' && (
+        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200 dark:border-blue-700/40 rounded-xl p-4 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-lg bg-blue-100 dark:bg-blue-800/40 flex items-center justify-center shrink-0">
+              <BellRing className="w-4.5 h-4.5 text-blue-600 dark:text-blue-400" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-slate-900 dark:text-white">Enable Browser Notifications</p>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                {notifPermission === 'denied'
+                  ? 'Notifications are blocked. Please enable them in your browser settings.'
+                  : 'Get real-time medicine reminders even when you\'re on another tab.'}
+              </p>
+            </div>
+          </div>
+          {notifPermission !== 'denied' && (
+            <button
+              onClick={handleEnableNotifications}
+              className="px-4 py-2 bg-[#1A56A0] hover:bg-[#1A56A0]/90 text-white text-xs font-semibold rounded-lg transition-colors shrink-0"
+            >
+              Enable Now
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* Notification channels info */}
+      <div className="flex flex-wrap items-center gap-3 text-[10.5px]">
+        <span className="text-slate-400 dark:text-slate-500 font-medium">Active Channels:</span>
+        <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-700/30 font-semibold">
+          <Mail className="w-3 h-3" /> Email
+        </span>
+        <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full font-semibold ${
+          notifPermission === 'granted'
+            ? 'bg-violet-50 dark:bg-violet-900/20 text-violet-600 dark:text-violet-400 border border-violet-200 dark:border-violet-700/30'
+            : 'bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 border border-slate-200 dark:border-slate-700'
+        }`}>
+          <Globe className="w-3 h-3" />
+          Browser {notifPermission === 'granted' ? '✓' : '(off)'}
+        </span>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
@@ -167,20 +278,29 @@ const CustomerReminders = () => {
                 Medicine Name *
               </label>
               <div className="relative">
-                <input
-                  type="text"
+                <select
                   required
                   value={medicineName}
                   onChange={(e) => setMedicineName(e.target.value)}
-                  placeholder="e.g. Lipitor 20mg"
-                  className="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-[#0C1628] border border-slate-200 dark:border-slate-700/60 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-[#1A56A0] dark:focus:border-sky-400 text-xs transition-colors duration-200"
-                />
+                  className="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-[#0C1628] border border-slate-200 dark:border-slate-700/60 text-slate-900 dark:text-white focus:outline-none focus:border-[#1A56A0] dark:focus:border-sky-400 text-xs transition-colors duration-200"
+                >
+                  <option value="">Select a medicine...</option>
+                  {medicines.length === 0 ? (
+                    <option value="" disabled>No medicines in catalog</option>
+                  ) : (
+                    medicines.map((med) => (
+                      <option key={med._id} value={med.name}>
+                        {med.name} ({med.genericName})
+                      </option>
+                    ))
+                  )}
+                </select>
               </div>
             </div>
 
             <div>
               <label className="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5">
-                SMS Mobile Number *
+                Mobile Number *
               </label>
               <div className="relative">
                 <input
@@ -188,9 +308,14 @@ const CustomerReminders = () => {
                   required
                   value={phoneNumber}
                   onChange={(e) => setPhoneNumber(e.target.value)}
-                  placeholder="e.g. +15550192834"
+                  placeholder="e.g. +919876543210"
                   className="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-[#0C1628] border border-slate-200 dark:border-slate-700/60 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-[#1A56A0] dark:focus:border-sky-400 text-xs transition-colors duration-200"
                 />
+                {!userProfile?.phone && (
+                  <p className="text-[10px] text-amber-600 mt-1.5 leading-normal">
+                    Tip: Add your number in <Link to="/customer/profile" className="underline font-semibold text-[#1A56A0] dark:text-sky-400">My Profile</Link> to auto-fill this field.
+                  </p>
+                )}
               </div>
             </div>
 
@@ -238,7 +363,7 @@ const CustomerReminders = () => {
                 <div className="w-6 h-6 border-2 border-slate-200 dark:border-slate-700 border-t-[#1A56A0] rounded-full animate-spin"></div>
               </div>
             ) : reminders.length === 0 ? (
-              <p className="text-xs text-slate-500 dark:text-slate-400 py-6 text-center font-medium">No SMS timers configured. Create one using the side card.</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400 py-6 text-center font-medium">No timers configured. Create one using the side card.</p>
             ) : (
               <div className="divide-y divide-slate-100 dark:divide-slate-700/50 max-h-72 overflow-y-auto pr-2">
                 {reminders.map((reminder) => (
@@ -314,26 +439,31 @@ const CustomerReminders = () => {
               <p className="text-xs text-slate-500 dark:text-slate-400 py-6 text-center font-medium">No alerts generated for your account yet.</p>
             ) : (
               <div className="divide-y divide-slate-150 dark:divide-slate-700/50 max-h-60 overflow-y-auto pr-2">
-                {logs.map((log) => (
-                  <div key={log._id} className="py-2.5 flex justify-between items-start gap-3">
-                    <div>
-                      <span className="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700/50 text-slate-600 dark:text-slate-300">
-                        {log.type}
-                      </span>
-                      <p className="text-xs text-slate-600 dark:text-slate-300 mt-1.5 leading-relaxed">{log.message}</p>
-                      <span className="text-[9px] text-slate-400 dark:text-slate-500 block mt-0.5">
-                        {new Date(log.sentAt).toLocaleString()}
+                {logs.map((log) => {
+                  const badge = getTypeBadge(log.type);
+                  const TypeIcon = badge.icon;
+                  return (
+                    <div key={log._id} className="py-2.5 flex justify-between items-start gap-3">
+                      <div className="min-w-0 flex-1">
+                        <span className={`inline-flex items-center gap-1 text-[9px] font-bold uppercase px-1.5 py-0.5 rounded border ${badge.className}`}>
+                          <TypeIcon className="w-2.5 h-2.5" />
+                          {log.type}
+                        </span>
+                        <p className="text-xs text-slate-600 dark:text-slate-300 mt-1.5 leading-relaxed">{log.message}</p>
+                        <span className="text-[9px] text-slate-400 dark:text-slate-500 block mt-0.5">
+                          {new Date(log.sentAt).toLocaleString()}
+                        </span>
+                      </div>
+                      <span className={`text-[9px] font-bold uppercase px-1.5 py-0.5 rounded shrink-0 ${
+                        log.status === 'sent'
+                          ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20'
+                          : 'bg-red-500/10 text-red-650 dark:text-red-400 border border-red-500/20'
+                      }`}>
+                        {log.status}
                       </span>
                     </div>
-                    <span className={`text-[9px] font-bold uppercase px-1.5 py-0.5 rounded ${
-                      log.status === 'sent'
-                        ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20'
-                        : 'bg-red-500/10 text-red-650 dark:text-red-400 border border-red-500/20'
-                    }`}>
-                      {log.status}
-                    </span>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>
