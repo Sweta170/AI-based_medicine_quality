@@ -98,6 +98,7 @@ const CustomerBills = () => {
                   <th className="py-2.5 px-4">Purchase Date</th>
                   <th className="py-2.5 px-4">Total Items</th>
                   <th className="py-2.5 px-4">Total Charged</th>
+                  <th className="py-2.5 px-4">Type</th>
                   <th className="py-2.5 px-4">Method</th>
                   <th className="py-2.5 px-4 text-right">Actions</th>
                 </tr>
@@ -118,7 +119,18 @@ const CustomerBills = () => {
                     <td className="py-2.5 px-4 text-slate-600 dark:text-slate-400">
                       {bill.items.reduce((sum, item) => sum + item.quantity, 0)} units
                     </td>
-                    <td className="py-2.5 px-4 text-slate-850 dark:text-slate-200 font-bold">₹{bill.total.toFixed(2)}</td>
+                    <td className="py-2.5 px-4 text-slate-855 dark:text-slate-200 font-bold">₹{bill.total.toFixed(2)}</td>
+                    <td className="py-2.5 px-4">
+                      {bill.billType === 'INSTORE' ? (
+                        <span className="bg-orange-100 text-orange-700 text-[10px] font-semibold px-2 py-0.5 rounded-full">
+                          🏪 In-Store
+                        </span>
+                      ) : (
+                        <span className="bg-blue-100 text-blue-700 text-[10px] font-semibold px-2 py-0.5 rounded-full">
+                          🌐 Online
+                        </span>
+                      )}
+                    </td>
                     <td className="py-2.5 px-4 text-slate-500 dark:text-slate-400">{bill.paymentMethod}</td>
                     <td className="py-2.5 px-4 text-right">
                       <div className="flex justify-end gap-1.5">

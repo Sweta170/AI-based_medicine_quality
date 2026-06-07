@@ -1,4 +1,5 @@
-﻿import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '../utils/api';
 import { useAuth } from '../context/AuthContext';
@@ -48,6 +49,7 @@ function CategoryBadge({ category }) {
 }
 
 const PharmacistDashboard = () => {
+  const navigate = useNavigate();
   const { user: currentUser, logout, updateProfile } = useAuth();
   const { theme, toggle } = useTheme();
   const queryClient = useQueryClient();
@@ -789,6 +791,12 @@ const PharmacistDashboard = () => {
           </div>
           
           <div className="flex items-center gap-4 text-[10.5px] font-medium text-slate-500">
+            <button
+              onClick={() => navigate('/pharmacist/instore-billing')}
+              className="flex items-center gap-2 px-4 py-2 bg-[#1A56A0] text-white rounded-xl text-sm font-semibold hover:bg-[#1450b0] transition-all"
+            >
+              🏪 In-Store Bill
+            </button>
             {activeTab === 'notifications' ? (
               <div className="flex items-center gap-1.5 px-2.5 py-1 border border-slate-200 rounded-lg bg-slate-50 text-slate-600 font-normal">
                 <Calendar className="w-3.5 h-3.5 text-slate-400" />

@@ -315,3 +315,170 @@ export const getAllBills = async (req, res, next) => {
     next(error);
   }
 };
+
+// @desc    Get single bill detail
+// @route   GET /api/bills/:id
+// @access  Private
+export const getBillById = async (req, res, next) => {
+  const { id } = req.params;
+
+  try {
+    const bill = await Bill.findById(id)
+      .populate('customerId', 'name email phone')
+      .populate('pharmacistId', 'name email');
+
+    if (!bill) {
+      res.status(404);
+      throw new Error('Bill not found');
+    }
+
+    // Security check: Customers can only view their own bills
+    if (req.user.role === 'customer' && (!bill.customerId || req.user._id.toString() !== bill.customerId._id.toString())) {
+      res.status(403);
+      throw new Error('Not authorized to access this bill record');
+    }
+
+    res.json(bill);
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Lookup customer by phone number
+// @route   GET /api/bills/lookup-customer
+// @access  Private
+export const lookupCustomerByPhone = async (req, res, next) => {
+  try {
+    const { phone } = req.query;
+    if (!phone) {
+      res.status(400);
+      throw new Error('Phone number query parameter is required');
+    }
+    const customer = await User.findOne({ phone, role: 'customer' });
+    if (customer) {
+      return res.json({
+        found: true,
+        customer: {
+          _id: customer._id,
+          name: customer.name,
+          email: customer.email,
+          phone: customer.phone,
+        },
+      });
+    } else {
+      return res.json({ found: false });
+    }
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Create an in-store checkout bill
+// @route   POST /api/bills/instore
+// @access  Private/Pharmacist/Superadmin
+export const createInstoreBill = async (req, res, next) => {
+  const { customerPhone, customerId, paymentMethod, discount, items } = req.body;
+
+  if (req.user.role === 'customer') {
+    res.status(403);
+    return next(new Error('Customers are not authorized to create in-store bills'));
+  }
+
+  if (!items || !Array.isArray(items) || items.length === 0) {
+    res.status(400);
+    return next(new Error('Bill items list cannot be empty'));
+  }
+
+  try {
+    const expiredItems = [];
+    const insufficientStockItems = [];
+    const validatedItems = [];
+    let subtotal = 0;
+
+    // Validate each item (REUSE compliance checks from createBill)
+    for (const item of items) {
+      const medicine = await Medicine.findById(item.medicineId);
+
+      if (!medicine) {
+        res.status(404);
+        return next(new Error(`Medicine not found: ${item.name || item.medicineId}`));
+      }
+
+      // Check Expiry Status
+      const expiryStatus = checkExpiryStatus(medicine.expiryDate);
+      if (expiryStatus === 'EXPIRED') {
+        expiredItems.push(`${medicine.name} (Batch: ${medicine.batchNumber})`);
+      }
+
+      // Check Stock Availability
+      if (medicine.quantity < item.quantity) {
+        insufficientStockItems.push(
+          `${medicine.name} (Requested: ${item.quantity}, Available: ${medicine.quantity})`
+        );
+      }
+
+      subtotal += medicine.price * item.quantity;
+
+      validatedItems.push({
+        medicineId: medicine._id,
+        name: medicine.name,
+        quantity: item.quantity,
+        unitPrice: medicine.price,
+        expiryStatus,
+        ref: medicine,
+      });
+    }
+
+    // Reject if any item is expired
+    if (expiredItems.length > 0) {
+      return res.status(403).json({
+        message: `Billing rejected. The following medicines are expired and cannot be billed: ${expiredItems.join(', ')}`,
+        code: 'MEDICINE_EXPIRED',
+        expiredMedicines: expiredItems,
+      });
+    }
+
+    // Reject if any item has insufficient stock
+    if (insufficientStockItems.length > 0) {
+      res.status(400);
+      return next(
+        new Error(
+          `Billing rejected due to insufficient stock levels: ${insufficientStockItems.join(', ')}`
+        )
+      );
+    }
+
+    // Calculate total
+    const finalDiscount = Number(discount) || 0;
+    const total = Math.max(0, subtotal - finalDiscount);
+
+    // Create the Bill record
+    const bill = await Bill.create({
+      pharmacistId: req.user._id,
+      customerId: customerId || null,
+      guestPhone: customerId ? null : customerPhone,
+      billType: 'INSTORE',
+      items: validatedItems.map((item) => ({
+        medicineId: item.medicineId,
+        name: item.name,
+        quantity: item.quantity,
+        unitPrice: item.unitPrice,
+        expiryStatus: item.expiryStatus,
+      })),
+      subtotal,
+      discount: finalDiscount,
+      total,
+      paymentMethod: paymentMethod || 'Cash',
+    });
+
+    // Decrement stock
+    for (const item of validatedItems) {
+      item.ref.quantity -= item.quantity;
+      await item.ref.save();
+    }
+
+    res.status(201).json({ success: true, bill });
+  } catch (error) {
+    next(error);
+  }
+};

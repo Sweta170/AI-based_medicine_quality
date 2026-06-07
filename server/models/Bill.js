@@ -40,7 +40,16 @@ const billSchema = new mongoose.Schema(
     customerId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
-      required: [true, 'Customer ID is required for tracking'],
+      default: null,
+    },
+    billType: {
+      type: String,
+      enum: ['ONLINE', 'INSTORE'],
+      default: 'ONLINE',
+    },
+    guestPhone: {
+      type: String,
+      default: null,
     },
     items: [billItemSchema],
     subtotal: {
