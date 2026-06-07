@@ -9,6 +9,36 @@ import {
   BellRing, Mail, Globe, MessageSquare
 } from 'lucide-react';
 
+const convertTo12Hour = (time24) => {
+  if (!time24) return '10:00 AM';
+  const [hourStr, minStr] = time24.split(':');
+  let hour = parseInt(hourStr, 10);
+  const minute = minStr;
+  const ampm = hour >= 12 ? 'PM' : 'AM';
+  
+  hour = hour % 12;
+  hour = hour ? hour : 12;
+  const displayHour = hour < 10 ? `0${hour}` : hour;
+  
+  return `${displayHour}:${minute} ${ampm}`;
+};
+
+const convertTo24Hour = (time12) => {
+  if (!time12) return '10:00';
+  const match = time12.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+  if (!match) return '10:00';
+  
+  let hour = parseInt(match[1], 10);
+  const minute = match[2];
+  const period = match[3].toUpperCase();
+  
+  if (period === 'AM' && hour === 12) hour = 0;
+  else if (period === 'PM' && hour !== 12) hour += 12;
+  
+  const displayHour = hour < 10 ? `0${hour}` : hour;
+  return `${displayHour}:${minute}`;
+};
+
 const CustomerReminders = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -323,15 +353,13 @@ const CustomerReminders = () => {
               <label className="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5">
                 Notification Schedule
               </label>
-              <select
-                value={time}
-                onChange={(e) => setTime(e.target.value)}
+              <input
+                type="time"
+                required
+                value={convertTo24Hour(time)}
+                onChange={(e) => setTime(convertTo12Hour(e.target.value))}
                 className="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-[#0C1628] border border-slate-200 dark:border-slate-700/60 text-slate-900 dark:text-white text-xs focus:outline-none focus:border-[#1A56A0] dark:focus:border-sky-400 transition-colors duration-200"
-              >
-                {timeOptions.map((t) => (
-                  <option key={t} value={t} className="bg-white dark:bg-[#1a2438]">{t}</option>
-                ))}
-              </select>
+              />
             </div>
 
             <button
@@ -378,16 +406,13 @@ const CustomerReminders = () => {
 
                     <div className="flex items-center gap-3">
                       {/* Time Selector */}
-                      <select
-                        value={reminder.time}
-                        onChange={(e) => handleTimeChange(reminder, e.target.value)}
+                      <input
+                        type="time"
+                        value={convertTo24Hour(reminder.time)}
+                        onChange={(e) => handleTimeChange(reminder, convertTo12Hour(e.target.value))}
                         disabled={updateMutation.isPending && updateMutation.variables?.reminderId === reminder._id}
                         className="bg-slate-50 dark:bg-[#0C1628] border border-slate-200 dark:border-slate-700/60 text-[11px] rounded-lg px-2 py-1 text-slate-900 dark:text-slate-200 focus:outline-none focus:border-[#1A56A0] dark:focus:border-sky-400 disabled:opacity-50 transition-colors duration-200"
-                      >
-                        {timeOptions.map((opt) => (
-                          <option key={opt} value={opt} className="bg-white dark:bg-[#1a2438]">{opt}</option>
-                        ))}
-                      </select>
+                      />
 
                       {/* Toggle switch (isActive) */}
                       <button

@@ -294,19 +294,20 @@ export const runLowStockReport = async () => {
   }
 };
 
-// --- Helper: Convert reminder time string ("04:00 PM") to 24h hour number ---
-const parseReminderHour = (timeStr) => {
-  if (!timeStr) return 10; // fallback to 10 AM
+// --- Helper: Convert reminder time string ("04:30 PM") to 24h hour and minute numbers ---
+const parseReminderTime = (timeStr) => {
+  if (!timeStr) return { hour: 10, minute: 0 }; // fallback to 10:00 AM
   const match = timeStr.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
-  if (!match) return 10;
+  if (!match) return { hour: 10, minute: 0 };
 
   let hour = parseInt(match[1], 10);
+  const minute = parseInt(match[2], 10);
   const period = match[3].toUpperCase();
 
   if (period === 'AM' && hour === 12) hour = 0;
   else if (period === 'PM' && hour !== 12) hour += 12;
 
-  return hour;
+  return { hour, minute };
 };
 
 // --- Build styled medication reminder email HTML ---
@@ -348,7 +349,8 @@ const buildReminderEmailHtml = (medicineName, customerName) => {
 export const runEmailReminders = async () => {
   const now = new Date();
   const currentHour = now.getHours();
-  console.log(`[Reminder Cron] Running hourly email reminder check (current hour: ${currentHour})...`);
+  const currentMinute = now.getMinutes();
+  console.log(`[Reminder Cron] Running email reminder check (time: ${currentHour}:${currentMinute})...`);
 
   try {
     const reminders = await Reminder.find({ isActive: true }).populate('customerId');
@@ -358,18 +360,17 @@ export const runEmailReminders = async () => {
       return { status: 'success', message: 'No active reminders found' };
     }
 
-    // Filter reminders whose scheduled hour matches the current hour
+    // Filter reminders whose scheduled hour and minute match the current time
     const dueReminders = reminders.filter((r) => {
-      const reminderHour = parseReminderHour(r.time);
-      return reminderHour === currentHour;
+      const { hour: reminderHour, minute: reminderMinute } = parseReminderTime(r.time);
+      return reminderHour === currentHour && reminderMinute === currentMinute;
     });
 
     if (dueReminders.length === 0) {
-      console.log(`[Reminder Cron] No reminders due at hour ${currentHour}.`);
-      return { status: 'success', message: 'No reminders due this hour' };
+      return { status: 'success', message: 'No reminders due this minute' };
     }
 
-    console.log(`[Reminder Cron] ${dueReminders.length} reminder(s) due at hour ${currentHour}.`);
+    console.log(`[Reminder Cron] ${dueReminders.length} reminder(s) due at ${currentHour}:${currentMinute}.`);
 
     const transporter = getEmailTransporter();
     const isEthereal = transporter.options.host === 'smtp.ethereal.email';
@@ -434,8 +435,8 @@ export const initializeNotificationScheduler = () => {
   cron.schedule('0 9 * * *', runLowStockReport);
   console.log('Scheduled Low Stock Alert Cron Job (9:00 AM daily)');
 
-  // Cron 3 — Every hour on the hour (0 * * * *)
-  // Matches each reminder's configured time slot and sends email
-  cron.schedule('0 * * * *', runEmailReminders);
-  console.log('Scheduled Customer Email Reminder Cron Job (every hour, time-matched)');
+  // Cron 3 — Every minute (* * * * *)
+  // Matches each reminder's configured hour and minute, and sends email instantly
+  cron.schedule('* * * * *', runEmailReminders);
+  console.log('Scheduled Customer Email Reminder Cron Job (every minute, time-matched)');
 };

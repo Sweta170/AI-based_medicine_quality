@@ -4,20 +4,21 @@ import api from '../utils/api';
 import { useAuth } from '../context/AuthContext';
 
 /**
- * Parse a time string like "04:00 PM" to a 24-hour number (0-23).
+ * Parse a time string like "04:30 PM" to an object containing 24-hour hour and minute.
  */
-const parseHour = (timeStr) => {
-  if (!timeStr) return 10;
+const parseTime = (timeStr) => {
+  if (!timeStr) return { hour: 10, minute: 0 };
   const match = timeStr.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
-  if (!match) return 10;
+  if (!match) return { hour: 10, minute: 0 };
 
   let hour = parseInt(match[1], 10);
+  const minute = parseInt(match[2], 10);
   const period = match[3].toUpperCase();
 
   if (period === 'AM' && hour === 12) hour = 0;
   else if (period === 'PM' && hour !== 12) hour += 12;
 
-  return hour;
+  return { hour, minute };
 };
 
 /**
@@ -67,13 +68,14 @@ const useBrowserNotifications = () => {
 
       const now = new Date();
       const currentHour = now.getHours();
+      const currentMinute = now.getMinutes();
 
-      // Reset fired set when the hour changes
-      const hourKey = `${now.getFullYear()}-${now.getMonth()}-${now.getDate()}-${currentHour}`;
+      // Reset fired set when the hour/minute changes
+      const minuteKey = `${now.getFullYear()}-${now.getMonth()}-${now.getDate()}-${currentHour}-${currentMinute}`;
       
-      // Clean old keys from the set (from previous hours)
+      // Clean old keys from the set (from previous minutes/hours)
       for (const key of firedRef.current) {
-        if (!key.startsWith(hourKey)) {
+        if (!key.startsWith(minuteKey)) {
           firedRef.current.delete(key);
         }
       }
@@ -81,10 +83,10 @@ const useBrowserNotifications = () => {
       const activeReminders = reminders.filter((r) => r.isActive);
 
       for (const reminder of activeReminders) {
-        const reminderHour = parseHour(reminder.time);
-        const fireKey = `${hourKey}-${reminder._id}`;
+        const { hour: reminderHour, minute: reminderMinute } = parseTime(reminder.time);
+        const fireKey = `${minuteKey}-${reminder._id}`;
 
-        if (reminderHour === currentHour && !firedRef.current.has(fireKey)) {
+        if (reminderHour === currentHour && reminderMinute === currentMinute && !firedRef.current.has(fireKey)) {
           firedRef.current.add(fireKey);
 
           // Show browser notification
