@@ -12,7 +12,7 @@ The application supports three roles, each with a tailored workspace and securit
 *   **Pharmacist Portal**: A high-efficiency panel designed for pharmacy operators:
     *   **Dashboard**: Shows statistics like sales history (last 7 days chart), total stock count, expired batches, and expiring-soon lists.
     *   **Catalog Database Manager**: Full CRUD operations on medicines, bulk JSON batch import, and an **OCR Smart Label Autocomplete** tool.
-    *   **Invoice Worksheet**: A point-of-sale compiler to select customers, add medicines to a bill, calculate discounts, block expired medicine sales, and instantly download a styled PDF receipt.
+    *   **Invoice Worksheet**: An integrated point-of-sale compiler directly in the dashboard that supports selecting registered customers as well as direct walk-in guest checkouts (using an optional guest phone number). On completion, it triggers an interactive success modal to print standard receipts or begin a new bill.
     *   **Alerts & Reminders page**: A simplified, friendly dashboard listing daily automated checks (expired medicine, low stock, patient reminders) with "Run now" capabilities.
 *   **Customer Portal**: A consumer-facing panel:
     *   **Medicine Shop**: A catalog to search, filter by category, and buy medicines.
@@ -27,7 +27,11 @@ The application supports three roles, each with a tailored workspace and securit
 *   The billing panel automatically detects if any medicine in the current invoice worksheet has expired.
 *   Blocks the checkout action and displays a compliance warning banner to prevent illegal distribution of expired drugs.
 
-### 4. Dual-Channel Alerts & Reminders
+### 4. Printable Receipts & Invoice History
+*   Features a dedicated printable receipt page (`/pharmacist/receipt/:id`) configured with clean CSS print media queries.
+*   Receipts (both print views and downloadable PDF documents) display the medicine's actual formatted **Expiry Date** (e.g. `Jan 2028`) instead of the compliance status text to meet auditing standards.
+
+### 5. Dual-Channel Alerts & Reminders
 *   **Daily Automated Reports**: Hourly background cron jobs check for expired items, low stock levels, and upcoming reminder times.
 *   **Hourly SMTP Email Dispatcher**: Sends detailed emails to patients reminding them of their scheduled doses.
 *   **Real-time Web Browser Notifications**: Triggers desktop notification banners inside the patient's browser when they have the application open.
