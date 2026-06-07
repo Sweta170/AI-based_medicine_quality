@@ -207,8 +207,8 @@ async function seedData() {
     });
 
     console.log('Bills created successfully:');
-    console.log(`- Bill 1: ${bill1.billNumber} ($${bill1.total})`);
-    console.log(`- Bill 2: ${bill2.billNumber} ($${bill2.total})`);
+    console.log(`- Bill 1: ${bill1.billNumber} (₹${bill1.total})`);
+    console.log(`- Bill 2: ${bill2.billNumber} (₹${bill2.total})`);
 
     // 6. Create Notifications
     console.log('Seeding Notifications...');

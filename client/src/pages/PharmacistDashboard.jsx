@@ -10,7 +10,7 @@ import {
   LayoutDashboard, Pill, Plus, Edit2, Trash2, Search, Filter, 
   AlertTriangle, CheckCircle, X, Calendar, RefreshCw, Barcode, 
   Database, Upload, Eye, Bell, Settings, Receipt, Users, LogOut, 
-  DollarSign, AlertCircle, ArrowRight, Lock, User, Info, ShieldAlert,
+  IndianRupee, AlertCircle, ArrowRight, Lock, User, Info, ShieldAlert,
   Menu
 } from 'lucide-react';
 
@@ -1019,7 +1019,7 @@ const PharmacistDashboard = () => {
                               <span className="text-slate-600 dark:text-slate-400 block">Batch: <span className="font-mono font-semibold">{med.batchNumber}</span></span>
                               <span className="text-slate-450 dark:text-slate-500 block mt-0.5 text-[10px]">Formula: {med.genericName}</span>
                             </td>
-                            <td className="py-2.5 px-4 font-bold text-slate-800 dark:text-slate-200">${med.price.toFixed(2)}</td>
+                            <td className="py-2.5 px-4 font-bold text-slate-800 dark:text-slate-200">₹{med.price.toFixed(2)}</td>
                             <td className="py-2.5 px-4">
                               <span className={`font-semibold ${med.quantity <= med.reorderLevel ? 'text-red-500' : 'text-slate-700 dark:text-slate-300'}`}>
                                 {med.quantity} units
@@ -1145,7 +1145,7 @@ const PharmacistDashboard = () => {
                               <span className="text-[10px] text-slate-500 dark:text-slate-400 block">Category: {med.category}</span>
                             </div>
                             <div className="text-right flex flex-col items-end gap-1 shrink-0">
-                              <span className="font-bold text-slate-805 dark:text-slate-200 text-xs">${med.price.toFixed(2)}</span>
+                              <span className="font-bold text-slate-805 dark:text-slate-200 text-xs">₹{med.price.toFixed(2)}</span>
                               {getExpiryStatusBadge(med.expiryStatus)}
                             </div>
                           </div>
@@ -1218,7 +1218,7 @@ const PharmacistDashboard = () => {
                                   {getExpiryStatusBadge(item.expiryStatus)}
                                 </div>
                               </td>
-                              <td className="py-2 px-3 text-right font-medium text-slate-700 dark:text-slate-350">${item.price.toFixed(2)}</td>
+                              <td className="py-2 px-3 text-right font-medium text-slate-700 dark:text-slate-350">₹{item.price.toFixed(2)}</td>
                               <td className="py-2 px-3">
                                 <input
                                   type="number"
@@ -1229,7 +1229,7 @@ const PharmacistDashboard = () => {
                                 />
                               </td>
                               <td className="py-2 px-3 text-right font-bold text-slate-800 dark:text-slate-200">
-                                ${(item.price * item.billQuantity).toFixed(2)}
+                                ₹{(item.price * item.billQuantity).toFixed(2)}
                               </td>
                               <td className="py-2 px-3 text-right">
                                 <button
@@ -1252,11 +1252,11 @@ const PharmacistDashboard = () => {
                     <div className="bg-slate-50 dark:bg-slate-900/40 p-3 rounded-xl space-y-2 text-xs border border-slate-100 dark:border-slate-700/50">
                       <div className="flex justify-between items-center text-slate-600 dark:text-slate-400">
                         <span>Items Subtotal:</span>
-                        <span className="font-bold text-slate-800 dark:text-slate-200">${calculateBillSubtotal().toFixed(2)}</span>
+                        <span className="font-bold text-slate-800 dark:text-slate-200">₹{calculateBillSubtotal().toFixed(2)}</span>
                       </div>
                       
                       <div className="flex justify-between items-center text-slate-600 dark:text-slate-400 gap-4">
-                        <span>Flat Invoice Discount ($):</span>
+                        <span>Flat Invoice Discount (₹):</span>
                         <input
                           type="number"
                           min="0"
@@ -1282,7 +1282,7 @@ const PharmacistDashboard = () => {
 
                       <div className="border-t border-slate-200 dark:border-slate-700 pt-2 flex justify-between items-center text-sm font-extrabold text-[#1A56A0] dark:text-sky-400">
                         <span>Grand Total Billed:</span>
-                        <span>${calculateBillTotal().toFixed(2)}</span>
+                        <span>₹{calculateBillTotal().toFixed(2)}</span>
                       </div>
                     </div>
                   )}

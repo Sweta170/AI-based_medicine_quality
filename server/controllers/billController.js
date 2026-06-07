@@ -245,9 +245,9 @@ export const generateBillPDF = async (req, res, next) => {
         .fillColor('#334155')
         .text(item.name, 50, y, { width: 180 })
         .text(item.expiryStatus, 240, y)
-        .text(`$${item.unitPrice.toFixed(2)}`, 340, y, { align: 'right', width: 60 })
+        .text(`Rs. ${item.unitPrice.toFixed(2)}`, 340, y, { align: 'right', width: 60 })
         .text(item.quantity.toString(), 420, y, { align: 'right', width: 50 })
-        .text(`$${(item.unitPrice * item.quantity).toFixed(2)}`, 500, y, { align: 'right', width: 50 });
+        .text(`Rs. ${(item.unitPrice * item.quantity).toFixed(2)}`, 500, y, { align: 'right', width: 50 });
 
       y += 20;
     });
@@ -260,15 +260,15 @@ export const generateBillPDF = async (req, res, next) => {
       .fillColor('#475569')
       .fontSize(10)
       .text('Subtotal:', 340, subtotalY + 10, { align: 'right', width: 130 })
-      .text(`$${bill.subtotal.toFixed(2)}`, 480, subtotalY + 10, { align: 'right', width: 70 })
+      .text(`Rs. ${bill.subtotal.toFixed(2)}`, 480, subtotalY + 10, { align: 'right', width: 70 })
 
       .text('Discount Applied:', 340, subtotalY + 25, { align: 'right', width: 130 })
-      .text(`-$${bill.discount.toFixed(2)}`, 480, subtotalY + 25, { align: 'right', width: 70 })
+      .text(`-Rs. ${bill.discount.toFixed(2)}`, 480, subtotalY + 25, { align: 'right', width: 70 })
 
       .fillColor('#0ea5e9')
       .fontSize(12)
       .text('Grand Total:', 340, subtotalY + 45, { bold: true, align: 'right', width: 130 })
-      .text(`$${bill.total.toFixed(2)}`, 480, subtotalY + 45, { bold: true, align: 'right', width: 70 });
+      .text(`Rs. ${bill.total.toFixed(2)}`, 480, subtotalY + 45, { bold: true, align: 'right', width: 70 });
 
     // --- Footer ---
     doc

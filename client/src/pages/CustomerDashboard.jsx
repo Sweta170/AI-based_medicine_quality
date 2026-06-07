@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { Link } from 'react-router-dom';
 import { 
   Activity, ShoppingBag, Bell, FileText, 
-  AlertTriangle, DollarSign, ArrowRight, ShieldCheck, HeartPulse
+  AlertTriangle, IndianRupee, ArrowRight, ShieldCheck, HeartPulse
 } from 'lucide-react';
 
 const CustomerDashboard = () => {
@@ -92,11 +92,11 @@ const CustomerDashboard = () => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
         <div className="bg-white dark:bg-[#1a2438] p-4 rounded-xl border border-slate-200 dark:border-slate-700/50 shadow-sm relative overflow-hidden transition-colors duration-200">
           <div className="absolute top-4 right-4 w-7 h-7 bg-emerald-500/10 rounded-lg flex items-center justify-center text-emerald-500 dark:text-emerald-400">
-            <DollarSign className="w-4 h-4" />
+            <IndianRupee className="w-4 h-4" />
           </div>
-          <p className="text-slate-400 dark:text-slate-500 text-[10px] font-bold uppercase tracking-wider">Purchases This Month</p>
+          <p className="text-slate-400 dark:text-slate-550 text-[10px] font-bold uppercase tracking-wider">Purchases This Month</p>
           <p className="text-xl font-bold text-slate-900 dark:text-white mt-1">
-            {billsLoading ? '...' : `$${totalPurchasesThisMonth.toFixed(2)}`}
+            {billsLoading ? '...' : `₹${totalPurchasesThisMonth.toFixed(2)}`}
           </p>
           <div className="mt-3 text-[10px] text-slate-400 dark:text-slate-500 flex items-center gap-1.5">
             <span>Total orders: </span>

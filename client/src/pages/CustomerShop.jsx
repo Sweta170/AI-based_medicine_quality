@@ -265,7 +265,7 @@ const CustomerShop = () => {
                 <div className="flex items-center justify-between mt-3 border-t border-slate-150 dark:border-slate-700/50 pt-3">
                   <div>
                     <span className="text-[10px] text-slate-405 dark:text-slate-500 block">Unit Price</span>
-                    <span className="text-base font-bold text-slate-900 dark:text-white">${item.price.toFixed(2)}</span>
+                    <span className="text-base font-bold text-slate-900 dark:text-white">₹{item.price.toFixed(2)}</span>
                   </div>
 
                   {item.quantity === 0 ? (
@@ -338,7 +338,7 @@ const CustomerShop = () => {
                                 )}
                               </h4>
                               <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">{item.category}</p>
-                              <span className="text-[#1A56A0] dark:text-sky-400 text-xs font-bold mt-1.5 inline-block">${item.price.toFixed(2)}</span>
+                              <span className="text-[#1A56A0] dark:text-sky-400 text-xs font-bold mt-1.5 inline-block">₹{item.price.toFixed(2)}</span>
                             </div>
 
                             <div className="flex flex-col justify-between items-end">
@@ -377,7 +377,7 @@ const CustomerShop = () => {
                     <div className="border-t border-slate-200 dark:border-slate-800 p-4 bg-slate-50 dark:bg-[#1a2438]/30 space-y-3">
                       <div className="flex justify-between items-center text-xs font-bold text-slate-900 dark:text-white">
                         <span>Grand Total:</span>
-                        <span className="text-[#1A56A0] dark:text-sky-400 text-base">${calculateTotal().toFixed(2)}</span>
+                        <span className="text-[#1A56A0] dark:text-sky-400 text-base">₹{calculateTotal().toFixed(2)}</span>
                       </div>
                       
                       {cart.some(item => item.expiryStatus === 'EXPIRED') && (
@@ -558,7 +558,7 @@ const CustomerShop = () => {
                   {lastReceipt.items.map((item, index) => (
                     <div key={index} className="flex justify-between items-center text-xs text-slate-700 dark:text-slate-300">
                       <span className="font-medium">{item.name} <span className="text-slate-400 text-[10px]">x{item.quantity}</span></span>
-                      <span className="font-semibold text-slate-900 dark:text-white font-mono">${(item.unitPrice * item.quantity).toFixed(2)}</span>
+                      <span className="font-semibold text-slate-900 dark:text-white font-mono">₹{(item.unitPrice * item.quantity).toFixed(2)}</span>
                     </div>
                   ))}
                 </div>
@@ -571,7 +571,7 @@ const CustomerShop = () => {
 
               <div className="flex justify-between items-center border-t border-slate-150 dark:border-slate-700/50 pt-2.5 text-xs font-bold text-slate-900 dark:text-white">
                 <span>Grand Total Charged</span>
-                <span className="text-[#1A56A0] dark:text-sky-400 text-sm font-mono">${lastReceipt.total.toFixed(2)}</span>
+                <span className="text-[#1A56A0] dark:text-sky-400 text-sm font-mono">₹{lastReceipt.total.toFixed(2)}</span>
               </div>
             </div>
 
