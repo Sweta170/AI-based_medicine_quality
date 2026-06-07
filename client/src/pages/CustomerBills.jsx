@@ -119,7 +119,7 @@ const CustomerBills = () => {
                     <td className="py-2.5 px-4 text-slate-600 dark:text-slate-400">
                       {bill.items.reduce((sum, item) => sum + item.quantity, 0)} units
                     </td>
-                    <td className="py-2.5 px-4 text-slate-855 dark:text-slate-200 font-bold">₹{bill.total.toFixed(2)}</td>
+                    <td className="py-2.5 px-4 text-slate-855 dark:text-slate-200 font-bold">{"\u20B9"}{bill.total.toFixed(2)}</td>
                     <td className="py-2.5 px-4">
                       {bill.billType === 'INSTORE' ? (
                         <span className="bg-orange-100 text-orange-700 text-[10px] font-semibold px-2 py-0.5 rounded-full">
@@ -220,10 +220,10 @@ const CustomerBills = () => {
                           {item.expiryStatus}
                         </span>
                       </td>
-                      <td className="py-2 px-3 text-right font-mono">₹{item.unitPrice.toFixed(2)}</td>
+                      <td className="py-2 px-3 text-right font-mono">{"\u20B9"}{item.unitPrice.toFixed(2)}</td>
                       <td className="py-2 px-3 text-right">{item.quantity} units</td>
                       <td className="py-2 px-3 text-right font-semibold text-slate-800 dark:text-slate-200 font-mono">
-                        ₹{(item.unitPrice * item.quantity).toFixed(2)}
+                        {"\u20B9"}{(item.unitPrice * item.quantity).toFixed(2)}
                       </td>
                     </tr>
                   ))}
@@ -235,15 +235,15 @@ const CustomerBills = () => {
             <div className="flex flex-col items-end gap-1 border-t border-slate-100 dark:border-slate-700/50 pt-3 text-xs text-slate-600 dark:text-slate-450 mb-4">
               <div className="flex gap-4">
                 <span className="text-slate-400 dark:text-slate-550">Subtotal:</span>
-                <span className="font-mono text-slate-800 dark:text-slate-200 w-20 text-right">₹{selectedBill.subtotal.toFixed(2)}</span>
+                <span className="font-mono text-slate-800 dark:text-slate-200 w-20 text-right">{"\u20B9"}{selectedBill.subtotal.toFixed(2)}</span>
               </div>
               <div className="flex gap-4">
                 <span className="text-slate-400 dark:text-slate-550">Discount:</span>
-                <span className="font-mono text-slate-800 dark:text-slate-200 w-20 text-right">-₹{selectedBill.discount.toFixed(2)}</span>
+                <span className="font-mono text-slate-800 dark:text-slate-200 w-20 text-right">-{"\u20B9"}{selectedBill.discount.toFixed(2)}</span>
               </div>
               <div className="flex gap-4 text-sm font-bold text-slate-900 dark:text-white mt-0.5">
                 <span className="text-[#1A56A0] dark:text-sky-400">Grand Total:</span>
-                <span className="font-mono text-[#1A56A0] dark:text-sky-400 w-20 text-right">₹{selectedBill.total.toFixed(2)}</span>
+                <span className="font-mono text-[#1A56A0] dark:text-sky-400 w-20 text-right">{"\u20B9"}{selectedBill.total.toFixed(2)}</span>
               </div>
             </div>
 

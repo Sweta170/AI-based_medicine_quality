@@ -148,9 +148,9 @@ const PrintReceipt = () => {
                     </span>
                   </td>
                   <td className="py-2.5 px-3 text-right font-medium">{item.quantity}</td>
-                  <td className="py-2.5 px-3 text-right font-mono">₹{item.unitPrice.toFixed(2)}</td>
+                  <td className="py-2.5 px-3 text-right font-mono">{"\u20B9"}{item.unitPrice.toFixed(2)}</td>
                   <td className="py-2.5 px-3 text-right font-semibold text-slate-900 font-mono">
-                    ₹{(item.unitPrice * item.quantity).toFixed(2)}
+                    {"\u20B9"}{(item.unitPrice * item.quantity).toFixed(2)}
                   </td>
                 </tr>
               ))}
@@ -162,17 +162,17 @@ const PrintReceipt = () => {
         <div className="flex flex-col items-end gap-1.5 pt-3 border-t border-slate-100 text-xs text-slate-650">
           <div className="flex justify-between w-64">
             <span className="text-slate-400">Subtotal:</span>
-            <span className="font-mono text-slate-800">₹{bill.subtotal.toFixed(2)}</span>
+            <span className="font-mono text-slate-800">{"\u20B9"}{bill.subtotal.toFixed(2)}</span>
           </div>
           {bill.discount > 0 && (
             <div className="flex justify-between w-64 text-green-600">
               <span>Discount:</span>
-              <span className="font-mono">−₹{bill.discount.toFixed(2)}</span>
+              <span className="font-mono">−{"\u20B9"}{bill.discount.toFixed(2)}</span>
             </div>
           )}
           <div className="flex justify-between w-64 text-sm font-bold text-slate-900 border-t border-slate-100 pt-2 mb-2">
             <span className="text-[#1A56A0]">Total:</span>
-            <span className="font-mono text-[#1A56A0]">₹{bill.total.toFixed(2)}</span>
+            <span className="font-mono text-[#1A56A0]">{"\u20B9"}{bill.total.toFixed(2)}</span>
           </div>
           <div className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider bg-slate-50 border border-slate-200/50 px-3 py-1 rounded-lg">
             Payment Method: {bill.paymentMethod}

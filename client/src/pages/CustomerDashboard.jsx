@@ -96,7 +96,7 @@ const CustomerDashboard = () => {
           </div>
           <p className="text-slate-400 dark:text-slate-550 text-[10px] font-bold uppercase tracking-wider">Purchases This Month</p>
           <p className="text-xl font-bold text-slate-900 dark:text-white mt-1">
-            {billsLoading ? '...' : `₹${totalPurchasesThisMonth.toFixed(2)}`}
+            {billsLoading ? '...' : `\u20B9${totalPurchasesThisMonth.toFixed(2)}`}
           </p>
           <div className="mt-3 text-[10px] text-slate-400 dark:text-slate-500 flex items-center gap-1.5">
             <span>Total orders: </span>

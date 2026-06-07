@@ -219,7 +219,7 @@ export default function LandingPage() {
               <div className="grid grid-cols-2 gap-2">
                 <div className="bg-slate-50 dark:bg-[#0C1628] border border-slate-200 dark:border-slate-750/30 rounded-xl p-2.5 transition-colors">
                   <span className="block text-[8px] text-slate-400 dark:text-slate-500 uppercase tracking-wider font-bold">Purchased</span>
-                  <span className="block text-sm font-extrabold text-slate-900 dark:text-white mt-0.5">₹124.50</span>
+                  <span className="block text-sm font-extrabold text-slate-900 dark:text-white mt-0.5">{"\u20B9"}124.50</span>
                   <span className="block text-[8px] text-slate-400 dark:text-slate-550 mt-1">This month</span>
                 </div>
                 <div className="bg-slate-50 dark:bg-[#0C1628] border border-slate-200 dark:border-slate-750/30 rounded-xl p-2.5 transition-colors">

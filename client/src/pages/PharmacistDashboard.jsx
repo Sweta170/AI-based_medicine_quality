@@ -1101,7 +1101,7 @@ const PharmacistDashboard = () => {
                               <span className="text-slate-600 dark:text-slate-400 block">Batch: <span className="font-mono font-semibold">{med.batchNumber}</span></span>
                               <span className="text-slate-450 dark:text-slate-500 block mt-0.5 text-[10px]">Formula: {med.genericName}</span>
                             </td>
-                            <td className="py-2.5 px-4 font-bold text-slate-800 dark:text-slate-200">₹{med.price.toFixed(2)}</td>
+                            <td className="py-2.5 px-4 font-bold text-slate-800 dark:text-slate-200">{"\u20B9"}{med.price.toFixed(2)}</td>
                             <td className="py-2.5 px-4">
                               <span className={`font-semibold ${med.quantity <= med.reorderLevel ? 'text-red-500' : 'text-slate-700 dark:text-slate-300'}`}>
                                 {med.quantity} units
@@ -1283,7 +1283,7 @@ const PharmacistDashboard = () => {
                             <div className="flex items-center gap-2 flex-shrink-0">
                               <CategoryBadge category={med.category} />
                               <span className="text-xs font-medium text-slate-700 dark:text-slate-200 w-12 text-right">
-                                ₹{med.price}
+                                {"\u20B9"}{med.price}
                               </span>
                               <button
                                 onClick={() => !isDisabled && handleAddToBill(med)}
@@ -1392,7 +1392,7 @@ const PharmacistDashboard = () => {
                               </div>
                             </div>
                             <p className="text-xs text-slate-600 dark:text-slate-300 text-right">
-                              ₹{item.price}
+                              {"\u20B9"}{item.price}
                             </p>
                             <div className="flex items-center justify-end gap-1">
                               <button onClick={() => decrementQty(item._id)}
@@ -1409,7 +1409,7 @@ const PharmacistDashboard = () => {
                                 aria-label="Increase quantity">+</button>
                             </div>
                             <p className="text-xs font-medium text-slate-800 dark:text-slate-100 text-right">
-                              ₹{(item.price * item.billQuantity).toFixed(2)}
+                              {"\u20B9"}{(item.price * item.billQuantity).toFixed(2)}
                             </p>
                             <button onClick={() => handleRemoveFromBill(item._id)}
                               className="flex items-center justify-center text-slate-300 dark:text-slate-600
@@ -1431,7 +1431,7 @@ const PharmacistDashboard = () => {
                     {billItems.length > 0 && (
                       <div className="grid grid-cols-2 gap-2 mb-2.5 pb-2.5 border-b border-slate-150 dark:border-slate-800">
                         <div className="flex items-center justify-between gap-1.5">
-                          <span className="text-[10px] text-slate-400 uppercase font-semibold">Discount (₹)</span>
+                          <span className="text-[10px] text-slate-400 uppercase font-semibold">Discount ({"\u20B9"})</span>
                           <input
                             type="number"
                             min="0"
@@ -1463,7 +1463,7 @@ const PharmacistDashboard = () => {
                         {billItems.reduce((s, i) => s + i.billQuantity, 0)} units
                       </span>
                       <span className="text-sm font-semibold text-slate-800 dark:text-slate-100">
-                        ₹{calculateBillTotal().toFixed(2)}
+                        {"\u20B9"}{calculateBillTotal().toFixed(2)}
                       </span>
                     </div>
                     
