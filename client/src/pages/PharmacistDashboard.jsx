@@ -11,13 +11,40 @@ import {
   AlertTriangle, CheckCircle, X, Calendar, RefreshCw, Barcode, 
   Database, Upload, Eye, Bell, Settings, Receipt, Users, LogOut, 
   IndianRupee, AlertCircle, ArrowRight, Lock, User, Info, ShieldAlert,
-  Menu
+  Menu, ChevronRight
 } from 'lucide-react';
 
 const getDaysLeft = (expiryDate) => {
   const diffTime = new Date(expiryDate) - new Date();
   return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 };
+
+const formatExpiry = (expiryDate) => {
+  return new Date(expiryDate).toLocaleDateString(undefined, {
+    year: 'numeric',
+    month: 'short',
+  });
+};
+
+function CategoryBadge({ category }) {
+  const map = {
+    'Pain Relief':    'bg-amber-50  text-amber-800  dark:bg-amber-950/40  dark:text-amber-300',
+    'Analgesic':      'bg-amber-50  text-amber-800  dark:bg-amber-950/40  dark:text-amber-300',
+    'Antibiotic':     'bg-blue-50   text-blue-800   dark:bg-blue-950/40   dark:text-blue-300',
+    'Vitamin':        'bg-green-50  text-green-800  dark:bg-green-950/40  dark:text-green-300',
+    'Vitamins':       'bg-green-50  text-green-800  dark:bg-green-950/40  dark:text-green-300',
+    'Diabetes':       'bg-purple-50 text-purple-800 dark:bg-purple-950/40 dark:text-purple-300',
+    'Diabetic':       'bg-purple-50 text-purple-800 dark:bg-purple-950/40 dark:text-purple-300',
+    'Cardiology':     'bg-red-50    text-red-800    dark:bg-red-950/40    dark:text-red-300',
+    'Cardiovascular': 'bg-red-50    text-red-800    dark:bg-red-950/40    dark:text-red-300',
+  };
+  const cls = map[category] ?? 'bg-slate-100 text-slate-605 dark:bg-slate-805 dark:text-slate-400';
+  return (
+    <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded ${cls} whitespace-nowrap`}>
+      {category}
+    </span>
+  );
+}
 
 const PharmacistDashboard = () => {
   const { user: currentUser, logout } = useAuth();
@@ -389,6 +416,24 @@ const PharmacistDashboard = () => {
     setBillItems(prev => prev.filter(item => item._id !== id));
   };
 
+  const incrementQty = (id) => {
+    const item = billItems.find(i => i._id === id);
+    if (item) {
+      if (item.billQuantity >= item.quantity) {
+        alert(`Insufficient stock. Only ${item.quantity} units available.`);
+        return;
+      }
+      setBillItems(prev => prev.map(i => i._id === id ? { ...i, billQuantity: i.billQuantity + 1 } : i));
+    }
+  };
+
+  const decrementQty = (id) => {
+    const item = billItems.find(i => i._id === id);
+    if (item && item.billQuantity > 1) {
+      setBillItems(prev => prev.map(i => i._id === id ? { ...i, billQuantity: i.billQuantity - 1 } : i));
+    }
+  };
+
   const calculateBillSubtotal = () => {
     return billItems.reduce((sum, item) => sum + item.price * item.billQuantity, 0);
   };
@@ -520,22 +565,28 @@ const PharmacistDashboard = () => {
     .sort((a, b) => new Date(a.expiryDate) - new Date(b.expiryDate))
     .slice(0, 10);
 
-  // Status Badge Colors Helper
   const getExpiryStatusBadge = (status) => {
+    let cls = '';
     switch (status) {
       case 'EXPIRED':
-        return 'bg-red-50 text-red-700 border-red-200 border text-[11px] font-extrabold uppercase px-2 py-0.5 rounded';
+        cls = 'bg-red-50 text-red-700 border border-red-200 text-[11px] font-extrabold uppercase px-2 py-0.5 rounded whitespace-nowrap';
+        break;
       case 'CRITICAL':
-        return 'bg-rose-50 text-rose-700 border-rose-200 border text-[11px] font-bold uppercase px-2 py-0.5 rounded';
+        cls = 'bg-rose-50 text-rose-700 border border-rose-200 text-[11px] font-bold uppercase px-2 py-0.5 rounded whitespace-nowrap';
+        break;
       case 'WARNING':
-        return 'bg-orange-50 text-orange-700 border-orange-200 border text-[11px] font-semibold uppercase px-2 py-0.5 rounded';
+        cls = 'bg-orange-50 text-orange-700 border border-orange-200 text-[11px] font-semibold uppercase px-2 py-0.5 rounded whitespace-nowrap';
+        break;
       case 'CAUTION':
-        return 'bg-yellow-50 text-yellow-700 border-yellow-200 border text-[11px] font-medium uppercase px-2 py-0.5 rounded';
+        cls = 'bg-yellow-50 text-yellow-700 border border-yellow-200 text-[11px] font-medium uppercase px-2 py-0.5 rounded whitespace-nowrap';
+        break;
       case 'SAFE':
-        return 'bg-emerald-50 text-emerald-700 border-emerald-200 border text-[11px] font-semibold uppercase px-2 py-0.5 rounded';
+        cls = 'bg-emerald-50 text-emerald-700 border border-emerald-200 text-[11px] font-semibold uppercase px-2 py-0.5 rounded whitespace-nowrap';
+        break;
       default:
-        return 'bg-slate-50 text-slate-700 border-slate-200 border text-[11px] px-2 py-0.5 rounded';
+        cls = 'bg-slate-50 text-slate-700 border border-slate-200 text-[11px] px-2 py-0.5 rounded whitespace-nowrap';
     }
+    return <span className={cls}>{status}</span>;
   };
 
   // Inventory Table Filter and Sort
@@ -1061,7 +1112,26 @@ const PharmacistDashboard = () => {
 
           {/* TAB 3: NEW BILL BUILDER (TWO PANEL) */}
           {activeTab === 'new-bill' && (
-            <div className="space-y-4">
+            <div className="space-y-3">
+              {/* Breadcrumb Bar */}
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2 text-[11px] text-slate-400">
+                  <LayoutDashboard className="w-3 h-3" />
+                  <span>Pharmadesk operations</span>
+                  <ChevronRight className="w-2.5 h-2.5 text-slate-500" />
+                  <span className="text-slate-600 dark:text-slate-300 font-medium">New bill</span>
+                </div>
+                <div className="flex items-center gap-3 text-[11px] text-slate-400">
+                  <span>
+                    <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1.5" />
+                    Server online
+                  </span>
+                  <span className="text-slate-300 dark:text-slate-700">|</span>
+                  <span>{new Date().toDateString()}</span>
+                </div>
+              </div>
+
+              {/* Status/Validation Messages */}
               {billSuccess && (
                 <div className="p-3 bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400 text-xs rounded-xl flex items-center gap-2">
                   <CheckCircle className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
@@ -1078,230 +1148,304 @@ const PharmacistDashboard = () => {
                 </div>
               )}
 
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
-                {/* Left Panel: Live Search */}
-                <div className="lg:col-span-5 bg-white dark:bg-[#1a2438] p-4 rounded-xl border border-slate-200 dark:border-slate-700/50 shadow-sm space-y-3 transition-colors duration-200">
-                  <div className="border-b border-slate-100 dark:border-slate-700/50 pb-2">
-                    <h3 className="font-bold text-xs text-[#1A56A0] dark:text-sky-400 uppercase tracking-wider">Medicine Catalog Lookup</h3>
-                    <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">Filter the active product list and click Add to invoice.</p>
+              {/* Main Two-Panel Layout */}
+              <div className="grid grid-cols-2 gap-3 h-[calc(100vh-185px)] min-h-[500px]">
+                {/* LEFT PANEL — Medicine Catalog */}
+                <div className="bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-800 rounded-xl flex flex-col overflow-hidden">
+                  <div className="px-4 pt-3 pb-2.5 border-b border-slate-100 dark:border-slate-800">
+                    <p className="text-xs font-semibold text-slate-800 dark:text-slate-100 mb-0.5">
+                      Medicine catalog
+                    </p>
+                    <p className="text-[11px] text-slate-400">
+                      Click + to add a medicine to the invoice
+                    </p>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-2">
-                    <div className="relative">
-                      <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2.5" />
+                  <div className="flex gap-2 p-2.5 border-b border-slate-100 dark:border-slate-800">
+                    <div className="flex-1 flex items-center gap-2 bg-slate-50 dark:bg-slate-800
+                      border border-slate-200 dark:border-slate-700 rounded-md px-2.5 py-1.5">
+                      <Search className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
                       <input
                         type="text"
-                        placeholder="Search medicines..."
+                        placeholder="Search medicines…"
                         value={billSearch}
-                        onChange={(e) => setBillSearch(e.target.value)}
-                        className="w-full pl-8 pr-2 py-1.5 border border-slate-200 dark:border-slate-700 rounded-lg text-[11px] focus:outline-none focus:border-[#1A56A0] text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900"
+                        onChange={e => setBillSearch(e.target.value)}
+                        className="flex-1 bg-transparent text-xs text-slate-700 dark:text-slate-205
+                          placeholder:text-slate-450 outline-none"
                       />
                     </div>
                     <select
                       value={billCategory}
-                      onChange={(e) => setBillCategory(e.target.value)}
-                      className="py-1.5 px-2 border border-slate-200 dark:border-slate-700 rounded-lg text-[11px] focus:outline-none focus:border-[#1A56A0] text-slate-705 dark:text-slate-250 bg-white dark:bg-slate-900"
+                      onChange={e => setBillCategory(e.target.value)}
+                      className="text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200
+                        dark:border-slate-700 rounded-md px-2.5 py-1.5 text-slate-600
+                        dark:text-slate-300 outline-none cursor-pointer"
                     >
-                      <option value="">All Categories</option>
-                      {standardCategories.map(c => <option key={c} value={c}>{c}</option>)}
+                      <option value="">All categories</option>
+                      {Array.from(new Set(medicines.map(m => m.category))).filter(Boolean).map(cat => (
+                        <option key={cat} value={cat}>{cat}</option>
+                      ))}
                     </select>
                   </div>
 
-                  {/* Medicines Search Results */}
-                  <div className="space-y-2 max-h-[380px] overflow-y-auto pr-1">
-                    {isMedsLoading ? (
-                      <div className="py-6 text-center text-xs text-slate-400">Loading medicines...</div>
-                    ) : medicines.filter(m => {
-                      const q = billSearch.toLowerCase();
-                      const cat = billCategory;
-                      const matchesSearch = m.name.toLowerCase().includes(q) || m.genericName.toLowerCase().includes(q) || m.batchNumber.toLowerCase().includes(q);
-                      const matchesCategory = cat ? m.category === cat : true;
-                      return matchesSearch && matchesCategory;
-                    }).length === 0 ? (
-                      <div className="py-6 text-center text-xs text-slate-400">No medicines found.</div>
-                    ) : (
-                      medicines.filter(m => {
+                  <div className="overflow-y-auto flex-1 p-2 space-y-1.5">
+                    {(() => {
+                      const filtered = medicines.filter(m => {
                         const q = billSearch.toLowerCase();
                         const cat = billCategory;
                         const matchesSearch = m.name.toLowerCase().includes(q) || m.genericName.toLowerCase().includes(q) || m.batchNumber.toLowerCase().includes(q);
                         const matchesCategory = cat ? m.category === cat : true;
                         return matchesSearch && matchesCategory;
-                      }).map(med => {
+                      });
+
+                      if (isMedsLoading) {
+                        return <div className="py-6 text-center text-xs text-slate-400">Loading medicines...</div>;
+                      }
+
+                      if (filtered.length === 0) {
+                        return <div className="py-6 text-center text-xs text-slate-400">No medicines found.</div>;
+                      }
+
+                      return filtered.map(med => {
                         const isStockOut = med.quantity === 0;
                         const isExpired = med.expiryStatus === 'EXPIRED';
+                        const isDisabled = isStockOut || isExpired;
                         return (
                           <div 
-                            key={med._id} 
-                            onClick={() => !isStockOut && !isExpired && handleAddToBill(med)}
-                            className={`p-2.5 border border-slate-100 dark:border-slate-700/50 rounded-xl flex items-center justify-between text-xs transition-all ${
-                              isStockOut || isExpired 
-                                ? 'opacity-55 cursor-not-allowed bg-slate-50 dark:bg-slate-900/20' 
-                                : 'hover:border-[#1A56A0]/40 hover:bg-slate-50/50 dark:hover:bg-slate-800/30 cursor-pointer'
+                            key={med._id}
+                            className={`flex items-center justify-between px-3 py-2 rounded-lg border transition-colors cursor-default ${
+                              isDisabled
+                                ? 'border-slate-100 dark:border-slate-800 opacity-60 bg-slate-50/50 dark:bg-slate-900/10'
+                                : 'border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/60'
                             }`}
                           >
-                            <div className="space-y-0.5">
-                              <span className="font-bold text-slate-800 dark:text-slate-205 block text-xs">{med.name}</span>
-                              <span className="text-[10px] text-slate-400 dark:text-slate-500 block font-mono">Batch: {med.batchNumber} | Stock: {med.quantity}</span>
-                              <span className="text-[10px] text-slate-500 dark:text-slate-400 block">Category: {med.category}</span>
+                            {/* LEFT: name + meta */}
+                            <div className="flex-1 min-w-0 mr-3">
+                              <p className="text-xs font-medium text-slate-800 dark:text-slate-100 truncate mb-1">
+                                {med.name}
+                              </p>
+                              <div className="flex items-center gap-2.5 flex-wrap">
+                                <span className="text-[10px] text-slate-400">
+                                  Batch <span className="text-slate-500 dark:text-slate-400 font-medium truncate max-w-[80px] inline-block align-bottom">
+                                    {med.batchNumber}
+                                  </span>
+                                </span>
+                                <span className="text-[10px] text-slate-400">
+                                  Stock{' '}
+                                  <span className={`font-medium ${
+                                    med.quantity <= 10
+                                      ? 'text-red-500'
+                                      : 'text-slate-500 dark:text-slate-400'
+                                  }`}>
+                                    {med.quantity}
+                                  </span>
+                                </span>
+                                <span className="text-[10px] text-slate-400">
+                                  Exp <span className="text-slate-500 dark:text-slate-400 font-medium">
+                                    {formatExpiry(med.expiryDate)}
+                                  </span>
+                                </span>
+                              </div>
                             </div>
-                            <div className="text-right flex flex-col items-end gap-1 shrink-0">
-                              <span className="font-bold text-slate-805 dark:text-slate-200 text-xs">₹{med.price.toFixed(2)}</span>
-                              {getExpiryStatusBadge(med.expiryStatus)}
+
+                            {/* RIGHT: category badge + price + add button */}
+                            <div className="flex items-center gap-2 flex-shrink-0">
+                              <CategoryBadge category={med.category} />
+                              <span className="text-xs font-medium text-slate-700 dark:text-slate-200 w-12 text-right">
+                                ₹{med.price}
+                              </span>
+                              <button
+                                onClick={() => !isDisabled && handleAddToBill(med)}
+                                disabled={isDisabled}
+                                className={`w-6 h-6 flex items-center justify-center rounded-md border transition-all ${
+                                  isDisabled
+                                    ? 'border-slate-100 dark:border-slate-800 text-slate-300 dark:text-slate-700 cursor-not-allowed'
+                                    : 'border-slate-200 dark:border-slate-700 text-slate-400 hover:bg-[#1A56A0] hover:text-white hover:border-[#1A56A0]'
+                                }`}
+                                aria-label={`Add ${med.name} to invoice`}
+                              >
+                                <Plus className="w-3 h-3" />
+                              </button>
                             </div>
                           </div>
                         );
-                      })
-                    )}
+                      });
+                    })()}
                   </div>
                 </div>
 
-                {/* Right Panel: Invoice Board */}
-                <div className="lg:col-span-7 bg-white dark:bg-[#1a2438] p-4 rounded-xl border border-slate-200 dark:border-slate-700/50 shadow-sm space-y-3 transition-colors duration-200">
-                  <div className="border-b border-slate-100 dark:border-slate-700/50 pb-2 flex justify-between items-center">
+                {/* RIGHT PANEL — Invoice Worksheet */}
+                <div className="bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-800 rounded-xl flex flex-col overflow-hidden">
+                  <div className="px-4 pt-3 pb-2.5 border-b border-slate-100 dark:border-slate-800
+                    flex items-start justify-between">
                     <div>
-                      <h3 className="font-bold text-xs text-[#1A56A0] dark:text-sky-400 uppercase tracking-wider">Invoice Worksheet</h3>
-                      <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">Assemble prescription line items, allocate users, and commit bill.</p>
+                      <p className="text-xs font-semibold text-slate-800 dark:text-slate-100 mb-0.5">
+                        Invoice worksheet
+                      </p>
+                      <p className="text-[11px] text-slate-400">
+                        Assign customer, set quantities, commit bill
+                      </p>
                     </div>
-                    <span className="text-[10px] font-mono bg-slate-100 dark:bg-slate-850 px-2 py-0.5 rounded text-slate-600 dark:text-slate-350">Pending post</span>
+                    <span className="text-[10px] font-medium px-2 py-0.5 rounded
+                      bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-450">
+                      Pending post
+                    </span>
                   </div>
 
-                  {/* Customer Select dropdown */}
-                  <div>
-                    <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Assign customer registration *</label>
+                  <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800">
+                    <p className="text-[10px] font-semibold tracking-wider uppercase
+                      text-slate-400 mb-1.5">
+                      Assign customer *
+                    </p>
                     <select
                       value={selectedCustomerId}
-                      onChange={(e) => setSelectedCustomerId(e.target.value)}
-                      className="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg text-xs focus:outline-none focus:border-[#1A56A0] text-slate-700 dark:text-slate-250 bg-white dark:bg-slate-900"
+                      onChange={e => setSelectedCustomerId(e.target.value)}
+                      className="w-full text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200
+                        dark:border-slate-700 rounded-lg px-3 py-2 text-slate-705 dark:text-slate-200
+                        outline-none focus:border-[#1A56A0] focus:ring-1 focus:ring-[#1A56A0]/20
+                        cursor-pointer"
                     >
-                      <option value="">Choose registered Customer account...</option>
-                      {customers.map(cust => (
-                        <option key={cust._id} value={cust._id}>{cust.name} ({cust.email})</option>
+                      <option value="">Choose registered customer account…</option>
+                      {customers.map(c => (
+                        <option key={c._id} value={c._id}>{c.name} — {c.email}</option>
                       ))}
                     </select>
                   </div>
 
                   {/* Expiry Alert banner */}
                   {billItems.some(item => item.expiryStatus === 'EXPIRED') && (
-                    <div className="p-3 bg-red-100 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded-xl flex items-start gap-2.5 text-red-800 dark:text-red-400">
+                    <div className="mx-4 my-2 p-2 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded-lg flex items-start gap-2 text-red-800 dark:text-red-400">
                       <AlertCircle className="w-4 h-4 text-red-700 dark:text-red-400 shrink-0 mt-0.5 animate-pulse" />
                       <div>
-                        <span className="font-bold text-xs block">BILLING BLOCKED: EXPIRY VIOLATION</span>
-                        <span className="text-[10.5px] leading-relaxed block mt-0.5">One or more selected medicines in this worksheet have expired. The checkout action is disabled by compliance rules. Please remove the expired item.</span>
+                        <span className="font-bold text-[11px] block">BILLING BLOCKED: EXPIRY VIOLATION</span>
+                        <span className="text-[10px] leading-relaxed block mt-0.5">One or more selected medicines in this worksheet have expired. The checkout action is disabled by compliance rules. Please remove the expired item.</span>
                       </div>
                     </div>
                   )}
 
-                  {/* Selected Items list */}
-                  <div className="border border-slate-100 dark:border-slate-700/50 rounded-xl overflow-hidden">
-                    <table className="w-full text-left border-collapse text-xs">
-                      <thead>
-                        <tr className="bg-slate-50 dark:bg-slate-900/40 border-b border-slate-100 dark:border-slate-700/50 text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider text-[9px]">
-                          <th className="py-2 px-3">Item Details</th>
-                          <th className="py-2 px-3 text-right">Price</th>
-                          <th className="py-2 px-3 text-center" style={{ width: '80px' }}>Qty</th>
-                          <th className="py-2 px-3 text-right">Total</th>
-                          <th className="py-2 px-3 text-right">Remove</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-slate-50 dark:divide-slate-700/50">
-                        {billItems.length === 0 ? (
-                          <tr>
-                            <td colSpan={5} className="py-8 text-center text-slate-400">Worksheet is empty. Select medicines from the left panel to begin.</td>
-                          </tr>
-                        ) : (
-                          billItems.map(item => (
-                            <tr key={item._id} className="hover:bg-slate-50/20 dark:hover:bg-slate-800/20">
-                              <td className="py-2 px-3">
-                                <span className="font-bold text-slate-805 dark:text-slate-200 block">{item.name}</span>
-                                <div className="flex items-center gap-1.5 mt-0.5 shrink-0">
-                                  <span className="text-[9px] text-slate-400 dark:text-slate-500 font-mono">B.No: {item.batchNumber}</span>
-                                  {getExpiryStatusBadge(item.expiryStatus)}
-                                </div>
-                              </td>
-                              <td className="py-2 px-3 text-right font-medium text-slate-700 dark:text-slate-350">₹{item.price.toFixed(2)}</td>
-                              <td className="py-2 px-3">
-                                <input
-                                  type="number"
-                                  min="1"
-                                  value={item.billQuantity}
-                                  onChange={(e) => handleUpdateBillQty(item._id, e.target.value, item.quantity)}
-                                  className="w-14 px-1.5 py-1 text-center border border-slate-200 dark:border-slate-700 rounded-md focus:outline-none text-xs text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900"
-                                />
-                              </td>
-                              <td className="py-2 px-3 text-right font-bold text-slate-800 dark:text-slate-200">
-                                ₹{(item.price * item.billQuantity).toFixed(2)}
-                              </td>
-                              <td className="py-2 px-3 text-right">
-                                <button
-                                  type="button"
-                                  onClick={() => handleRemoveFromBill(item._id)}
-                                  className="text-slate-400 hover:text-red-600 dark:text-slate-500 dark:hover:text-red-400 p-1"
-                                >
-                                  <X className="w-3.5 h-3.5 mx-auto" />
-                                </button>
-                              </td>
-                            </tr>
-                          ))
-                        )}
-                      </tbody>
-                    </table>
-                  </div>
-
-                  {/* Summary calculations */}
-                  {billItems.length > 0 && (
-                    <div className="bg-slate-50 dark:bg-slate-900/40 p-3 rounded-xl space-y-2 text-xs border border-slate-100 dark:border-slate-700/50">
-                      <div className="flex justify-between items-center text-slate-600 dark:text-slate-400">
-                        <span>Items Subtotal:</span>
-                        <span className="font-bold text-slate-800 dark:text-slate-200">₹{calculateBillSubtotal().toFixed(2)}</span>
-                      </div>
-                      
-                      <div className="flex justify-between items-center text-slate-600 dark:text-slate-400 gap-4">
-                        <span>Flat Invoice Discount (₹):</span>
-                        <input
-                          type="number"
-                          min="0"
-                          step="0.01"
-                          placeholder="0.00"
-                          value={discount}
-                          onChange={(e) => setDiscount(e.target.value)}
-                          className="w-20 px-2 py-1 text-right border border-slate-200 dark:border-slate-700 rounded-md focus:outline-none text-xs text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900"
-                        />
-                      </div>
-
-                      <div className="flex justify-between items-center text-slate-600 dark:text-slate-400">
-                        <span>Payment Method:</span>
-                        <select
-                          value={paymentMethod}
-                          onChange={(e) => setPaymentMethod(e.target.value)}
-                          className="px-2 py-1 border border-slate-200 dark:border-slate-700 rounded-md focus:outline-none text-xs bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200"
-                        >
-                          <option value="Card">Card Payment</option>
-                          <option value="Cash">Cash Handout</option>
-                        </select>
-                      </div>
-
-                      <div className="border-t border-slate-200 dark:border-slate-700 pt-2 flex justify-between items-center text-sm font-extrabold text-[#1A56A0] dark:text-sky-400">
-                        <span>Grand Total Billed:</span>
-                        <span>₹{calculateBillTotal().toFixed(2)}</span>
-                      </div>
+                  {billItems.length === 0 ? (
+                    <div className="flex-1 flex flex-col items-center justify-center
+                      py-10 gap-2 text-center">
+                      <FileText className="w-8 h-8 text-slate-200 dark:text-slate-750" />
+                      <p className="text-xs text-slate-400">Worksheet is empty</p>
+                      <p className="text-[11px] text-slate-300 dark:text-slate-600">
+                        Select medicines from the left panel to begin
+                      </p>
                     </div>
+                  ) : (
+                    <>
+                      {/* Table Header */}
+                      <div className="grid grid-cols-[1fr_52px_80px_60px_28px] gap-1
+                        px-4 py-2 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/10">
+                        {['Item','Price','Qty','Total',''].map((h,i) => (
+                          <span key={i}
+                            className={`text-[10px] font-semibold tracking-wider uppercase
+                              text-slate-400 ${i > 0 && i < 4 ? 'text-right' : ''}`}>
+                            {h}
+                          </span>
+                        ))}
+                      </div>
+
+                      {/* Line row list */}
+                      <div className="flex-1 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800">
+                        {billItems.map(item => (
+                          <div key={item._id}
+                            className="grid grid-cols-[1fr_52px_80px_60px_28px] gap-1 items-center
+                              px-4 py-2 border-b border-slate-100 dark:border-slate-800 hover:bg-slate-50/30 dark:hover:bg-slate-900/5">
+                            <div className="min-w-0 pr-1">
+                              <p className="text-xs font-medium text-slate-800 dark:text-slate-100
+                                truncate">{item.name}</p>
+                              <div className="flex items-center gap-1.5 flex-wrap mt-0.5">
+                                <span className="text-[10px] text-slate-405 truncate max-w-[80px]">Batch {item.batchNumber}</span>
+                                {getExpiryStatusBadge(item.expiryStatus)}
+                              </div>
+                            </div>
+                            <p className="text-xs text-slate-600 dark:text-slate-300 text-right">
+                              ₹{item.price}
+                            </p>
+                            <div className="flex items-center justify-end gap-1">
+                              <button onClick={() => decrementQty(item._id)}
+                                className="w-4 h-4 flex items-center justify-center rounded border
+                                  border-slate-200 dark:border-slate-700 text-slate-405
+                                  hover:bg-slate-100 dark:hover:bg-slate-700 text-[10px]"
+                                aria-label="Decrease quantity">−</button>
+                              <span className="text-xs text-slate-700 dark:text-slate-202
+                                min-w-[18px] text-center">{item.billQuantity}</span>
+                              <button onClick={() => incrementQty(item._id)}
+                                className="w-4 h-4 flex items-center justify-center rounded border
+                                  border-slate-200 dark:border-slate-700 text-slate-450
+                                  hover:bg-slate-100 dark:hover:bg-slate-700 text-[10px]"
+                                aria-label="Increase quantity">+</button>
+                            </div>
+                            <p className="text-xs font-medium text-slate-800 dark:text-slate-100 text-right">
+                              ₹{(item.price * item.billQuantity).toFixed(2)}
+                            </p>
+                            <button onClick={() => handleRemoveFromBill(item._id)}
+                              className="flex items-center justify-center text-slate-300 dark:text-slate-600
+                                hover:text-red-400 dark:hover:text-red-400 transition-colors ml-auto"
+                              aria-label={`Remove ${item.name}`}>
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </>
                   )}
 
-                  {/* Action buttons */}
-                  {billItems.length > 0 && (
+                  {/* Invoice footer (pinned to bottom of panel) */}
+                  <div className="px-4 py-3 border-t border-slate-100 dark:border-slate-800
+                    bg-slate-50 dark:bg-slate-800/40 mt-auto">
+                    
+                    {/* Optional Discount and Payment Method inputs */}
+                    {billItems.length > 0 && (
+                      <div className="grid grid-cols-2 gap-2 mb-2.5 pb-2.5 border-b border-slate-150 dark:border-slate-800">
+                        <div className="flex items-center justify-between gap-1.5">
+                          <span className="text-[10px] text-slate-400 uppercase font-semibold">Discount (₹)</span>
+                          <input
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            placeholder="0.00"
+                            value={discount}
+                            onChange={e => setDiscount(e.target.value)}
+                            className="w-16 px-1.5 py-0.5 border border-slate-200 dark:border-slate-700 rounded text-right text-[10px] bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-205 focus:outline-none focus:border-[#1A56A0]"
+                          />
+                        </div>
+                        <div className="flex items-center justify-between gap-1.5">
+                          <span className="text-[10px] text-slate-400 uppercase font-semibold">Payment</span>
+                          <select
+                            value={paymentMethod}
+                            onChange={e => setPaymentMethod(e.target.value)}
+                            className="px-1.5 py-0.5 border border-slate-200 dark:border-slate-700 rounded text-[10px] bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 focus:outline-none focus:border-[#1A56A0] cursor-pointer"
+                          >
+                            <option value="Card">Card</option>
+                            <option value="Cash">Cash</option>
+                            <option value="UPI">UPI</option>
+                          </select>
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="flex items-center justify-between mb-2.5">
+                      <span className="text-[11px] text-slate-400">
+                        {billItems.length} item{billItems.length !== 1 ? 's' : ''} ·{' '}
+                        {billItems.reduce((s, i) => s + i.billQuantity, 0)} units
+                      </span>
+                      <span className="text-sm font-semibold text-slate-800 dark:text-slate-100">
+                        ₹{calculateBillTotal().toFixed(2)}
+                      </span>
+                    </div>
+                    
                     <button
                       onClick={handleConfirmAndPrintBill}
-                      disabled={isBillingPending || billItems.some(item => item.expiryStatus === 'EXPIRED')}
-                      className="w-full py-2.5 bg-[#1A56A0] hover:bg-blue-700 text-white font-bold text-xs rounded-xl shadow-md transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                      disabled={!selectedCustomerId || billItems.length === 0 || isBillingPending || billItems.some(item => item.expiryStatus === 'EXPIRED')}
+                      className="w-full py-2 rounded-lg text-xs font-semibold text-white
+                        bg-[#1A56A0] hover:bg-[#1e63b8] disabled:opacity-40
+                        disabled:cursor-not-allowed transition-colors"
                     >
-                      {isBillingPending ? (
-                        <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                      ) : (
-                        <Receipt className="w-4 h-4" />
-                      )}
-                      <span>Confirm & Print PDF invoice</span>
+                      {isBillingPending ? 'Posting bill…' : 'Commit & post bill'}
                     </button>
-                  )}
+                  </div>
                 </div>
               </div>
             </div>
