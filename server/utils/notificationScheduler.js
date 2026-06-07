@@ -151,6 +151,15 @@ export const runExpiryReport = async () => {
       </p>
     `;
 
+    const medSummary = medicines.map((m) => {
+      const status = checkExpiryStatus(m.expiryDate);
+      const diffTime = new Date(m.expiryDate).getTime() - today.getTime();
+      const diffDays = Math.ceil(diffTime / msInDay);
+      return `- ${m.name} (Batch: ${m.batchNumber}) [${status}]: ${diffDays} days remaining.`;
+    }).join('\n');
+
+    const detailedMessage = `Daily Expiry Report:\n${medSummary}`;
+
     const transporter = getEmailTransporter();
 
     // Send emails to all pharmacists
@@ -175,7 +184,7 @@ export const runExpiryReport = async () => {
         await Notification.create({
           recipientId: pharmacist._id,
           type: 'Email',
-          message: `Daily Expiry Report sent: ${medicines.length} expiring medicines found.`,
+          message: detailedMessage,
           status: 'sent',
         });
       } catch (err) {
@@ -255,6 +264,14 @@ export const runLowStockReport = async () => {
       </p>
     `;
 
+    const stockSummary = medicines.map((m) => {
+      const isDepleted = m.quantity === 0;
+      const statusStr = isDepleted ? 'DEPLETED' : 'LOW STOCK';
+      return `- ${m.name} (Batch: ${m.batchNumber}): ${m.quantity} units left (Reorder: ${m.reorderLevel}) [${statusStr}]`;
+    }).join('\n');
+
+    const detailedMessage = `Low Stock Alert:\n${stockSummary}`;
+
     const transporter = getEmailTransporter();
 
     // Send emails
@@ -277,7 +294,7 @@ export const runLowStockReport = async () => {
         await Notification.create({
           recipientId: pharmacist._id,
           type: 'Email',
-          message: `Low Stock Alert report sent: ${medicines.length} low stock medicines flagged.`,
+          message: detailedMessage,
           status: 'sent',
         });
       } catch (err) {
