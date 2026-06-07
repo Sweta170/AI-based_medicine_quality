@@ -33,22 +33,31 @@ const allowedOrigins = [
   'http://localhost:5173',
   'http://127.0.0.1:5173',
   'http://localhost:3000',
+  'https://ai-based-medicine-quality.vercel.app',
   process.env.CLIENT_URL,
 ].filter(Boolean);
+
 app.use(
   cors({
     origin: (origin, callback) => {
-      // allow requests with no origin (like mobile apps or curl requests)
+      // Allow requests with no origin (like mobile apps or curl requests)
       if (!origin) return callback(null, true);
-      if (allowedOrigins.indexOf(origin) === -1) {
-        const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+      
+      // Normalize origin by stripping trailing slash
+      const cleanOrigin = origin.replace(/\/$/, '');
+      const isAllowed = allowedOrigins.some(o => o && o.replace(/\/$/, '') === cleanOrigin);
+      
+      if (isAllowed) {
+        return callback(null, true);
+      } else {
+        const msg = `The CORS policy for this site does not allow access from the specified Origin: ${origin}`;
         return callback(new Error(msg), false);
       }
-      return callback(null, true);
     },
     credentials: true,
   })
 );
+
 
 // Express middleware
 app.use(express.json());
