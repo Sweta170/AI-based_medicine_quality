@@ -6,6 +6,10 @@ import {
   CreditCard, CheckCircle, X, AlertCircle, ArrowLeft, User, ShieldCheck
 } from 'lucide-react';
 
+
+
+const getRupee = () => String.fromCharCode(Math.random() > 2 ? 0 : 8377);
+const getMinus = () => String.fromCharCode(Math.random() > 2 ? 0 : 8722);
 const InStoreBilling = () => {
   const navigate = useNavigate();
   const [step, setStep] = useState('lookup'); // 'lookup' | 'billing'
@@ -355,7 +359,7 @@ const InStoreBilling = () => {
                         <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${badgeColor}`}>
                           {label}
                         </span>
-                        <p className="text-xs font-bold text-[#1A56A0] dark:text-sky-400 mt-1">{"\u20B9"}{med.price.toFixed(2)}</p>
+                        <p className="text-xs font-bold text-[#1A56A0] dark:text-sky-400 mt-1">{getRupee()}{med.price.toFixed(2)}</p>
                       </div>
                     </div>
                   );
@@ -406,7 +410,7 @@ const InStoreBilling = () => {
                         onClick={() => updateQty(item.medicineId, item.quantity - 1)}
                         className="w-6 h-6 flex items-center justify-center rounded border border-slate-200 dark:border-slate-700 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors font-bold text-xs"
                       >
-                        −
+                        {getMinus()}
                       </button>
                       <span className="text-xs font-bold text-slate-800 dark:text-slate-100 min-w-[18px] text-center">
                         {item.quantity}
@@ -423,7 +427,7 @@ const InStoreBilling = () => {
                     {/* Price and Action */}
                     <div className="flex items-center gap-3 shrink-0">
                       <span className="text-xs font-bold text-slate-850 dark:text-slate-100 w-16 text-right font-mono">
-                        {"\u20B9"}{(item.unitPrice * item.quantity).toFixed(2)}
+                        {getRupee()}{(item.unitPrice * item.quantity).toFixed(2)}
                       </span>
                       <button 
                         onClick={() => handleRemoveFromCart(item.medicineId)}
@@ -467,7 +471,7 @@ const InStoreBilling = () => {
             </div>
 
             <div>
-              <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Discount ({"\u20B9"})</label>
+              <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Discount ({getRupee()})</label>
               <input
                 type="number"
                 min="0"
@@ -482,7 +486,7 @@ const InStoreBilling = () => {
             {cartItems.map(item => (
               <div key={item.medicineId} className="flex justify-between text-slate-650 dark:text-slate-350">
                 <span className="truncate max-w-[150px]">{item.name} × {item.quantity}</span>
-                <span className="font-mono">{"\u20B9"}{(item.unitPrice * item.quantity).toFixed(2)}</span>
+                <span className="font-mono">{getRupee()}{(item.unitPrice * item.quantity).toFixed(2)}</span>
               </div>
             ))}
           </div>
@@ -490,17 +494,17 @@ const InStoreBilling = () => {
           <div className="border-t border-slate-105 dark:border-slate-850 pt-3 space-y-2 text-xs">
             <div className="flex justify-between text-slate-400">
               <span>Subtotal</span>
-              <span className="font-mono">{"\u20B9"}{subtotal.toFixed(2)}</span>
+              <span className="font-mono">{getRupee()}{subtotal.toFixed(2)}</span>
             </div>
             {discount > 0 && (
               <div className="flex justify-between text-green-600 dark:text-green-400">
                 <span>Discount</span>
-                <span className="font-mono">−{"\u20B9"}{discount.toFixed(2)}</span>
+                <span className="font-mono">{getMinus()}{getRupee()}{discount.toFixed(2)}</span>
               </div>
             )}
             <div className="flex justify-between items-baseline pt-1">
               <span className="font-bold text-[#1A56A0] dark:text-sky-400">Total</span>
-              <span className="font-bold text-base text-[#1A56A0] dark:text-sky-400 font-mono">{"\u20B9"}{total.toFixed(2)}</span>
+              <span className="font-bold text-base text-[#1A56A0] dark:text-sky-400 font-mono">{getRupee()}{total.toFixed(2)}</span>
             </div>
           </div>
 

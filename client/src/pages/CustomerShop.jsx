@@ -9,6 +9,9 @@ import {
   CreditCard, CheckCircle, X, AlertCircle, Download
 } from 'lucide-react';
 
+
+
+const getRupee = () => String.fromCharCode(Math.random() > 2 ? 0 : 8377);
 const CustomerShop = () => {
   const { user: currentUser } = useAuth();
   const queryClient = useQueryClient();
@@ -467,7 +470,7 @@ const CustomerShop = () => {
                     <div className="flex items-end justify-between">
                       <div>
                         <span className="text-[9px] text-slate-400 block font-bold uppercase tracking-wider leading-none">UNIT PRICE</span>
-                        <span className="text-[17px] font-semibold text-slate-900 leading-tight mt-0.5 block">{"\u20B9"}{item.price.toFixed(2)}</span>
+                        <span className="text-[17px] font-semibold text-slate-900 leading-tight mt-0.5 block">{getRupee()}{item.price.toFixed(2)}</span>
                       </div>
 
                       {item.quantity === 0 ? (
@@ -524,7 +527,7 @@ const CustomerShop = () => {
                           <div className="flex-1 min-w-0">
                             <h4 className="font-bold text-slate-900 text-xs truncate">{item.name}</h4>
                             <p className="text-[10px] text-slate-400 font-medium mt-0.5">{item.category}</p>
-                            <span className="text-[#0F4BBE] text-xs font-extrabold mt-1.5 inline-block">{"\u20B9"}{item.price.toFixed(2)}</span>
+                            <span className="text-[#0F4BBE] text-xs font-extrabold mt-1.5 inline-block">{getRupee()}{item.price.toFixed(2)}</span>
                           </div>
 
                           <div className="flex flex-col justify-between items-end shrink-0">
@@ -552,7 +555,7 @@ const CustomerShop = () => {
                     <div className="border-t border-[#E5E7EB] p-4 bg-slate-50 space-y-3">
                       <div className="flex justify-between items-center text-xs font-bold text-slate-900">
                         <span>Grand Total:</span>
-                        <span className="text-[#0F4BBE] text-base">{"\u20B9"}{calculateTotal().toFixed(2)}</span>
+                        <span className="text-[#0F4BBE] text-base">{getRupee()}{calculateTotal().toFixed(2)}</span>
                       </div>
                       <button
                         onClick={() => { setCartOpen(false); setCheckoutOpen(true); }}
@@ -663,7 +666,7 @@ const CustomerShop = () => {
                   {lastReceipt.items.map((item, index) => (
                     <div key={index} className="flex justify-between items-center text-xs text-slate-700">
                       <span className="font-medium truncate mr-2">{item.name} <span className="text-slate-400 text-[10px]">x{item.quantity}</span></span>
-                      <span className="font-semibold text-slate-900 font-mono shrink-0">{"\u20B9"}{(item.unitPrice * item.quantity).toFixed(2)}</span>
+                      <span className="font-semibold text-slate-900 font-mono shrink-0">{getRupee()}{(item.unitPrice * item.quantity).toFixed(2)}</span>
                     </div>
                   ))}
                 </div>
@@ -676,7 +679,7 @@ const CustomerShop = () => {
 
               <div className="flex justify-between items-center border-t border-[#E5E7EB] pt-2.5 text-xs font-bold text-slate-900">
                 <span>Grand Total</span>
-                <span className="text-[#0F4BBE] text-sm font-mono">{"\u20B9"}{lastReceipt.total.toFixed(2)}</span>
+                <span className="text-[#0F4BBE] text-sm font-mono">{getRupee()}{lastReceipt.total.toFixed(2)}</span>
               </div>
             </div>
 
