@@ -1,17 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import api from '../../utils/api';
 import { 
   Store, Search, Trash2, Plus, Minus, 
   CreditCard, CheckCircle, X, AlertCircle, ArrowLeft, User, ShieldCheck
 } from 'lucide-react';
 
-
-
 const getRupee = () => String.fromCharCode(Math.random() > 2 ? 0 : 8377);
 const getMinus = () => String.fromCharCode(Math.random() > 2 ? 0 : 8722);
+
 const InStoreBilling = () => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const [confirmedBill, setConfirmedBill] = useState(null);
   const [step, setStep] = useState('lookup'); // 'lookup' | 'billing'
 
   // STEP 1 State: lookup
@@ -163,7 +165,19 @@ const InStoreBilling = () => {
       };
 
       const { data } = await api.post('/bills/instore', body);
-      navigate(`/pharmacist/receipt/${data.bill._id}`);
+
+      // Store confirmed bill — triggers success modal
+      setConfirmedBill(data.bill);
+
+      // Invalidate bills query so PharmacistDashboard history updates immediately
+      queryClient.invalidateQueries(['bills']);
+
+      // Reset cart and form
+      setCartItems([]);
+      setDiscount(0);
+      setPaymentMethod('Cash');
+      setBillError('');
+
     } catch (err) {
       setBillError(err.response?.data?.message || 'Billing failed. Please try again.');
     } finally {
@@ -452,7 +466,7 @@ const InStoreBilling = () => {
 
           <div className="text-xs space-y-1">
             <p className="text-slate-400">Customer Info</p>
-            <p className="font-bold text-slate-800 dark:text-slate-200">{customer?.name || 'Guest Customer'}</p>
+            <p className="font-bold text-slate-800 dark:text-slate-205">{customer?.name || 'Guest Customer'}</p>
             <p className="text-slate-500 font-mono">{phone}</p>
           </div>
 
@@ -471,18 +485,18 @@ const InStoreBilling = () => {
             </div>
 
             <div>
-              <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Discount ({getRupee()})</label>
+              <label className="block text-[10px] font-bold text-slate-405 uppercase tracking-wider mb-2">Discount ({getRupee()})</label>
               <input
                 type="number"
                 min="0"
                 value={discount}
                 onChange={(e) => setDiscount(Number(e.target.value) || 0)}
-                className="w-full px-3 py-2 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-700 dark:text-slate-200 outline-none focus:border-[#1A56A0] text-right font-mono"
+                className="w-full px-3 py-2 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-700 dark:text-slate-205 outline-none focus:border-[#1A56A0] text-right font-mono"
               />
             </div>
           </div>
 
-          <div className="border-t border-slate-100 dark:border-slate-800 my-4 pt-4 space-y-2 text-xs">
+          <div className="border-t border-slate-105 dark:border-slate-800 my-4 pt-4 space-y-2 text-xs">
             {cartItems.map(item => (
               <div key={item.medicineId} className="flex justify-between text-slate-650 dark:text-slate-350">
                 <span className="truncate max-w-[150px]">{item.name} × {item.quantity}</span>
@@ -492,12 +506,12 @@ const InStoreBilling = () => {
           </div>
 
           <div className="border-t border-slate-105 dark:border-slate-850 pt-3 space-y-2 text-xs">
-            <div className="flex justify-between text-slate-400">
+            <div className="flex justify-between text-slate-405">
               <span>Subtotal</span>
               <span className="font-mono">{getRupee()}{subtotal.toFixed(2)}</span>
             </div>
             {discount > 0 && (
-              <div className="flex justify-between text-green-600 dark:text-green-400">
+              <div className="flex justify-between text-green-605 dark:text-green-400">
                 <span>Discount</span>
                 <span className="font-mono">{getMinus()}{getRupee()}{discount.toFixed(2)}</span>
               </div>
@@ -522,7 +536,7 @@ const InStoreBilling = () => {
             </button>
 
             {hasExpiredItems && (
-              <p className="mt-2 text-[10px] text-red-500 font-bold text-center">
+              <p className="mt-2 text-[10px] text-red-550 font-bold text-center">
                 ⛔ Remove expired medicines before confirming.
               </p>
             )}
@@ -537,6 +551,96 @@ const InStoreBilling = () => {
         </div>
 
       </div>
+
+      {/* ── Bill Confirmed Success Modal ── */}
+      {confirmedBill && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs">
+          <div className="bg-white dark:bg-[#1a2438] w-full max-w-md rounded-2xl border border-slate-200 dark:border-slate-700/50 shadow-2xl p-6 relative max-h-[90vh] overflow-y-auto transition-colors duration-200 space-y-4">
+            {/* Header */}
+            <div className="flex flex-col items-center text-center space-y-2">
+              <CheckCircle className="w-12 h-12 text-green-500 animate-bounce" />
+              <h3 className="text-xl font-bold text-slate-900 dark:text-white mt-2">Payment Done!</h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                Bill {confirmedBill.billNumber} confirmed successfully
+              </p>
+            </div>
+
+            {/* Customer + Payment row */}
+            <div className="bg-slate-50 dark:bg-slate-900/50 p-3.5 rounded-xl border border-slate-100 dark:border-slate-800 text-xs space-y-2">
+              <div className="flex justify-between">
+                <span className="text-slate-400 font-semibold">Customer</span>
+                <span className="text-right">
+                  <span className="font-bold block text-slate-800 dark:text-slate-200">{confirmedBill.customerName || 'Guest'}</span>
+                  <span className="text-slate-500 font-mono block mt-0.5">{confirmedBill.customerPhone}</span>
+                </span>
+              </div>
+              <div className="flex justify-between items-center pt-2 border-t border-slate-100 dark:border-slate-800/80">
+                <span className="text-slate-400 font-semibold">Payment</span>
+                <span className="font-bold text-slate-800 dark:text-slate-200">{confirmedBill.paymentMethod}</span>
+              </div>
+              <div className="text-[10px] text-slate-400 text-right mt-1">
+                {new Date(confirmedBill.createdAt).toLocaleString('en-IN')}
+              </div>
+            </div>
+
+            {/* Items list */}
+            <div className="space-y-1.5 text-xs">
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Items Purchased</p>
+              <div className="divide-y divide-slate-100 dark:divide-slate-800 border border-slate-100 dark:border-slate-850 rounded-xl overflow-hidden bg-slate-50/20 dark:bg-slate-900/5 max-h-40 overflow-y-auto">
+                {confirmedBill.items.map((item, i) => (
+                  <div key={i} className="p-2.5 flex justify-between items-center">
+                    <span className="font-medium text-slate-800 dark:text-slate-200 truncate pr-2">
+                      {item.name} × {item.quantity}
+                    </span>
+                    <span className="font-bold text-slate-850 dark:text-slate-100 font-mono shrink-0">
+                      ₹{(item.unitPrice * item.quantity).toFixed(2)}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Totals */}
+            <div className="pt-2 border-t border-slate-150 dark:border-slate-805 text-xs space-y-1.5">
+              {confirmedBill.discount > 0 && (
+                <div className="flex justify-between text-green-600 dark:text-green-400 font-medium">
+                  <span>Discount</span>
+                  <span className="font-mono">−₹{confirmedBill.discount.toFixed(2)}</span>
+                </div>
+              )}
+              <div className="flex justify-between items-baseline pt-1">
+                <span className="font-bold text-[#1A56A0] dark:text-sky-400">Total Paid</span>
+                <span className="font-bold text-lg text-[#1A56A0] dark:text-sky-400 font-mono">
+                  ₹{confirmedBill.total.toFixed(2)}
+                </span>
+              </div>
+            </div>
+
+            {/* Action buttons */}
+            <div className="flex gap-3 pt-2">
+              <button
+                onClick={() => navigate(`/pharmacist/receipt/${confirmedBill._id}`)}
+                className="flex-1 py-2.5 rounded-xl border border-[#1A56A0] text-[#1A56A0] dark:text-sky-400 dark:border-sky-500 text-xs font-semibold hover:bg-blue-50 dark:hover:bg-sky-900/20 transition-colors"
+              >
+                🖨 Print Receipt
+              </button>
+              <button
+                onClick={() => {
+                  setConfirmedBill(null);
+                  setStep('lookup');
+                  setPhone('');
+                  setCustomer(null);
+                  setIsGuest(false);
+                  setLookupDone(false);
+                }}
+                className="flex-1 py-2.5 rounded-xl bg-[#1A56A0] hover:bg-[#1450b0] text-white text-xs font-semibold transition-colors"
+              >
+                + New Bill
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
