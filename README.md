@@ -86,15 +86,37 @@ The application supports three roles, each with a tailored workspace and securit
 
 ---
 
-## ⚙️ Installation & Configuration
+## ⚙️ Step-by-Step Installation & Setup Guide (For New / Different Systems)
 
-### Prerequisites
-*   Node.js (v18 or higher)
-*   MongoDB Instance (Local or MongoDB Atlas)
-*   SMTP Server Credentials (e.g., Gmail App Password) for email dispatchers
+This section provides comprehensive instructions for deploying, installing, and running **Pharma Desk** on any fresh Windows, macOS, or Linux system.
 
-### 1. Environment Configuration
-Create a `.env` file in the `server/` directory and configure the variables based on `server/.env.example`:
+---
+
+### Step 1: Install Prerequisites
+Before running the application, make sure the target system has the following software installed:
+
+1. **Node.js (LTS Version - v18 or higher)**
+   * Download and install from [Node.js Official Website](https://nodejs.org/).
+   * Verify installation in terminal/command prompt:
+     ```bash
+     node -v
+     npm -v
+     ```
+2. **MongoDB Database Service** (Choose **Option A** or **Option B**):
+   * **Option A: Local MongoDB (Recommended for offline/development)**
+     * Download and install [MongoDB Community Server](https://www.mongodb.com/try/download/community).
+     * Download and install [MongoDB Compass](https://www.mongodb.com/try/download/compass) (Graphical Interface to view database).
+     * Ensure the MongoDB service is running (default port is `27017`).
+   * **Option B: MongoDB Atlas (Cloud database)**
+     * Create a free account at [MongoDB Atlas](https://www.mongodb.com/cloud/atlas).
+     * Create a free cluster, whitelist your IP address (or select `0.0.0.0/0` for access from anywhere), and obtain your application connection string (e.g. `mongodb+srv://...`).
+
+---
+
+### Step 2: Environment Configuration (.env)
+1. Go to the `server/` directory.
+2. Duplicate or copy the `.env.example` file and rename it to `.env`.
+3. Open `.env` in any text editor and fill in the configuration variables:
 
 ```env
 PORT=5000
@@ -111,35 +133,55 @@ SMTP_USER=your-email@gmail.com
 SMTP_PASS=your-gmail-app-password
 ```
 
-### 2. Install Dependencies
-Run the install command in the root directory. This script will automatically install dependencies for the root, frontend, and backend packages:
+#### 💡 Environment Config Notes for Different Systems:
+* **`MONGO_URI`**:
+  * If running **local MongoDB**, use `mongodb://localhost:27017/pharmadesk`. (On some systems, if `localhost` fails to connect, try `mongodb://127.0.0.1:27017/pharmadesk`).
+  * If running **MongoDB Atlas cloud**, replace it with your Atlas connection string (e.g., `mongodb+srv://username:password@cluster.xxxx.mongodb.net/pharmadesk?retryWrites=true&w=majority`).
+* **`JWT Secrets`**:
+  * You can generate high-entropy secure keys on any platform by executing this command in your terminal:
+    ```bash
+    node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+    ```
+* **`SMTP_USER` & `SMTP_PASS`**:
+  * Required if you wish to test automated patient email notifications.
+  * For **Gmail**, you cannot use your standard password due to security blocks. Enable **2-Step Verification** on the Google Account, navigate to Google App Passwords settings, generate a 16-character **App Password**, and use that string for `SMTP_PASS`.
+
+---
+
+### Step 3: Install Dependencies
+Open your terminal (PowerShell, Command Prompt, or bash) in the **root directory** of the extracted project (where the root `package.json` is located) and run:
 
 ```bash
 npm run install:all
 ```
+*This script automatically runs npm installation inside the root directory, the frontend `client/` directory, and the backend `server/` directory.*
 
-### 3. Seed Mock Data
-To populate the database with test accounts (customers, pharmacists, superadmins) and initial stock items, run:
+---
+
+### Step 4: Seed Mock Data
+To populate the database with default test accounts (Superadmins, Pharmacists, Customers) and mock medicine listings, run:
 
 ```bash
-npm run seed --prefix server
+npm run seed
 ```
 
-### 4. Run Locally
-Start both the backend server and frontend Vite developer server concurrently:
+---
+
+### Step 5: Run the Project
+Start both the Node.js API server and React/Vite development server concurrently with a single command from the project root:
 
 ```bash
 npm run dev
 ```
 
-*   **Frontend Client**: Runs on `http://localhost:5173`
-*   **Backend Server**: Runs on `http://localhost:5000`
+* **Frontend Client (React/Vite)**: Runs on **[http://localhost:5173](http://localhost:5173)**
+* **Backend Server (Express API)**: Runs on **[http://localhost:5000](http://localhost:5000)**
 
 ---
 
 ## 🧪 Test Accounts
-After running the seeder script, you can log in using the following credentials:
+After running the seeder script, you can log in using the following pre-configured credentials:
 
-*   **Superadmin**: `superadmin@pharmadesk.com` / `admin123`
-*   **Pharmacist**: `pharmacist@pharmadesk.com` / `pharmacist123`
-*   **Customer**: `customer@pharmadesk.com` / `customer123`
+* **Superadmin**: `superadmin@pharmadesk.com` / `admin123`
+* **Pharmacist**: `pharmacist@pharmadesk.com` / `pharmacist123`
+* **Customer**: `customer@pharmadesk.com` / `customer123`
