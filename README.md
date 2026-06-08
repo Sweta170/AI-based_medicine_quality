@@ -98,16 +98,17 @@ Create a `.env` file in the `server/` directory and configure the variables base
 
 ```env
 PORT=5000
+NODE_ENV=development
 MONGO_URI=mongodb://localhost:27017/pharmadesk
-JWT_SECRET=your_jwt_secret_key
-JWT_EXPIRE=30d
+JWT_ACCESS_SECRET=your_access_token_secret_here
+JWT_REFRESH_SECRET=your_refresh_token_secret_here
+CLIENT_URL=http://localhost:5173
 
 # SMTP Configuration (Required for Medication Email Reminders)
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
 SMTP_USER=your-email@gmail.com
 SMTP_PASS=your-gmail-app-password
-SMTP_FROM=Pharma Desk <noreply@pharmadesk.com>
 ```
 
 ### 2. Install Dependencies
