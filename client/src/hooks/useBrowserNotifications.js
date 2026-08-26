@@ -31,13 +31,14 @@ const useBrowserNotifications = () => {
   const firedRef = useRef(new Set()); // Track which reminders fired this hour
 
   // Fetch active reminders
+  const isCustomer = user?.role === 'customer';
   const { data: reminders = [] } = useQuery({
     queryKey: ['reminders', user?._id],
     queryFn: async () => {
       const { data } = await api.get(`/notifications/reminders/customer/${user._id}`);
       return data;
     },
-    enabled: !!user?._id,
+    enabled: !!user?._id && isCustomer,
     staleTime: 60000, // Re-fetch at most once per minute
   });
 
@@ -60,7 +61,7 @@ const useBrowserNotifications = () => {
   }, []);
 
   useEffect(() => {
-    if (!user?._id) return;
+    if (!user?._id || !isCustomer) return;
     if (!('Notification' in window)) return;
 
     const checkReminders = () => {

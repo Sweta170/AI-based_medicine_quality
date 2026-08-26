@@ -20,11 +20,7 @@ import PrintReceipt from './pages/pharmacist/PrintReceipt';
 
 // Browser notification activator — runs the reminder checker for customers
 const BrowserNotificationProvider = ({ children }) => {
-  const { user } = useAuth();
-  // Only activate for customers
-  if (user?.role === 'customer') {
-    useBrowserNotifications();
-  }
+  useBrowserNotifications();
   return children;
 };
 
